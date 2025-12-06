@@ -1,0 +1,27 @@
+# 备份文件
+*.bak
+
+# 临时文件
+*.tmp
+*.temp
+
+# 编辑器配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# Python缓存文件
+__pycache__/
+*.pyc
+
+# 测试文件
+*.test.html
+
+# 日志文件
+*.log

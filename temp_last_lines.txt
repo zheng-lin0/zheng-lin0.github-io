@@ -1,0 +1,100 @@
+﻿                visitCount: 1
+            };
+            
+            // 妫€鏌ユ槸鍚﹀凡瀛樺湪
+            const existingIndex = browserState.history.findIndex(item => item.url === url);
+            if (existingIndex !== -1) {
+                browserState.history[existingIndex].visitCount++;
+                browserState.history[existingIndex].timestamp = historyItem.timestamp;
+            } else {
+                browserState.history.unshift(historyItem);
+                // 闄愬埗鍘嗗彶璁板綍鏁伴噺
+                if (browserState.history.length > 100) {
+                    browserState.history.pop();
+                }
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        // 鏇存柊鍘嗗彶璁板綍鏄剧ず
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = browserState.history.map(item => `
+                <div class="history-item" onclick="loadBookmark('${item.url}')">
+                    <i class="fas fa-clock"></i>
+                    <div class="history-details">
+                        <div class="history-title">${item.title}</div>
+                        <div class="history-url">${item.url}</div>
+                        <div class="history-time">${item.timestamp}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 鏇存柊娴忚鍣ㄧ姸鎬?
+        function updateBrowserStatus(message) {
+            const statusElement = document.getElementById('browserStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+                
+                // 娣诲姞涓存椂楂樹寒鏁堟灉
+                statusElement.style.color = '#10B981';
+                setTimeout(() => {
+                    statusElement.style.color = '';
+                }, 2000);
+            }
+        }
+
+        // 娴忚鍣ㄥ垵濮嬪寲澧炲己 - initBrowser鍑芥暟宸插湪鍓嶆柟瀹氫箟
+
+        // 鍒濆鍖栦晶杈规爮 - 宸插湪鍓嶆柟瀹氫箟锛岄伩鍏嶉噸澶?
+
+        // 椤甸潰鍔犺浇瀹屾垚鍚庡垵濮嬪寲娴忚鍣?
+        // 娉ㄦ剰锛歩nitBrowser() 宸茬粡鍦ㄩ〉闈㈠姞杞芥椂璋冪敤锛岄伩鍏嶉噸澶嶅垵濮嬪寲
+        
+        // 娣诲姞鎬ц兘鐩戞帶
+        monitorPerformance();
+        
+        // 娣诲姞椤甸潰鍗歌浇鏃剁殑娓呯悊
+        window.addEventListener('beforeunload', function() {
+            optimizeBrowserPerformance();
+        });
+
+        // 鎬ц兘鐩戞帶
+        function monitorPerformance() {
+            // 鐩戞帶椤甸潰鍔犺浇鏃堕棿
+            const navigationStart = performance.timing.navigationStart;
+            const loadTime = performance.now();
+            
+            console.log(`椤甸潰鍔犺浇鏃堕棿: ${loadTime.toFixed(2)}ms`);
+            
+            // 鐩戞帶鍐呭瓨浣跨敤
+            if (performance.memory) {
+                const usedMB = performance.memory.usedJSHeapSize / 1048576;
+                const totalMB = performance.memory.totalJSHeapSize / 1048576;
+                
+                console.log(`鍐呭瓨浣跨敤: ${usedMB.toFixed(2)}MB / ${totalMB.toFixed(2)}MB`);
+                
+                // 濡傛灉鍐呭瓨浣跨敤杩囬珮锛岃嚜鍔ㄤ紭鍖?
+                if (usedMB > totalMB * 0.8) {
+                    console.warn('鍐呭瓨浣跨敤杩囬珮锛岃嚜鍔ㄤ紭鍖栨€ц兘');
+                    optimizeBrowserPerformance();
+                }
+            }
+        }
+
+        // 娣诲姞娴忚鍣ㄧ绾挎敮鎸?
+        window.addEventListener('online', function() {
+            showToast('缃戠粶杩炴帴宸叉仮澶?, 'success');
+            updateBrowserStatus('缃戠粶杩炴帴姝ｅ父');
+        });
+
+        window.addEventListener('offline', function() {
+            showToast('缃戠粶杩炴帴宸叉柇寮€', 'warning');
+            updateBrowserStatus('缃戠粶杩炴帴鏂紑');
+        });
+    </script>
+
+</body>
+</html>
