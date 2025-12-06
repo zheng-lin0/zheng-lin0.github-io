@@ -37,12 +37,7 @@ window.appConfig = {
     
     // 功能模块配置
     modules: {
-        projectManagement: true,
-        crm: true,
-        financial: true,
-        collaboration: true,
-        analytics: true,
-        apiIntegration: true
+        // 基础功能模块
     },
     
     // 第三方服务配置
