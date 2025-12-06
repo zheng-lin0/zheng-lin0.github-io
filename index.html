@@ -10,32 +10,1942 @@
     <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <!-- 主要应用容器 -->
-    <div id="app-container">
-        <!-- 顶部导航栏 -->
-        <nav id="top-nav">
-            <!-- 导航栏内容 -->
-        </nav>
-        
-        <!-- 主内容区域 -->
-        <main id="main-content">
-            <!-- 主要内容 -->
-        </main>
-        
-        <!-- 底部信息栏 -->
-        <footer id="footer">
-            <!-- 底部内容 -->
+    <!-- 消息通知容器 -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="#" class="logo" onclick="window.location.reload()">
+                <i class="fas fa-compass logo-icon"></i>
+                <span class="logo-text">智能导航中心</span>
+            </a>
+            
+            <button class="menu-toggle" onclick="toggleMenu()" aria-label="切换菜单">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="nav-links" id="navLinks">
+                <!-- 搜索框 -->
+                <div class="nav-search">
+                    <input type="text" placeholder="搜索网站、工具或应用..." class="nav-search-input" onkeyup="handleNavSearch(event)">
+                    <button class="nav-search-btn" onclick="performNavSearch()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+                
+                <!-- 游客链接 -->
+                <div id="guestLinks">
+                    <a href="#" class="nav-link primary" onclick="openModal('toolsModal')">
+                        <i class="fas fa-tools"></i>
+                        <span>实用工具</span>
+                        <span class="nav-link-badge">26+</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openModal('appCenterModal')">
+                        <i class="fas fa-store"></i>
+                        <span>应用中心</span>
+                    </a>
+                    <a href="#" class="nav-link" onclick="openModal('authModal')">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>登录</span>
+                    </a>
+                </div>
+                
+                <!-- 用户链接 -->
+                <div id="userNavItem" style="display: none;">
+                    <div class="user-menu">
+                        <div class="user-avatar" id="userAvatar">
+                            <span id="userInitials">U</span>
+                        </div>
+                        <div class="user-dropdown">
+                            <div class="dropdown-item">
+                                <i class="fas fa-user"></i>
+                                <span id="currentUser">用户</span>
+                                <span id="userLevelBadge" class="level-badge" style="display: none;">普通用户</span>
+                            </div>
+                            <a href="#" class="dropdown-item" onclick="openModal('profileModal')">
+                                <i class="fas fa-user-circle"></i>
+                                <span>个人中心</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('dashboardModal')">
+                                <i class="fas fa-th-large"></i>
+                                <span>我的仪表盘</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('toolsModal')">
+                                <i class="fas fa-tools"></i>
+                                <span>实用工具</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('appCenterModal')">
+                                <i class="fas fa-store"></i>
+                                <span>应用中心</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('resourceCenterModal')">
+                                <i class="fas fa-book"></i>
+                                <span>资源中心</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('aiModal')" id="aiLink" style="display: none;">
+                                <i class="fas fa-robot"></i>
+                                <span>AI助手</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('membershipCenterModal')">
+                                <i class="fas fa-crown"></i>
+                                <span>会员中心</span>
+                            </a>
+                            <div class="dropdown-item" style="border-top: 1px solid var(--border-light); margin-top: var(--space-2); padding-top: var(--space-3);">
+                                <i class="fas fa-cog"></i>
+                                <span>设置</span>
+                            </div>
+                            <a href="#" class="dropdown-item" onclick="openModal('adminResourcesModal')" id="adminResourcesLink" style="display: none;">
+                                <i class="fas fa-book-medical"></i>
+                                <span>资源管理</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="openModal('adminPanelModal')" id="adminPanelLink" style="display: none;">
+                                <i class="fas fa-cogs"></i>
+                                <span>系统管理</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="logout()" style="color: var(--danger-color);">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>退出登录</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <main class="container">
+        <!-- 优化后的浏览器组件 -->
+        <section class="browser-container" id="mainBrowser">
+            <div class="browser-header">
+                <h2><i class="fas fa-globe"></i> 智能在线浏览器</h2>
+                <div class="flex gap-3">
+                    <button class="btn btn-warning btn-sm" onclick="clearBrowserHistory()">
+                        <i class="fas fa-trash"></i> 清除记录
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="toggleBookmarksPanel()">
+                        <i class="fas fa-bookmark"></i> 书签
+                    </button>
+                    <button class="btn btn-secondary btn-sm" onclick="toggleHistoryPanel()">
+                        <i class="fas fa-history"></i> 历史
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 标签页 -->
+            <div class="browser-tabs" id="browserTabs">
+                <div class="browser-tab active" data-tab-id="tab1">
+                    <div class="tab-favicon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="tab-title">新标签页</div>
+                    <div class="tab-close" onclick="closeTab(this)">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 地址栏和工具栏 -->
+            <div class="browser-controls">
+                <div class="input-group" style="flex: 1;">
+                    <input type="text" class="browser-url-input" id="browserUrl" 
+                           placeholder="输入网址或搜索内容..." 
+                           onkeypress="handleUrlEnter(event)">
+                    <button class="btn btn-primary" onclick="navigate()">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+                
+                <div class="browser-toolbar">
+                    <button class="toolbar-btn" onclick="browserBack()" title="后退">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="browserForward()" title="前进">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="refreshBrowser()" title="刷新">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="browserHome()" title="主页">
+                        <i class="fas fa-home"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="toggleBookmarks()" title="书签">
+                        <i class="fas fa-bookmark"></i>
+                    </button>
+                    <button class="toolbar-btn" onclick="downloadPage()" title="下载页面">
+                        <i class="fas fa-download"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 浏览器主内容区域 -->
+            <div class="browser-content">
+                <!-- 侧边栏（书签/历史记录） -->
+                <div class="browser-sidebar" id="browserSidebar" style="display: none;">
+                    <div class="bookmarks-panel">
+                        <h4><i class="fas fa-bookmark"></i> 书签</h4>
+                        <div id="bookmarksList">
+                            <div class="bookmark-item" onclick="loadBookmark('https://www.baidu.com')">
+                                <i class="fas fa-search"></i> 百度搜索
+                            </div>
+                            <div class="bookmark-item" onclick="loadBookmark('https://www.google.com')">
+                                <i class="fab fa-google"></i> Google
+                            </div>
+                            <div class="bookmark-item" onclick="loadBookmark('https://github.com')">
+                                <i class="fab fa-github"></i> GitHub
+                            </div>
+                            <div class="bookmark-item" onclick="loadBookmark('https://www.zhihu.com')">
+                                <i class="fas fa-question-circle"></i> 知乎
+                            </div>
+                        </div>
+                    </div>
+                    <div class="history-panel">
+                        <h4><i class="fas fa-history"></i> 历史记录</h4>
+                        <div id="historyList">
+                            <!-- 历史记录将通过JavaScript动态加载 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 主浏览器窗口 -->
+                <div class="browser-main">
+                    <div class="browser-iframe-container" id="iframeContainer" style="position: relative; width: 100%; height: 600px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                        <!-- 加载状态 -->
+                        <div class="iframe-loading" id="iframeLoading" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 10; align-items: center; justify-content: center; flex-direction: column;">
+                            <div class="loading-spinner" style="width: 40px; height: 40px; border: 3px solid #f3f4f6; border-top-color: #1e3c72; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                            <p style="margin-top: 10px; color: #6b7280;">正在加载页面...</p>
+                        </div>
+                        
+                        <!-- 浏览器框架 -->
+                        <iframe class="browser-iframe" id="browserIframe" 
+                                src="about:blank" 
+                                allowfullscreen 
+                                sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+                                style="width: 100%; height: 100%; border: none; background: white; position: absolute; top: 0; left: 0;"
+                                onload="window.iframeLoaded && window.iframeLoaded()"></iframe>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 状态栏 -->
+            <div class="browser-status" style="margin-top: var(--space-3); display: flex; justify-content: space-between; align-items: center; color: var(--text-tertiary); font-size: 0.8rem;">
+                <span id="browserStatus">就绪</span>
+                <span id="browserSecurity">安全模式</span>
+            </div>
+        </section>
+
+        <!-- 功能卡片网格 -->
+        <section class="card-grid">
+            <div class="link-card">
+                <i class="fas fa-tools card-icon"></i>
+                <span class="card-badge">30+ 工具</span>
+                <h3 class="card-title">实用工具</h3>
+                <p class="card-description">包含科学计算器、单位转换、JSON格式化、密码生成、颜色选择器等30多种在线工具，满足您的各种需求</p>
+                <button class="btn btn-primary btn-block" onclick="openModal('toolsModal')">
+                    <i class="fas fa-wrench"></i> 使用工具
+                </button>
+            </div>
+
+            <div class="link-card">
+                <i class="fas fa-store card-icon"></i>
+                <span class="card-badge">共享平台</span>
+                <h3 class="card-title">应用商店</h3>
+                <p class="card-description">用户共享应用平台，上传和下载各种实用应用，包含Windows/Mac/Android/iOS应用，经过严格审核</p>
+                <button class="btn btn-success btn-block" onclick="openModal('appCenterModal')">
+                    <i class="fas fa-shopping-bag"></i> 浏览应用
+                </button>
+            </div>
+
+            <div class="link-card">
+                <i class="fas fa-robot card-icon"></i>
+                <span class="card-badge">会员专属</span>
+                <h3 class="card-title">AI助手</h3>
+                <p class="card-description">智能问答助手，支持代码解释、文案创作、学习答疑等功能，基于GPT-3.5模型，提供精准回答</p>
+                <button class="btn btn-warning btn-block" onclick="openAiModal()" id="aiCardBtn">
+                    <i class="fas fa-comments"></i> 使用AI助手
+                </button>
+            </div>
+
+            <div class="link-card">
+                <i class="fas fa-crown card-icon"></i>
+                <span class="card-badge">11级体系</span>
+                <h3 class="card-title">会员中心</h3>
+                <p class="card-description">完整的11级会员体系，解锁更多功能和特权，升级会员享受高速下载、AI助手等高级功能</p>
+                <button class="btn btn-warning btn-block" onclick="openModal('membershipCenterModal')">
+                    <i class="fas fa-gem"></i> 查看特权
+                </button>
+            </div>
+
+            <div class="link-card">
+                <i class="fas fa-book card-icon"></i>
+                <span class="card-badge">海量资源</span>
+                <h3 class="card-title">资源中心</h3>
+                <p class="card-description">汇集各类学习资源、文档模板、软件工具，支持搜索、下载、收藏，助力您的学习和工作</p>
+                <button class="btn btn-info btn-block" onclick="openModal('resourceCenterModal')">
+                    <i class="fas fa-book-open"></i> 浏览资源
+                </button>
+            </div>
+
+            <div class="link-card">
+                <i class="fas fa-chart-line card-icon"></i>
+                <span class="card-badge">数据分析</span>
+                <h3 class="card-title">数据统计</h3>
+                <p class="card-description">详细的数据统计和分析功能，包括用户行为分析、工具使用统计、系统性能监控等</p>
+                <button class="btn btn-primary btn-block" onclick="openModal('statsModal')">
+                    <i class="fas fa-chart-bar"></i> 查看统计
+                </button>
+            </div>
+        </section>
+
+        <!-- 统计展示 -->
+        <section class="stats-grid" id="siteStats">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-card-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>12%</span>
+                    </div>
+                </div>
+                <div class="stat-card-value" id="visitCount">0</div>
+                <div class="stat-card-label">今日访问</div>
+                <div class="stat-card-progress">
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 75%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon success">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="stat-card-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>8%</span>
+                    </div>
+                </div>
+                <div class="stat-card-value" id="userCount">0</div>
+                <div class="stat-card-label">注册用户</div>
+                <div class="stat-card-progress">
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 65%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon warning">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <div class="stat-card-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>25%</span>
+                    </div>
+                </div>
+                <div class="stat-card-value" id="downloadCount">0</div>
+                <div class="stat-card-label">总下载量</div>
+                <div class="stat-card-progress">
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 85%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div class="stat-card-icon danger">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div class="stat-card-trend up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>18%</span>
+                    </div>
+                </div>
+                <div class="stat-card-value" id="toolUsageCount">0</div>
+                <div class="stat-card-label">工具使用</div>
+                <div class="stat-card-progress">
+                    <div class="progress">
+                        <div class="progress-bar" style="width: 90%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-content">
+                <div class="footer-grid">
+                    <div class="footer-section">
+                        <h3>智能导航中心</h3>
+                        <p style="opacity: 0.9; margin-bottom: var(--space-4);">多功能集成平台 - 为您提供一站式在线工具服务</p>
+                        <div class="flex gap-3">
+                            <a href="#" class="btn btn-secondary btn-sm" onclick="testSupabaseConnection()">
+                                <i class="fas fa-vial"></i> 测试连接
+                            </a>
+                            <a href="#" class="btn btn-secondary btn-sm" onclick="checkSystemStatus()">
+                                <i class="fas fa-heartbeat"></i> 系统状态
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h3>快速链接</h3>
+                        <ul class="footer-links">
+                            <li><a href="#" onclick="openModal('toolsModal')"><i class="fas fa-tools"></i> 实用工具</a></li>
+                            <li><a href="#" onclick="openModal('appCenterModal')"><i class="fas fa-th-large"></i> 应用中心</a></li>
+                            <li><a href="#" onclick="openModal('resourceCenterModal')"><i class="fas fa-book"></i> 资源中心</a></li>
+                            <li><a href="#" onclick="showInfo()"><i class="fas fa-info-circle"></i> 关于我们</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h3>用户支持</h3>
+                        <ul class="footer-links">
+                            <li><a href="#" onclick="openModal('helpModal')"><i class="fas fa-question-circle"></i> 帮助中心</a></li>
+                            <li><a href="#" onclick="openModal('faqModal')"><i class="fas fa-comments"></i> 常见问题</a></li>
+                            <li><a href="#" onclick="openModal('contactModal')"><i class="fas fa-envelope"></i> 联系我们</a></li>
+                            <li><a href="#" onclick="showApiInfo()"><i class="fas fa-code"></i> API文档</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="footer-section">
+                        <h3>技术栈</h3>
+                        <ul class="footer-links">
+                            <li><i class="fab fa-html5"></i> HTML5</li>
+                            <li><i class="fab fa-css3-alt"></i> CSS3</li>
+                            <li><i class="fab fa-js"></i> JavaScript ES6+</li>
+                            <li><i class="fas fa-database"></i> Supabase</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="footer-bottom">
+                    <p style="margin-bottom: var(--space-2);">
+                        <i class="fas fa-shield-alt"></i> 安全提示：请妥善保管您的账号信息
+                        <span style="margin: 0 var(--space-2);">|</span>
+                        <i class="fas fa-external-link-alt"></i> 推荐使用 Chrome 或 Edge 浏览器
+                    </p>
+                    <div style="margin-top: var(--space-2); font-size: 0.8rem; opacity: 0.7;">
+                        <p>© 2024 智能导航中心 版权所有 | 版本: 2.0.0 | 最后更新: 2024-06-14</p>
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
+
+    <!-- 回到顶部按钮 -->
+    <button id="backToTop" class="back-to-top" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- ============ 模态框定义 ============ -->
     
-    <!-- 外部JavaScript文件引用 -->
-    <script src="js/config.js"></script>
-    <script src="js/modules/ProjectManagement.js"></script>
-    <script src="js/modules/CRMService.js"></script>
-    <script src="js/modules/FinancialManagement.js"></script>
-    <script src="js/modules/CollaborationSystem.js"></script>
-    <script src="js/modules/DataAnalyticsSystem.js"></script>
-    <script src="js/modules/APIIntegrationSystem.js"></script>
-    <script src="js/app.js"></script>
+    <!-- 登录/注册模态框 -->
+    <div id="authModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('authModal')">&times;</span>
+                <h2 class="modal-title">用户登录 / 注册</h2>
+                
+                <div class="tabs">
+                    <div id="loginTab" class="tab active" onclick="switchAuthTab('login')">
+                        <i class="fas fa-sign-in-alt"></i> 登录
+                    </div>
+                    <div id="registerTab" class="tab" onclick="switchAuthTab('register')">
+                        <i class="fas fa-user-plus"></i> 注册
+                    </div>
+                    <div id="resetTab" class="tab" onclick="switchAuthTab('reset')">
+                        <i class="fas fa-key"></i> 重置密码
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 登录表单 -->
+            <form id="loginForm" class="modal-body" style="display: block;">
+                <div class="form-group">
+                    <label for="loginUsername" class="form-label form-label-required">
+                        <i class="fas fa-user"></i> 用户名
+                    </label>
+                    <input type="text" id="loginUsername" class="form-control" 
+                           placeholder="请输入用户名" required autocomplete="username">
+                    <div id="loginUsernameError" class="form-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label form-label-required">
+                        <i class="fas fa-lock"></i> 密码
+                    </label>
+                    <input type="password" id="loginPassword" class="form-control" 
+                           placeholder="请输入密码" required autocomplete="current-password">
+                    <div class="form-text">
+                        <i class="fas fa-lightbulb"></i> 提示：请使用您的用户名和密码登录
+                    </div>
+                    <div id="loginPasswordError" class="form-error"></div>
+                </div>
+                
+                <div style="margin-bottom: var(--space-4);">
+                    <label class="form-check">
+                        <input type="checkbox" id="rememberMe" class="form-check-input">
+                        <span>记住我</span>
+                    </label>
+                    <a href="#" class="text-secondary" style="float: right; font-size: 0.9rem;" onclick="switchAuthTab('reset')">
+                        忘记密码？
+                    </a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                
+                <div class="divider">
+                    <div class="divider-text">或</div>
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" class="btn btn-secondary btn-block" onclick="switchAuthTab('register')">
+                        <i class="fas fa-user-plus"></i> 还没有账号？立即注册
+                    </button>
+                </div>
+            </form>
+            
+            <!-- 注册表单 -->
+            <form id="registerForm" class="modal-body" style="display: none;">
+                <div class="form-group">
+                    <label for="registerUsername" class="form-label form-label-required">
+                        <i class="fas fa-user"></i> 用户名
+                    </label>
+                    <input type="text" id="registerUsername" class="form-control" 
+                           placeholder="请输入用户名 (3-20位字母数字)" required>
+                    <div class="form-text">用户名将用于登录，注册后不可更改</div>
+                    <div id="registerUsernameError" class="form-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerEmail" class="form-label">
+                        <i class="fas fa-envelope"></i> 邮箱地址
+                    </label>
+                    <input type="email" id="registerEmail" class="form-control" 
+                           placeholder="example@domain.com">
+                    <div class="form-text">填写邮箱可用于找回密码</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="registerPassword" class="form-label form-label-required">
+                        <i class="fas fa-lock"></i> 密码
+                    </label>
+                    <input type="password" id="registerPassword" class="form-control" 
+                           placeholder="请输入密码 (至少6位)" required>
+                    <div class="form-text">
+                        <i class="fas fa-info-circle"></i> 密码强度: <span id="passwordStrength">弱</span>
+                        <div class="progress" style="margin-top: var(--space-2);">
+                            <div class="progress-bar" id="passwordStrengthBar" style="width: 20%;"></div>
+                        </div>
+                    </div>
+                    <div id="registerPasswordError" class="form-error"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword" class="form-label form-label-required">
+                        <i class="fas fa-lock"></i> 确认密码
+                    </label>
+                    <input type="password" id="confirmPassword" class="form-control" 
+                           placeholder="请再次输入密码" required>
+                    <div id="confirmPasswordError" class="form-error"></div>
+                </div>
+                
+                <div style="margin: var(--space-6) 0; padding: var(--space-4); background: var(--bg-tertiary); border-radius: var(--radius-lg);">
+                    <h4 style="margin-bottom: var(--space-2); color: var(--primary-color);">
+                        <i class="fas fa-gift"></i> 注册即享福利
+                    </h4>
+                    <ul style="padding-left: var(--space-4); color: var(--text-secondary);">
+                        <li>立即获得 <strong>100积分</strong></li>
+                        <li>免费使用基础工具</li>
+                        <li>每日登录奖励积分</li>
+                        <li>解锁普通资源下载</li>
+                        <li>加入用户社区</li>
+                    </ul>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-check">
+                        <input type="checkbox" id="acceptTerms" class="form-check-input" required>
+                        <span>我已阅读并同意 <a href="#" onclick="openModal('termsModal')">服务条款</a> 和 <a href="#" onclick="openModal('privacyModal')">隐私政策</a></span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="btn btn-success btn-block btn-lg">
+                    <i class="fas fa-user-plus"></i> 立即注册
+                </button>
+            </form>
+            
+            <!-- 重置密码表单 -->
+            <form id="resetForm" class="modal-body" style="display: none;">
+                <div class="form-group">
+                    <label for="resetEmail" class="form-label form-label-required">
+                        <i class="fas fa-envelope"></i> 注册邮箱
+                    </label>
+                    <input type="email" id="resetEmail" class="form-control" 
+                           placeholder="请输入注册时使用的邮箱" required>
+                    <div class="form-text">我们将发送重置链接到您的邮箱</div>
+                    <div id="resetEmailError" class="form-error"></div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block btn-lg">
+                    <i class="fas fa-paper-plane"></i> 发送重置邮件
+                </button>
+                
+                <div style="text-align: center; margin-top: var(--space-4);">
+                    <a href="#" class="text-secondary" onclick="switchAuthTab('login')">
+                        <i class="fas fa-arrow-left"></i> 返回登录
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 个人资料模态框 -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('profileModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-user-circle"></i> 个人中心</h2>
+            </div>
+            <div id="profileContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载个人主页信息...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI助手模态框 -->
+    <div id="aiModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px; width: 95%; height: 90vh;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('aiModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-robot"></i> AI智能助手</h2>
+                <div class="ai-status">
+                    <span class="ai-status-dot"></span>
+                    <span id="aiStatus">在线</span>
+                </div>
+            </div>
+            <div id="aiContent" class="modal-body" style="padding: 0; height: calc(100% - 80px);">
+                <div class="ai-container">
+                    <div class="ai-sidebar" id="aiHistory" style="display: flex;">
+                        <div class="ai-conversations" style="flex: 1;">
+                            <div style="padding: var(--space-4); border-bottom: 1px solid var(--border-color);">
+                                <div class="flex justify-between items-center">
+                                    <h4 style="margin: 0; font-size: 1rem;">对话历史</h4>
+                                    <button class="btn btn-sm btn-secondary" onclick="newAiConversation()">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="conversationList" style="padding: var(--space-2);">
+                                <div class="loading" style="padding: var(--space-8) var(--space-4);">
+                                    <div class="loading-spinner" style="width: 30px; height: 30px;"></div>
+                                    <p style="font-size: 0.9rem;">加载中...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="ai-main">
+                        <div id="aiMessages" class="ai-messages">
+                            <div class="message system">
+                                <div class="message-header">
+                                    <i class="fas fa-robot"></i>
+                                    <span>AI助手</span>
+                                </div>
+                                <div class="message-content">
+                                    <p><strong>👋 欢迎使用AI助手！</strong></p>
+                                    <p style="margin-top: var(--space-2); font-size: 0.9rem;">
+                                        我是您的智能助手，可以为您提供：
+                                    </p>
+                                    <ul style="text-align: left; margin: var(--space-2) 0; padding-left: var(--space-4);">
+                                        <li>代码解释和调试</li>
+                                        <li>学习问题解答</li>
+                                        <li>文案创作和润色</li>
+                                        <li>技术问题咨询</li>
+                                        <li>其他任何问题</li>
+                                    </ul>
+                                    <p style="font-size: 0.85rem; margin-top: var(--space-2);">
+                                        请在下方的输入框中提问，我会尽力为您解答！
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="ai-input-container">
+                            <div class="ai-input-wrapper">
+                                <textarea id="aiInput" class="ai-input" 
+                                          placeholder="输入您的问题... (Shift+Enter换行，Enter发送)" 
+                                          rows="3"></textarea>
+                                <button id="sendAiMessage" class="btn btn-primary" 
+                                        style="align-self: flex-end; height: 60px; min-width: 60px;">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <div class="ai-input-actions">
+                                <div class="ai-input-stats">
+                                    <span id="tokenCount">0</span> 字符 | 
+                                    <span id="conversationCount">0</span> 条消息 |
+                                    <span id="aiModel">GPT-3.5</span>
+                                </div>
+                                <div class="ai-input-buttons">
+                                    <button class="btn btn-sm btn-secondary" onclick="clearAiMessages()">
+                                        <i class="fas fa-trash"></i> 清空
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="toggleAiHistory()">
+                                        <i class="fas fa-history"></i> 历史
+                                    </button>
+                                    <button class="btn btn-sm btn-secondary" onclick="openModal('aiSettingsModal')">
+                                        <i class="fas fa-cog"></i> 设置
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 实用工具模态框 -->
+    <div id="toolsModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('toolsModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-tools"></i> 实用工具</h2>
+            </div>
+            <div id="toolsContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载工具列表...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 应用中心模态框 -->
+    <div id="appCenterModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('appCenterModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-th-large"></i> 应用中心</h2>
+            </div>
+            <div id="appCenterContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载应用中心...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 资源中心模态框 -->
+    <div id="resourceCenterModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('resourceCenterModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-book"></i> 资源中心</h2>
+            </div>
+            <div id="resourceCenterContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载资源中心...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 会员中心模态框 -->
+    <div id="membershipCenterModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('membershipCenterModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-crown"></i> 会员中心</h2>
+            </div>
+            <div id="membershipContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载会员信息...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 仪表盘模态框 -->
+    <div id="dashboardModal" class="modal">
+        <div class="modal-content" style="max-width: 1400px; width: 95%;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('dashboardModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-th-large"></i> 我的仪表盘</h2>
+            </div>
+            <div id="dashboardContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载仪表盘...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 管理员资源管理模态框 -->
+    <div id="adminResourcesModal" class="modal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('adminResourcesModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-book-medical"></i> 资源管理</h2>
+            </div>
+            <div id="adminResourcesContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载资源管理面板...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 系统管理面板 -->
+    <div id="adminPanelModal" class="modal">
+        <div class="modal-content" style="max-width: 1400px; width: 95%;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('adminPanelModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-cogs"></i> 系统管理面板</h2>
+            </div>
+            <div id="adminPanelContent" class="modal-body">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">加载系统管理面板...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于我们模态框 -->
+    <div id="aboutModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <span class="modal-close" onclick="closeModal('aboutModal')">&times;</span>
+                <h2 class="modal-title"><i class="fas fa-info-circle"></i> 关于智能导航中心</h2>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: var(--space-8);">
+                    <i class="fas fa-compass" style="font-size: 4rem; color: var(--primary-color); margin-bottom: var(--space-4);"></i>
+                    <h3>智能导航中心 v2.0</h3>
+                    <p style="color: var(--text-tertiary); margin-top: var(--space-2);">多功能集成平台</p>
+                </div>
+                
+                <div class="grid gap-6">
+                    <div>
+                        <h4><i class="fas fa-rocket"></i> 平台特色</h4>
+                        <ul style="margin-top: var(--space-2); padding-left: var(--space-4); color: var(--text-secondary);">
+                            <li>一体化在线工具集合（30+种工具）</li>
+                            <li>智能浏览器（多标签页、书签管理）</li>
+                            <li>会员等级体系与权限控制（11级体系）</li>
+                            <li>AI智能助手（基于GPT-3.5，会员专属）</li>
+                            <li>应用商店（用户共享，严格审核）</li>
+                            <li>资源中心（海量学习资源）</li>
+                            <li>响应式设计，多端完美适配</li>
+                            <li>个性化仪表盘（可拖拽布局）</li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4><i class="fas fa-cogs"></i> 技术架构</h4>
+                        <div style="margin-top: var(--space-2); color: var(--text-secondary);">
+                            <p><strong>前端技术:</strong></p>
+                            <ul style="padding-left: var(--space-4);">
+                                <li>HTML5 + CSS3 + JavaScript ES6+</li>
+                                <li>Font Awesome 6.4.0 图标库</li>
+                                <li>Chart.js 数据可视化</li>
+                                <li>Monaco Editor 代码编辑器</li>
+                                <li>响应式设计，支持PWA</li>
+                            </ul>
+                            
+                            <p style="margin-top: var(--space-4);"><strong>后端技术:</strong></p>
+                            <ul style="padding-left: var(--space-4);">
+                                <li>Supabase (PostgreSQL + 实时数据库)</li>
+                                <li>Row Level Security 行级安全</li>
+                                <li>用户认证和授权系统</li>
+                                <li>文件存储和CDN加速</li>
+                            </ul>
+                            
+                            <p style="margin-top: var(--space-4);"><strong>部署环境:</strong></p>
+                            <ul style="padding-left: var(--space-4);">
+                                <li>Netlify / Vercel 部署</li>
+                                <li>GitHub Actions 自动化部署</li>
+                                <li>HTTPS 安全加密</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4><i class="fas fa-shield-alt"></i> 安全声明</h4>
+                        <p style="color: var(--text-secondary); margin-top: var(--space-2); font-size: 0.9rem;">
+                            本平台采用最先进的安全认证授权机制，所有用户数据均加密存储。
+                            我们承诺保护用户隐私，不会泄露任何个人信息。所有数据传输都通过
+                            HTTPS 加密，确保通信安全。
+                        </p>
+                    </div>
+                    
+                    <div style="text-align: center; padding-top: var(--space-6); border-top: 1px solid var(--border-color);">
+                        <p style="color: var(--text-tertiary);">
+                            <i class="fas fa-code-branch"></i> 版本: 2.0.0<br>
+                            <i class="fas fa-calendar"></i> 最后更新: 2024年12月5日<br>
+                            <i class="fas fa-copyright"></i> 2024 智能导航中心 版权所有
+                        </p>
+                    </div>
+                </div>
+            </div>
+    </div>
+</main>
+
+
+
+    <!-- ============ 大规模功能扩展开始 ============ -->
+    
+    <!-- 高级会员系统 -->
+    
+
+    <!-- 实用工具扩展 -->
+    
+
+    <!-- 数据统计和后台管理系统 -->
+    
+
+    <!-- 高级AI助手功能 -->
+    
+
+    <!-- 文件存储和云服务 -->
+    
+
+    <!-- 社区和社交功能 -->
+    
+
+    <!-- 实时通知系统 -->
+    
+
+    <!-- 高级搜索功能 -->
+    
+
+    <!-- 性能监控和错误追踪 -->
+    
+    
+    <!-- 测试按钮 -->
+    <div style="position: fixed; top: 10px; right: 10px; z-index: 9999;">
+        <button onclick="testCreateModal()" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+            测试模态框
+        </button>
+        <button onclick="testPerformanceMonitor()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+            测试性能监控
+        </button>
+    </div>
+
+    <!-- 扩展的CSS样式 -->
+    
+
+
+
+
+                this.transactions = [
+                    { id: 1, type: 'income', amount: 299, description: '钻石会员订阅', date: '2024-01-15', category: 'subscription' },
+                    { id: 2, type: 'expense', amount: 1500, description: '服务器费用', date: '2024-01-10', category: 'infrastructure' },
+                    { id: 3, type: 'income', amount: 129, description: '黄金会员订阅', date: '2024-01-12', category: 'subscription' }
+                ];
+
+                this.invoices = [
+                    { id: 'INV-2024-001', client: '企业客户A', amount: 5000, status: 'paid', dueDate: '2024-02-01' },
+                    { id: 'INV-2024-002', client: '企业客户B', amount: 3000, status: 'pending', dueDate: '2024-02-15' }
+                ];
+
+                this.budgets = [
+                    { category: 'development', allocated: 20000, spent: 15000 },
+                    { category: 'marketing', allocated: 10000, spent: 7500 },
+                    { category: 'infrastructure', allocated: 5000, spent: 3000 }
+                ];
+            }
+
+            // 获取财务概览
+            getFinancialOverview() {
+                const income = this.transactions
+                    .filter(t => t.type === 'income')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const expenses = this.transactions
+                    .filter(t => t.type === 'expense')
+                    .reduce((sum, t) => sum + t.amount, 0);
+                
+                const netIncome = income - expenses;
+                
+                return {
+                    income,
+                    expenses,
+                    netIncome,
+                    profitMargin: income > 0 ? ((netIncome / income) * 100).toFixed(1) : 0
+                };
+            }
+
+            // 添加交易
+            addTransaction(transaction) {
+                const newTransaction = {
+                    id: this.transactions.length + 1,
+                    ...transaction,
+                    date: new Date().toISOString().split('T')[0]
+                };
+                this.transactions.push(newTransaction);
+                return newTransaction;
+            }
+
+            // 获取预算使用情况
+            getBudgetUsage() {
+                return this.budgets.map(budget => ({
+                    ...budget,
+                    remaining: budget.allocated - budget.spent,
+                    usagePercentage: (budget.spent / budget.allocated) * 100
+                }));
+            }
+
+            // 生成财务报表
+            generateFinancialReport(period = 'monthly') {
+                const overview = this.getFinancialOverview();
+                const budgetUsage = this.getBudgetUsage();
+                const pendingInvoices = this.invoices.filter(i => i.status === 'pending');
+                
+                return {
+                    period,
+                    generatedAt: new Date().toISOString(),
+                    overview,
+                    budgetUsage,
+                    pendingInvoices,
+                    recommendations: this.generateRecommendations(overview, budgetUsage)
+                };
+            }
+
+            generateRecommendations(overview, budgetUsage) {
+                const recommendations = [];
+                
+                if (overview.netIncome < 0) {
+                    recommendations.push('考虑优化成本结构或增加收入来源');
+                }
+                
+                budgetUsage.forEach(budget => {
+                    if (budget.usagePercentage > 90) {
+                        recommendations.push(`${budget.category}预算即将用完，考虑调整或追加预算`);
+                    }
+                });
+                
+                return recommendations;
+            }
+        }
+
+        const financialManager = new FinancialManagementSystem();
+        
+        // 客户关系管理系统
+        class CustomerRelationshipManager {
+            constructor() {
+                this.customers = [];
+                this.leads = [];
+                this.supportTickets = [];
+                this.initializeSampleData();
+            }
+
+            initializeSampleData() {
+                this.customers = [
+                    {
+                        id: 1,
+                        name: '张三科技有限公司',
+                        email: 'zhang@tech.com',
+                        phone: '13800138000',
+                        industry: '科技',
+                        status: 'active',
+                        membershipLevel: 5,
+                        joinDate: '2023-12-01',
+                        lastContact: '2024-01-15'
+                    },
+                    {
+                        id: 2,
+                        name: '李四设计工作室',
+                        email: 'li@design.com',
+                        phone: '13900139000',
+                        industry: '设计',
+                        status: 'active',
+                        membershipLevel: 3,
+                        joinDate: '2024-01-05',
+                        lastContact: '2024-01-18'
+                    }
+                ];
+
+                this.leads = [
+                    {
+                        id: 1,
+                        name: '王五教育机构',
+                        email: 'wang@edu.com',
+                        phone: '13700137000',
+                        source: '官网咨询',
+                        status: 'contacted',
+                        interestLevel: 'high'
+                    }
+                ];
+
+                this.supportTickets = [
+                    {
+                        id: 1,
+                        customerId: 1,
+                        subject: 'API使用问题',
+                        description: '调用API时遇到认证错误',
+                        status: 'resolved',
+                        priority: 'high',
+                        createdAt: '2024-01-16'
+                    }
+                ];
+            }
+
+            // 获取客户统计
+            getCustomerStats() {
+                const totalCustomers = this.customers.length;
+                const activeCustomers = this.customers.filter(c => c.status === 'active').length;
+                const premiumCustomers = this.customers.filter(c => c.membershipLevel >= 3).length;
+                
+                return {
+                    totalCustomers,
+                    activeCustomers,
+                    premiumCustomers,
+                    premiumRate: totalCustomers > 0 ? ((premiumCustomers / totalCustomers) * 100).toFixed(1) : 0,
+                    activeLeads: this.leads.length,
+                    openTickets: this.supportTickets.filter(t => t.status !== 'resolved').length
+                };
+            }
+
+            // 添加新客户
+            addCustomer(customerData) {
+                const customer = {
+                    id: this.customers.length + 1,
+                    ...customerData,
+                    joinDate: new Date().toISOString().split('T')[0],
+                    status: 'active'
+                };
+                this.customers.push(customer);
+                return customer;
+            }
+
+            // 创建支持工单
+            createSupportTicket(ticketData) {
+                const ticket = {
+                    id: this.supportTickets.length + 1,
+                    ...ticketData,
+                    createdAt: new Date().toISOString().split('T')[0],
+                    status: 'open'
+                };
+                this.supportTickets.push(ticket);
+                return ticket;
+            }
+
+            // 获取客户满意度分析
+            getCustomerSatisfaction() {
+                const resolvedTickets = this.supportTickets.filter(t => t.status === 'resolved');
+                const totalResponseTime = resolvedTickets.reduce((sum, ticket) => {
+                    // 模拟响应时间分析
+                    return sum + Math.random() * 24; // 小时
+                }, 0);
+                
+                const avgResponseTime = resolvedTickets.length > 0 ? totalResponseTime / resolvedTickets.length : 0;
+                
+                return {
+                    totalTickets: this.supportTickets.length,
+                    resolvedTickets: resolvedTickets.length,
+                    resolutionRate: this.supportTickets.length > 0 ? 
+                        (resolvedTickets.length / this.supportTickets.length * 100).toFixed(1) : 0,
+                    avgResponseTime: avgResponseTime.toFixed(1),
+                    satisfactionScore: this.calculateSatisfactionScore()
+                };
+            }
+
+            calculateSatisfactionScore() {
+                // 模拟满意度计算
+                const baseScore = 85;
+                const resolutionBonus = this.supportTickets.filter(t => t.status === 'resolved').length * 0.5;
+                const responsePenalty = Math.random() * 10;
+                return Math.min(100, Math.max(60, baseScore + resolutionBonus - responsePenalty));
+            }
+        }
+
+        window.crmSystem = new CustomerRelationshipManagement();
+    </script>
+
+
+            constructor() {
+                this.campaigns = [];
+                this.emailTemplates = [];
+                this.analytics = {};
+                this.initializeSampleData();
+            }
+
+            initializeSampleData() {
+                this.campaigns = [
+                    {
+                        id: 1,
+                        name: '新年促销活动',
+                        type: 'promotion',
+                        status: 'active',
+                        startDate: '2024-01-01',
+                        endDate: '2024-01-31',
+                        targetAudience: 'all_users',
+                        budget: 5000,
+                        metrics: {
+                            impressions: 15000,
+                            clicks: 1200,
+                            conversions: 85,
+                            roi: 3.2
+                        }
+                    }
+                ];
+
+                this.emailTemplates = [
+                    {
+                        id: 1,
+                        name: '欢迎邮件',
+                        subject: '欢迎加入智能导航中心！',
+                        content: '感谢您注册智能导航中心...',
+                        type: 'welcome'
+                    },
+                    {
+                        id: 2,
+                        name: '促销通知',
+                        subject: '新年特惠：会员8折优惠',
+                        content: '亲爱的用户，新年快乐！...',
+                        type: 'promotion'
+                    }
+                ];
+            }
+
+            // 创建营销活动
+            createCampaign(campaignData) {
+                const campaign = {
+                    id: this.campaigns.length + 1,
+                    ...campaignData,
+                    metrics: {
+                        impressions: 0,
+                        clicks: 0,
+                        conversions: 0,
+                        roi: 0
+                    }
+                };
+                this.campaigns.push(campaign);
+                return campaign;
+            }
+
+            // 获取营销效果分析
+            getMarketingAnalytics() {
+                const totalImpressions = this.campaigns.reduce((sum, c) => sum + c.metrics.impressions, 0);
+                const totalClicks = this.campaigns.reduce((sum, c) => sum + c.metrics.clicks, 0);
+                const totalConversions = this.campaigns.reduce((sum, c) => sum + c.metrics.conversions, 0);
+                const totalBudget = this.campaigns.reduce((sum, c) => sum + c.budget, 0);
+                
+                return {
+                    totalCampaigns: this.campaigns.length,
+                    activeCampaigns: this.campaigns.filter(c => c.status === 'active').length,
+                    totalImpressions,
+                    totalClicks,
+                    totalConversions,
+                    clickThroughRate: totalImpressions > 0 ? (totalClicks / totalImpressions * 100).toFixed(2) : 0,
+                    conversionRate: totalClicks > 0 ? (totalConversions / totalClicks * 100).toFixed(2) : 0,
+                    totalBudget,
+                    averageROI: this.campaigns.length > 0 ? 
+                        this.campaigns.reduce((sum, c) => sum + c.metrics.roi, 0) / this.campaigns.length : 0
+                };
+            }
+
+            // 发送营销邮件
+            sendMarketingEmail(templateId, recipients, customData = {}) {
+                const template = this.emailTemplates.find(t => t.id === templateId);
+                if (!template) {
+                    throw new Error('邮件模板不存在');
+                }
+
+                // 模拟邮件发送
+                const email = {
+                    id: 'email_' + Date.now(),
+                    templateId,
+                    recipients,
+                    subject: this.customizeTemplate(template.subject, customData),
+                    content: this.customizeTemplate(template.content, customData),
+                    sentAt: new Date(),
+                    status: 'sent'
+                };
+
+                return email;
+            }
+
+            // 模板定制
+            customizeTemplate(template, data) {
+                return template.replace(/\{\{([^}]+)\}\}/g, (match, key) => {
+                    return data[key.trim()] || match;
+                });
+            }
+
+            // 获取营销建议
+            getMarketingRecommendations() {
+                const analytics = this.getMarketingAnalytics();
+                const recommendations = [];
+                
+                if (analytics.clickThroughRate < 2) {
+                    recommendations.push('点击率较低，建议优化广告创意和目标受众定位');
+                }
+                
+                if (analytics.conversionRate < 5) {
+                    recommendations.push('转化率有待提升，考虑优化落地页和用户引导流程');
+                }
+                
+                if (analytics.averageROI < 2) {
+                    recommendations.push('投资回报率偏低，建议调整营销预算分配');
+                }
+                
+                return recommendations;
+            }
+        }
+
+        window.marketingTools = new MarketingAutomationTools();
+    </script>
+
+    <!-- 更多CSS样式和组件 -->
+    
+
+    
+
+    <!-- 客户关系管理系统 -->
+    
+
+    <!-- 财务管理系统 -->
+    
+
+    <!-- 营销自动化工具集 -->
+    
+
+    <!-- 团队协作和任务管理系统 -->
+    
+
+    <!-- 数据分析和BI仪表板系统 -->
+    
+
+    <!-- API集成和第三方服务系统 -->
+    
+                <div class="tab-favicon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="tab-title">新标签页</div>
+                <div class="tab-close" onclick="closeTab(this)">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            tabsContainer.appendChild(newTab);
+            
+            // 初始化标签页状态
+            browserState.tabs[tabId] = {
+                url: 'about:blank',
+                title: '新标签页',
+                history: [],
+                historyIndex: -1
+            };
+            
+            // 激活新标签页
+            switchTab(tabId);
+            
+            showToast('新标签页已创建', 'success');
+        }
+
+        // 创建新标签页
+        function createNewTab() {
+            const tabId = 'tab_' + Date.now();
+            const tabsContainer = document.getElementById('browserTabs');
+            
+            // 创建新标签页元素
+            const newTab = document.createElement('div');
+            newTab.className = 'browser-tab';
+            newTab.setAttribute('data-tab-id', tabId);
+            newTab.innerHTML = `
+                <div class="tab-favicon">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="tab-title">新标签页</div>
+                <div class="tab-close" onclick="closeTab(this)">
+                    <i class="fas fa-times"></i>
+                </div>
+            `;
+            
+            // 设置初始样式和动画
+            newTab.style.opacity = '0';
+            newTab.style.transform = 'scale(0.8)';
+            newTab.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            tabsContainer.appendChild(newTab);
+            
+            // 触发动画
+            setTimeout(() => {
+                newTab.style.opacity = '1';
+                newTab.style.transform = 'scale(1)';
+            }, 10);
+            
+            // 初始化标签页状态
+            browserState.tabs[tabId] = {
+                url: 'about:blank',
+                title: '新标签页',
+                history: [],
+                historyIndex: -1
+            };
+            
+            // 激活新标签页
+            switchTab(tabId);
+            
+            showToast('新标签页已创建', 'success');
+            logUserActivity('创建新标签页', { tabId: tabId });
+        }
+
+        // 关闭标签页
+        function closeTab(element) {
+            const tab = element.closest('.browser-tab');
+            const tabId = tab.getAttribute('data-tab-id');
+            const tabsContainer = document.getElementById('browserTabs');
+            
+            if (tabsContainer.children.length <= 1) {
+                showToast('不能关闭最后一个标签页', 'warning');
+                return;
+            }
+            
+            const isActive = tab.classList.contains('active');
+            
+            // 添加关闭动画
+            tab.style.opacity = '0';
+            tab.style.transform = 'scale(0.8)';
+            tab.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            
+            setTimeout(() => {
+                tab.remove();
+                
+                // 删除标签页状态
+                delete browserState.tabs[tabId];
+                
+                // 如果关闭的是当前激活的标签，激活前一个标签
+                if (isActive) {
+                    const remainingTabs = tabsContainer.querySelectorAll('.browser-tab');
+                    if (remainingTabs.length > 0) {
+                        const lastTab = remainingTabs[remainingTabs.length - 1];
+                        switchTab(lastTab.getAttribute('data-tab-id'));
+                    }
+                }
+                
+                showToast('标签页已关闭', 'info');
+            }, 300);
+            
+            logUserActivity('关闭标签页', { tabId: tabId });
+        }
+        }
+
+        // 切换标签页
+        function switchTab(tabId) {
+            // 更新标签页状态
+            const tabs = document.querySelectorAll('.browser-tab');
+            const currentActiveTab = document.querySelector('.browser-tab.active');
+            
+            // 添加淡出动画到当前激活标签
+            if (currentActiveTab) {
+                currentActiveTab.style.opacity = '0.5';
+                currentActiveTab.style.transition = 'opacity 0.2s ease';
+            }
+            
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            const activeTab = document.querySelector(`[data-tab-id="${tabId}"]`);
+            if (activeTab) {
+                activeTab.classList.add('active');
+                
+                // 添加淡入动画到新激活标签
+                activeTab.style.opacity = '1';
+                activeTab.style.transform = 'scale(1.05)';
+                activeTab.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                
+                setTimeout(() => {
+                    activeTab.style.transform = 'scale(1)';
+                }, 200);
+            }
+            
+            // 更新浏览器状态
+            browserState.activeTab = tabId;
+            const tabState = browserState.tabs[tabId];
+            
+            // 更新地址栏
+            document.getElementById('browserUrl').value = tabState.url;
+            
+            // 加载标签页内容
+            loadUrl(tabState.url);
+            
+            logUserActivity('切换标签页', { tabId: tabId });
+        }
+
+        // 导航到指定URL
+        function navigate() {
+            const urlInput = document.getElementById('browserUrl');
+            let url = urlInput.value.trim();
+            
+            if (!url) {
+                showToast('请输入网址', 'warning');
+                return;
+            }
+            
+            // 处理URL格式
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                if (url.includes('.') && !url.includes(' ')) {
+                    url = 'https://' + url;
+                } else {
+                    // 作为搜索处理
+                    url = 'https://www.baidu.com/s?wd=' + encodeURIComponent(url);
+                }
+            }
+            
+            loadUrl(url);
+        }
+
+        // 加载URL
+        function loadUrl(url) {
+            const iframe = document.getElementById('browserIframe');
+            const loading = document.getElementById('iframeLoading');
+            
+            // 显示加载状态
+            loading.classList.add('show');
+            iframe.classList.add('loading');
+            updateBrowserStatus('正在加载: ' + url);
+            
+            // 更新当前标签页状态
+            const tabId = browserState.activeTab;
+            const tabState = browserState.tabs[tabId];
+            
+            // 添加到历史记录
+            if (tabState.url !== url) {
+                tabState.history = tabState.history.slice(0, tabState.historyIndex + 1);
+                tabState.history.push(url);
+                tabState.historyIndex = tabState.history.length - 1;
+            }
+            
+            tabState.url = url;
+            
+            // 更新标签页标题
+            const activeTab = document.querySelector(`[data-tab-id="${tabId}"]`);
+            if (activeTab) {
+                const titleElement = activeTab.querySelector('.tab-title');
+                titleElement.textContent = '加载中...';
+            }
+            
+            // 设置超时机制，确保加载状态最终会被隐藏
+            const loadTimeout = setTimeout(() => {
+                if (loading.classList.contains('show')) {
+                    loading.classList.remove('show');
+                    loading.classList.add('hide');
+                    iframe.classList.remove('loading');
+                    setTimeout(() => {
+                        loading.style.display = 'none';
+                        loading.classList.remove('hide');
+                    }, 300);
+                    updateBrowserStatus('页面加载超时');
+                    showToast('页面加载超时，请检查网络连接', 'warning');
+                }
+            }, 10000); // 10秒超时
+            
+            // 保存超时ID以便清理
+            tabState.loadTimeout = loadTimeout;
+            
+            // 加载URL
+            iframe.src = url;
+            
+            // 添加到全局历史记录
+            addToHistory(url);
+        }
+
+        // 处理回车键导航
+        function handleUrlEnter(event) {
+            if (event.key === 'Enter') {
+                navigate();
+            }
+        }
+
+        // iframe加载完成
+        window.iframeLoaded = function iframeLoaded() {
+            const iframe = document.getElementById('browserIframe');
+            const loading = document.getElementById('iframeLoading');
+            const tabId = browserState.activeTab;
+            const tabState = browserState.tabs[tabId];
+            
+            // 清理超时定时器
+            if (tabState.loadTimeout) {
+                clearTimeout(tabState.loadTimeout);
+                delete tabState.loadTimeout;
+            }
+            
+            // 隐藏加载状态（使用动画效果）
+            loading.classList.remove('show');
+            loading.classList.add('hide');
+            iframe.classList.remove('loading');
+            
+            setTimeout(() => {
+                loading.style.display = 'none';
+                loading.classList.remove('hide');
+            }, 300);
+            
+            try {
+                // 尝试获取页面标题
+                const doc = iframe.contentDocument || iframe.contentWindow.document;
+                const title = doc.title || '未知页面';
+                
+                // 更新标签页标题
+                tabState.title = title;
+                const activeTab = document.querySelector(`[data-tab-id="${tabId}"]`);
+                if (activeTab) {
+                    const titleElement = activeTab.querySelector('.tab-title');
+                    titleElement.textContent = title;
+                    
+                    // 更新favicon
+                    const faviconElement = activeTab.querySelector('.tab-favicon');
+                    const favicon = doc.querySelector('link[rel*="icon"]');
+                    if (favicon) {
+                        faviconElement.innerHTML = `<img src="${favicon.href}" alt="favicon" style="width:16px;height:16px;border-radius:2px;">`;
+                    } else {
+                        faviconElement.innerHTML = '<i class="fas fa-globe"></i>';
+                    }
+                }
+                
+                updateBrowserStatus('页面加载完成: ' + title);
+                showToast('页面加载完成', 'success');
+                
+            } catch (error) {
+                // 跨域限制，无法获取页面信息
+                tabState.title = '外部页面';
+                updateBrowserStatus('页面加载完成');
+                showToast('页面加载完成（受跨域限制）', 'info');
+            }
+        }
+
+        // 浏览器后退
+        function browserBack() {
+            const tabId = browserState.activeTab;
+            const tabState = browserState.tabs[tabId];
+            
+            if (tabState.historyIndex > 0) {
+                tabState.historyIndex--;
+                const previousUrl = tabState.history[tabState.historyIndex];
+                loadUrl(previousUrl);
+            } else {
+                showToast('没有更多历史记录', 'info');
+            }
+        }
+
+        // 浏览器前进
+        function browserForward() {
+            const tabId = browserState.activeTab;
+            const tabState = browserState.tabs[tabId];
+            
+            if (tabState.historyIndex < tabState.history.length - 1) {
+                tabState.historyIndex++;
+                const nextUrl = tabState.history[tabState.historyIndex];
+                loadUrl(nextUrl);
+            } else {
+                showToast('没有更多历史记录', 'info');
+            }
+        }
+
+        // 刷新页面
+        function refreshBrowser() {
+            const tabId = browserState.activeTab;
+            const tabState = browserState.tabs[tabId];
+            loadUrl(tabState.url);
+        }
+
+        // 回到主页
+        function browserHome() {
+            loadHomePage();
+        }
+
+        // 加载主页
+        function loadHomePage() {
+            const homeUrl = 'https://www.baidu.com';
+            document.getElementById('browserUrl').value = homeUrl;
+            loadUrl(homeUrl);
+        }
+
+        // 浏览器性能优化
+        // 错误处理增强
+        function handleBrowserError(error) {
+            console.error('浏览器错误:', error);
+            
+            const errorMessages = {
+                'net::ERR_NAME_NOT_RESOLVED': '无法解析域名，请检查网络连接',
+                'net::ERR_CONNECTION_REFUSED': '连接被拒绝，服务器可能已关闭',
+                'net::ERR_CONNECTION_TIMED_OUT': '连接超时，请检查网络连接',
+                'net::ERR_CERT_COMMON_NAME_INVALID': '证书错误，网站可能不安全'
+            };
+            
+            const message = errorMessages[error.message] || '页面加载失败，请重试';
+            showToast(message, 'error');
+            updateBrowserStatus('加载失败: ' + message);
+        }
+
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(event) {
+            // Ctrl+T: 新建标签页
+            if (event.ctrlKey && event.key === 't') {
+                event.preventDefault();
+                createNewTab();
+            }
+            
+            // Ctrl+W: 关闭当前标签页
+            if (event.ctrlKey && event.key === 'w') {
+                event.preventDefault();
+                const activeTab = document.querySelector('.browser-tab.active');
+                if (activeTab) {
+                    closeTab(activeTab.querySelector('.tab-close'));
+                }
+            }
+            
+            // F5: 刷新页面
+            if (event.key === 'F5') {
+                event.preventDefault();
+                refreshBrowser();
+            }
+            
+            // Alt+Home: 回到主页
+            if (event.altKey && event.key === 'Home') {
+                event.preventDefault();
+                browserHome();
+            }
+        });
+
+        // 浏览器性能优化
+        function optimizeBrowserPerformance() {
+            // 清理内存泄漏
+            const iframe = document.getElementById('browserIframe');
+            if (iframe) {
+                // 重置iframe以释放内存
+                iframe.src = 'about:blank';
+            }
+            
+            // 清理过期的定时器
+            for (const tabId in browserState.tabs) {
+                const tabState = browserState.tabs[tabId];
+                if (tabState.loadTimeout) {
+                    clearTimeout(tabState.loadTimeout);
+                    delete tabState.loadTimeout;
+                }
+            }
+            
+            // 强制垃圾回收（如果浏览器支持）
+            if (window.gc) {
+                window.gc();
+            }
+            
+            showToast('浏览器性能已优化', 'success');
+        }
+
+        // 错误处理增强
+        function handleBrowserError(error) {
+            console.error('浏览器错误:', error);
+            
+            const errorMessages = {
+                'net::ERR_NAME_NOT_RESOLVED': '无法解析域名，请检查网络连接',
+                'net::ERR_CONNECTION_REFUSED': '连接被拒绝，服务器可能已关闭',
+                'net::ERR_CONNECTION_TIMED_OUT': '连接超时，请检查网络连接',
+                'net::ERR_CERT_COMMON_NAME_INVALID': '证书错误，网站可能不安全'
+            };
+            
+            const message = errorMessages[error.message] || '页面加载失败，请重试';
+            showToast(message, 'error');
+            updateBrowserStatus('加载失败: ' + message);
+        }
+
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(event) {
+            // Ctrl+T: 新建标签页
+            if (event.ctrlKey && event.key === 't') {
+                event.preventDefault();
+                createNewTab();
+            }
+            
+            // Ctrl+W: 关闭当前标签页
+            if (event.ctrlKey && event.key === 'w') {
+                event.preventDefault();
+                const activeTab = document.querySelector('.browser-tab.active');
+                if (activeTab) {
+                    closeTab(activeTab.querySelector('.tab-close'));
+                }
+            }
+            
+            // F5: 刷新页面
+            if (event.key === 'F5') {
+                event.preventDefault();
+                refreshBrowser();
+            }
+            
+            // Alt+Home: 回到主页
+            if (event.altKey && event.key === 'Home') {
+                event.preventDefault();
+                browserHome();
+            }
+        });
+
+        // 切换书签侧边栏
+        function toggleBookmarks() {
+            const sidebar = document.getElementById('browserSidebar');
+            if (sidebar.style.display === 'none') {
+                sidebar.style.display = 'flex';
+                updateBrowserStatus('书签侧边栏已打开');
+            } else {
+                sidebar.style.display = 'none';
+                updateBrowserStatus('书签侧边栏已关闭');
+            }
+        }
+
+        // 加载书签
+        function loadBookmark(url) {
+            document.getElementById('browserUrl').value = url;
+            loadUrl(url);
+            
+            // 自动关闭侧边栏
+            document.getElementById('browserSidebar').style.display = 'none';
+        }
+
+        // 下载当前页面
+        function downloadPage() {
+            const tabId = browserState.activeTab;
+            const tabState = browserState.tabs[tabId];
+            
+            const link = document.createElement('a');
+            link.href = tabState.url;
+            link.download = tabState.title + '.html';
+            link.click();
+            
+            showToast('页面下载链接已创建', 'success');
+        }
+
+        // 添加到历史记录
+        function addToHistory(url) {
+            const historyItem = {
+                url: url,
+                title: '正在加载...',
+                timestamp: new Date().toLocaleString(),
+                visitCount: 1
+            };
+            
+            // 检查是否已存在
+            const existingIndex = browserState.history.findIndex(item => item.url === url);
+            if (existingIndex !== -1) {
+                browserState.history[existingIndex].visitCount++;
+                browserState.history[existingIndex].timestamp = historyItem.timestamp;
+            } else {
+                browserState.history.unshift(historyItem);
+                // 限制历史记录数量
+                if (browserState.history.length > 100) {
+                    browserState.history.pop();
+                }
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        // 更新历史记录显示
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = browserState.history.map(item => `
+                <div class="history-item" onclick="loadBookmark('${item.url}')">
+                    <i class="fas fa-clock"></i>
+                    <div class="history-details">
+                        <div class="history-title">${item.title}</div>
+                        <div class="history-url">${item.url}</div>
+                        <div class="history-time">${item.timestamp}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新浏览器状态
+        function updateBrowserStatus(message) {
+            const statusElement = document.getElementById('browserStatus');
+            if (statusElement) {
+                statusElement.textContent = message;
+                
+                // 添加临时高亮效果
+                statusElement.style.color = '#10B981';
+                setTimeout(() => {
+                    statusElement.style.color = '';
+                }, 2000);
+            }
+        }
+
+        // 浏览器初始化增强 - initBrowser函数已在前方定义
+
+        // 初始化侧边栏 - 已在前方定义，避免重复
+
+        // 页面加载完成后初始化浏览器
+        // 注意：initBrowser() 已经在页面加载时调用，避免重复初始化
+        
+        // 添加性能监控
+        monitorPerformance();
+        
+        // 添加页面卸载时的清理
+        window.addEventListener('beforeunload', function() {
+            optimizeBrowserPerformance();
+        });
+
+        // 性能监控
+        function monitorPerformance() {
+            // 监控页面加载时间
+            const navigationStart = performance.timing.navigationStart;
+            const loadTime = performance.now();
+            
+            console.log(`页面加载时间: ${loadTime.toFixed(2)}ms`);
+            
+            // 监控内存使用
+            if (performance.memory) {
+                const usedMB = performance.memory.usedJSHeapSize / 1048576;
+                const totalMB = performance.memory.totalJSHeapSize / 1048576;
+                
+                console.log(`内存使用: ${usedMB.toFixed(2)}MB / ${totalMB.toFixed(2)}MB`);
+                
+                // 如果内存使用过高，自动优化
+                if (usedMB > totalMB * 0.8) {
+                    console.warn('内存使用过高，自动优化性能');
+                    optimizeBrowserPerformance();
+                }
+            }
+        }
+
+        // 添加浏览器离线支持
+        window.addEventListener('online', function() {
+            showToast('网络连接已恢复', 'success');
+            updateBrowserStatus('网络连接正常');
+        });
+
+        window.addEventListener('offline', function() {
+            showToast('网络连接已断开', 'warning');
+            updateBrowserStatus('网络连接断开');
+        });
+    </script>
+
+
+
+
+
+
+
+
+
+
 </body>
 </html>
