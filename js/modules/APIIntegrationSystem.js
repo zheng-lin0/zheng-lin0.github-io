@@ -264,5 +264,5 @@
             }
         }
 
-        // 实例化API集成系统
-        window.apiIntegration = new APIIntegrationSystem();
+        // 将类添加到全局变量
+        window.APIIntegrationSystem = APIIntegrationSystem;

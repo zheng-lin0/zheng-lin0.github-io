@@ -17,40 +17,40 @@ document.addEventListener('DOMContentLoaded', function() {
 // 初始化所有功能模块
 function initializeAllModules() {
     try {
-        // 初始化各个系统
+        // 初始化各个系统并存储到全局变量中
         // 初始化ProjectManagement系统
         if (window.ProjectManagementSystem) {
-            const projectSystem = new ProjectManagementSystem();
+            window.projectSystem = new ProjectManagementSystem();
             console.log('ProjectManagementSystem实例创建成功');
         }
 
         // 初始化CRM系统
         if (window.CRMService) {
-            const crmSystem = new CRMService();
+            window.crmSystem = new CRMService();
             console.log('CRMService实例创建成功');
         }
 
         // 初始化财务管理系统
         if (window.FinancialManagementSystem) {
-            const financialSystem = new FinancialManagementSystem();
+            window.financialSystem = new FinancialManagementSystem();
             console.log('FinancialManagementSystem实例创建成功');
         }
 
         // 初始化协作系统
         if (window.CollaborationSystem) {
-            const collaborationSystem = new CollaborationSystem();
+            window.collaborationSystem = new CollaborationSystem();
             console.log('CollaborationSystem实例创建成功');
         }
 
-        // 初始化数据分析系统
+        // 初始化数据分析系统（需要其他系统作为依赖）
         if (window.DataAnalyticsSystem) {
-            const analyticsSystem = new DataAnalyticsSystem();
+            window.analyticsSystem = new DataAnalyticsSystem(window.financialSystem, window.crmSystem);
             console.log('DataAnalyticsSystem实例创建成功');
         }
 
         // 初始化API集成系统
         if (window.APIIntegrationSystem) {
-            const apiSystem = new APIIntegrationSystem();
+            window.apiSystem = new APIIntegrationSystem();
             console.log('APIIntegrationSystem实例创建成功');
         }
         

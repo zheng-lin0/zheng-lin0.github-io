@@ -153,5 +153,3 @@ class ProjectManagementSystem {
 
         // 将类添加到全局变量
         window.ProjectManagementSystem = ProjectManagementSystem;
-        // 实例化项目管理系统
-        const projectManager = new ProjectManagementSystem();

@@ -242,5 +242,5 @@
             }
         }
 
-        // 实例化团队协作系统
-        window.collaborationTools = new CollaborationSystem();
+        // 将类添加到全局变量
+        window.CollaborationSystem = CollaborationSystem;

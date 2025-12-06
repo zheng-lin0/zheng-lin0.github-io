@@ -176,4 +176,5 @@
         }
 
         // 实例化CRM系统
-        window.crmSystem = new CRMService();
+        // 将类添加到全局变量
+        window.CRMService = CRMService;

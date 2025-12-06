@@ -173,5 +173,5 @@
             }
         }
 
-        // 实例化财务管理系统
-        window.financialManager = new FinancialManagementSystem();
+        // 将类添加到全局变量
+        window.FinancialManagementSystem = FinancialManagementSystem;

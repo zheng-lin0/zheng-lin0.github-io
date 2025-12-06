@@ -1,9 +1,11 @@
 // 数据分析系统
     class DataAnalyticsSystem {
-            constructor() {
+            constructor(financialManager = null, crmSystem = null) {
                 this.dashboards = new Map();
                 this.reports = new Map();
                 this.datasets = new Map();
+                this.financialManager = financialManager;
+                this.crmSystem = crmSystem;
                 this.initializeSampleData();
             }
 
@@ -60,8 +62,8 @@
             // 分析销售业绩
             analyzeSalesPerformance(period = 'month') {
                 // 模拟销售分析
-                const financialReport = financialManager.generateFinancialReport(period);
-                const customerStats = crmSystem.getCustomerStats();
+                const financialReport = this.financialManager ? this.financialManager.generateFinancialReport(period) : { overview: { income: 0, expenses: 0, netIncome: 0 } };
+                const customerStats = this.crmSystem ? this.crmSystem.getCustomerStats() : { totalCustomers: 0, customerRetentionRate: 0 };
                 const marketingROI = { // 模拟营销ROI数据
                     totalSpent: 25000,
                     totalRevenue: 75000,
@@ -127,7 +129,7 @@
             // 收入预测
             forecastRevenue(months = 12) {
                 const forecast = [];
-                const currentRevenue = financialManager.getFinancialOverview().netIncome;
+                const currentRevenue = this.financialManager ? this.financialManager.getFinancialOverview().netIncome : 0;
                 
                 for (let i = 0; i < months; i++) {
                     const growthRate = 0.08 + (Math.random() * 0.04); // 8-12%增长率
@@ -224,4 +226,5 @@
         }
 
         // 实例化数据分析系统
-        window.analyticsSystem = new DataAnalyticsSystem();
+        // 将类添加到全局变量
+        window.DataAnalyticsSystem = DataAnalyticsSystem;
