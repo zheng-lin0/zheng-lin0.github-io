@@ -1317,6 +1317,46 @@
             color: white;
         }
 
+        /* 管理员用户样式 */
+        .admin-user {
+            font-weight: 700;
+            color: #2563EB;
+            text-shadow: 0 0 5px rgba(37, 99, 235, 0.3);
+        }
+
+        /* 管理员徽章样式 */
+        .admin-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: var(--radius-full);
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            color: white;
+            margin-top: 4px;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        /* 超级管理员徽章样式 */
+        .admin-badge.super-admin {
+            background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+        }
+
+        /* 管理员徽章动画 */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 16px rgba(239, 68, 68, 0.6);
+            }
+            100% {
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            }
+        }
+
         /* 会员等级卡片样式 */
         .level-card {
             background: var(--bg-primary);

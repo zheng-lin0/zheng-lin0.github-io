@@ -692,6 +692,13 @@ class UserManagement {
             if (userName) {
                 userName.textContent = this.currentUser.username;
                 console.log('更新用户名显示:', userName.textContent);
+                
+                // 为管理员用户添加特殊样式
+                if (this.currentUser.role === '超级管理员' || this.currentUser.role === '管理员') {
+                    userName.classList.add('admin-user');
+                } else {
+                    userName.classList.remove('admin-user');
+                }
             }
             
             if (userLevel) {
@@ -716,7 +723,7 @@ class UserManagement {
                 
                 // 根据等级设置徽章样式
                 userLevel.className = 'user-level';
-                if (level === '钻石会员' || level === '超级VIP') {
+                if (level === '钻石会员' || level === '超级VIP' || level === '至尊会员') {
                     userLevel.classList.add('diamond');
                 } else if (level === '高级会员') {
                     userLevel.classList.add('premium');
@@ -725,6 +732,40 @@ class UserManagement {
                 } else {
                     userLevel.classList.add('regular');
                 }
+            }
+            
+            // 添加管理员角色标识
+            let adminBadge = document.getElementById('adminBadge');
+            if (this.currentUser.role === '超级管理员' || this.currentUser.role === '管理员') {
+                if (!adminBadge) {
+                    adminBadge = document.createElement('div');
+                    adminBadge.id = 'adminBadge';
+                    adminBadge.className = 'admin-badge';
+                    adminBadge.textContent = this.currentUser.role;
+                    
+                    // 为超级管理员添加特殊类名
+                    if (this.currentUser.role === '超级管理员') {
+                        adminBadge.classList.add('super-admin');
+                    } else {
+                        adminBadge.classList.remove('super-admin');
+                    }
+                    
+                    // 将管理员徽章添加到用户信息区域
+                    const userInfo = document.querySelector('.user-info');
+                    if (userInfo) {
+                        userInfo.appendChild(adminBadge);
+                    }
+                } else {
+                    // 更新角色文本和类名
+                    adminBadge.textContent = this.currentUser.role;
+                    if (this.currentUser.role === '超级管理员') {
+                        adminBadge.classList.add('super-admin');
+                    } else {
+                        adminBadge.classList.remove('super-admin');
+                    }
+                }
+            } else if (adminBadge) {
+                adminBadge.remove();
             }
             
             // 根据角色显示管理员功能
@@ -860,9 +901,9 @@ class UserManagement {
         if (this.supabase) {
             try {
                 const { error } = await this.supabase
-                    .from('users')
-                    .update({ level: level })
-                    .eq('id', userId);
+                     .from('users')
+                     .update({ level: level })
+                     .eq('id', userId);
 
                 if (!error) {
                     // 更新当前用户信息
