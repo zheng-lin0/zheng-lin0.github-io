@@ -43,12 +43,57 @@ class SearchSystem {
             // 合并配置
             this.config = { ...this.config, ...options };
             
-            // 查找搜索相关元素
-            this.searchInput = document.querySelector('.nav-search-input');
+            // 确保DOM已经完全加载
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => this.initializeSearchElements());
+            } else {
+                this.initializeSearchElements();
+            }
+        } catch (error) {
+            console.error('SearchSystem初始化失败:', error);
+        }
+    }
+    
+    /**
+     * 初始化搜索元素（确保在DOM完全加载后执行）
+     * @private
+     */
+    initializeSearchElements() {
+        try {
+            // 尝试查找搜索相关元素 - 增加对ID的支持
+            this.searchInput = document.querySelector('.nav-search-input, .search-input, #resourceSearch');
             this.searchResults = document.querySelector('.search-results');
             
             if (!this.searchInput) {
-                console.error('未找到搜索输入框');
+                // 如果找不到搜索输入框，尝试轮询查找（最多尝试5次，每次间隔200ms）
+                let attempts = 0;
+                const maxAttempts = 5;
+                const pollInterval = 200;
+                
+                const pollForSearchInput = () => {
+                    attempts++;
+                    this.searchInput = document.querySelector('.nav-search-input, .search-input');
+                    this.searchResults = document.querySelector('.search-results');
+                    
+                    if (this.searchInput || attempts >= maxAttempts) {
+                        if (this.searchInput) {
+                            // 找到搜索输入框，继续初始化
+                            this.createSearchResultsContainer();
+                            this.setupSearchListeners();
+                            this.isInitialized = true;
+                            console.log('SearchSystem初始化成功');
+                        } else {
+                            // 仍然找不到搜索输入框，记录警告而不是错误
+                            console.warn('多次尝试后仍未找到搜索输入框，搜索功能可能无法使用');
+                            this.isInitialized = true; // 标记为已初始化，避免重复尝试
+                        }
+                    } else {
+                        // 继续轮询
+                        setTimeout(pollForSearchInput, pollInterval);
+                    }
+                };
+                
+                pollForSearchInput();
                 return;
             }
             
@@ -61,7 +106,7 @@ class SearchSystem {
             this.isInitialized = true;
             console.log('SearchSystem初始化成功');
         } catch (error) {
-            console.error('SearchSystem初始化失败:', error);
+            console.error('SearchSystem初始化搜索元素失败:', error);
         }
     }
 
@@ -189,7 +234,7 @@ class SearchSystem {
         });
 
         // 搜索按钮点击事件
-        const searchBtn = document.querySelector('.search-btn');
+        const searchBtn = document.querySelector('.search-btn, .nav-search-btn, .search-button');
         if (searchBtn) {
             searchBtn.addEventListener('click', () => {
                 this.handleSearch(this.searchInput.value);

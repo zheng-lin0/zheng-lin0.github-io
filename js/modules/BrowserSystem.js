@@ -210,8 +210,9 @@ class BrowserSystem {
             if (url.includes('.') && !url.includes(' ')) {
                 url = 'https://' + url;
             } else {
-                // 作为搜索处理
-                url = 'https://www.baidu.com/s?wd=' + encodeURIComponent(url);
+                // 不支持搜索功能，只接受有效的URL
+                notificationSystem.showNotification('请输入有效的网址（需要包含http://或https://，或者包含域名）', 'warning');
+                return;
             }
         }
         
@@ -475,7 +476,7 @@ class BrowserSystem {
 
     // 加载主页
     loadHomePage() {
-        const homeUrl = 'https://www.baidu.com';
+        const homeUrl = 'about:blank';
         document.getElementById('browserUrl').value = homeUrl;
         this.loadUrl(homeUrl);
     }

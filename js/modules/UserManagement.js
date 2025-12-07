@@ -62,7 +62,7 @@ class UserManagement {
                 .select('*');
 
             if (error) {
-                console.error('获取用户数据失败:', error);
+                console.warn('Supabase数据获取失败，回退到localStorage');
                 // 失败时回退到默认用户
                 localStorage.setItem('users', JSON.stringify(defaultUsers));
                 return defaultUsers;
@@ -393,7 +393,7 @@ class UserManagement {
                 .single();
 
             if (usernameError || !userByUsername) {
-                console.error('Supabase查找用户失败，回退到localStorage:', usernameError);
+                console.warn('Supabase用户查找失败，回退到localStorage');
                 // Supabase查找失败，回退到localStorage模式
                 this.handleLocalStorageLogin(username, password);
                 return;

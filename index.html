@@ -174,7 +174,9 @@
                         <div class="loading-spinner"></div>
                         <div class="loading-text">加载中...</div>
                     </div>
-                    <iframe id="browserIframe" src="https://www.baidu.com" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-top-navigation-by-user-activation"></iframe>
+                    <div class="browser-iframe-container">
+                        <iframe id="browserIframe" class="browser-iframe" src="about:blank" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-top-navigation-by-user-activation"></iframe>
+                    </div>
                 </div>
             </div>
         </div>
@@ -416,6 +418,9 @@
     <script src="js/modules/MembershipSystem.js"></script>
     <script src="js/modules/BrowserSystem.js"></script>
     <script src="js/modules/ResourceManager.js"></script>
+    <script src="js/modules/ResourceCenter.js"></script>
+    <script src="js/modules/AppCenter.js"></script>
+    <script src="js/modules/SearchSystem.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

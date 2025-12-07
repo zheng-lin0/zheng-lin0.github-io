@@ -350,10 +350,10 @@ class NavigationSystem {
      * @public
      */
     toggleMobileMenu() {
-        if (this.isMobileMenuOpen) {
-            this.closeMobileMenu();
-        } else {
-            this.openMobileMenu();
+        this.isMobileMenuOpen = !this.isMobileMenuOpen;
+        const menu = document.getElementById('navbarMenu');
+        if (menu) {
+            menu.classList.toggle('open', this.isMobileMenuOpen);
         }
     }
 
@@ -566,4 +566,11 @@ if (typeof module !== 'undefined' && module.exports) {
     define([], function() { return navigationSystem; });
 } else {
     window.navigationSystem = navigationSystem;
+}
+
+// 创建全局函数，用于页面上的事件调用
+window.toggleNavMenu = function() {
+    if (window.navigationSystem) {
+        window.navigationSystem.toggleMobileMenu();
+    }
 }

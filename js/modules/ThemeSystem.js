@@ -160,15 +160,21 @@ class ThemeSystem {
         document.head.appendChild(style);
         
         // 插入到导航栏中
-        const nav = document.querySelector('.nav-container');
+        const nav = document.querySelector('.navbar');
         if (nav) {
-            // 找到用户链接区域并插入
-            const userLinks = nav.querySelector('.user-links');
-            if (userLinks) {
-                userLinks.insertAdjacentElement('beforebegin', toggleContainer);
+            // 找到用户操作区域并插入
+            const userActions = nav.querySelector('.navbar-actions');
+            if (userActions) {
+                userActions.insertAdjacentElement('beforebegin', toggleContainer);
             } else {
-                // 如果没有用户链接区域，添加到导航栏末尾
-                nav.appendChild(toggleContainer);
+                // 找到导航菜单并插入
+                const navbarMenu = nav.querySelector('.navbar-menu');
+                if (navbarMenu) {
+                    navbarMenu.appendChild(toggleContainer);
+                } else {
+                    // 如果找不到合适位置，添加到导航栏末尾
+                    nav.appendChild(toggleContainer);
+                }
             }
         }
         
