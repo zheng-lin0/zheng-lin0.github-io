@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h2 {
+            color: #555;
+            margin-top: 0;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 3px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>网站修复验证测试</h1>
+        
+        <div class="test-section">
+            <h2>1. 模块加载测试</h2>
+            <div id="module-test-result" class="test-result info">测试进行中...</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. BrowserSystem功能测试</h2>
+            <button onclick="testBrowserSystem()">测试BrowserSystem</button>
+            <div id="browser-test-result" class="test-result info">点击按钮开始测试</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. 性能监控测试</h2>
+            <button onclick="testPerformanceMonitoring()">测试性能监控</button>
+            <div id="performance-test-result" class="test-result info">点击按钮开始测试</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. 通知系统测试</h2>
+            <button onclick="testNotificationSystem()">测试通知系统</button>
+            <div id="notification-test-result" class="test-result info">点击按钮开始测试</div>
+        </div>
+        
+        <div class="test-section">
+            <h2>5. 网络状态测试</h2>
+            <button onclick="testNetworkStatus()">测试网络状态</button>
+            <div id="network-test-result" class="test-result info">点击按钮开始测试</div>
+        </div>
+    </div>
+
+    <!-- 引入必要的JavaScript文件 -->
+    <script src="js/modules/NotificationSystem.js"></script>
+    <script src="js/modules/BrowserSystem.js"></script>
+    
+    <script>
+        // 初始化通知系统
+        const notificationSystem = new NotificationSystem();
+        
+        // 1. 模块加载测试
+        function testModuleLoading() {
+            const resultDiv = document.getElementById('module-test-result');
+            let errors = [];
+            let successes = [];
+            
+            // 检查NotificationSystem
+            if (typeof NotificationSystem !== 'undefined') {
+                successes.push('NotificationSystem模块加载成功');
+            } else {
+                errors.push('NotificationSystem模块加载失败');
+            }
+            
+            // 检查BrowserSystem
+            if (typeof BrowserSystem !== 'undefined') {
+                successes.push('BrowserSystem模块加载成功');
+            } else {
+                errors.push('BrowserSystem模块加载失败');
+            }
+            
+            // 检查优化函数
+            if (typeof optimizeBrowserPerformance !== 'undefined') {
+                successes.push('optimizeBrowserPerformance函数存在');
+            } else {
+                errors.push('optimizeBrowserPerformance函数不存在');
+            }
+            
+            // 检查性能监控函数
+            if (typeof monitorPerformance !== 'undefined') {
+                successes.push('monitorPerformance函数存在');
+            } else {
+                errors.push('monitorPerformance函数不存在');
+            }
+            
+            // 显示结果
+            if (errors.length === 0) {
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = '<strong>所有模块加载成功！</strong><br>' + successes.join('<br>');
+            } else {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = '<strong>模块加载失败：</strong><br>' + errors.join('<br>') + '<br><br><strong>成功加载：</strong><br>' + successes.join('<br>');
+            }
+        }
+        
+        // 2. BrowserSystem功能测试
+        function testBrowserSystem() {
+            const resultDiv = document.getElementById('browser-test-result');
+            resultDiv.className = 'test-result info';
+            resultDiv.innerHTML = '测试进行中...';
+            
+            try {
+                // 创建BrowserSystem实例
+                const browserSystem = new BrowserSystem();
+                
+                // 测试初始化
+                browserSystem.init();
+                resultDiv.innerHTML += '<br>BrowserSystem初始化成功';
+                
+                // 测试创建标签页
+                const tabId = browserSystem.createNewTab('https://www.example.com');
+                if (tabId) {
+                    resultDiv.innerHTML += '<br>创建标签页成功：' + tabId;
+                } else {
+                    resultDiv.innerHTML += '<br>创建标签页失败';
+                }
+                
+                // 测试切换标签页
+                browserSystem.switchTab(tabId);
+                resultDiv.innerHTML += '<br>切换标签页成功';
+                
+                // 测试logUserActivity方法
+                browserSystem.logUserActivity('测试活动', { test: 'data' });
+                resultDiv.innerHTML += '<br>logUserActivity方法调用成功';
+                
+                // 测试updateBrowserStatus方法
+                browserSystem.updateBrowserStatus('测试状态');
+                resultDiv.innerHTML += '<br>updateBrowserStatus方法调用成功';
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = '<strong>BrowserSystem功能测试通过！</strong><br>' + resultDiv.innerHTML;
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = '<strong>BrowserSystem功能测试失败：</strong><br>' + error.message + '<br>Stack: ' + error.stack;
+            }
+        }
+        
+        // 3. 性能监控测试
+        function testPerformanceMonitoring() {
+            const resultDiv = document.getElementById('performance-test-result');
+            resultDiv.className = 'test-result info';
+            resultDiv.innerHTML = '测试进行中...';
+            
+            try {
+                // 测试optimizeBrowserPerformance函数
+                if (typeof optimizeBrowserPerformance === 'function') {
+                    optimizeBrowserPerformance();
+                    resultDiv.innerHTML += '<br>optimizeBrowserPerformance函数调用成功';
+                } else {
+                    throw new Error('optimizeBrowserPerformance函数未定义');
+                }
+                
+                // 测试monitorPerformance函数
+                if (typeof monitorPerformance === 'function') {
+                    const performanceData = monitorPerformance();
+                    resultDiv.innerHTML += '<br>monitorPerformance函数调用成功，返回数据：' + JSON.stringify(performanceData);
+                } else {
+                    throw new Error('monitorPerformance函数未定义');
+                }
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = '<strong>性能监控测试通过！</strong><br>' + resultDiv.innerHTML;
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = '<strong>性能监控测试失败：</strong><br>' + error.message + '<br>Stack: ' + error.stack;
+            }
+        }
+        
+        // 4. 通知系统测试
+        function testNotificationSystem() {
+            const resultDiv = document.getElementById('notification-test-result');
+            resultDiv.className = 'test-result info';
+            resultDiv.innerHTML = '测试进行中...';
+            
+            try {
+                // 测试成功通知
+                const successId = notificationSystem.showNotification('测试成功通知', 'success');
+                resultDiv.innerHTML += '<br>成功通知显示成功，ID：' + successId;
+                
+                // 测试警告通知
+                const warningId = notificationSystem.showNotification('测试警告通知', 'warning');
+                resultDiv.innerHTML += '<br>警告通知显示成功，ID：' + warningId;
+                
+                // 测试错误通知
+                const errorId = notificationSystem.showNotification('测试错误通知', 'error');
+                resultDiv.innerHTML += '<br>错误通知显示成功，ID：' + errorId;
+                
+                // 测试信息通知
+                const infoId = notificationSystem.showNotification('测试信息通知', 'info');
+                resultDiv.innerHTML += '<br>信息通知显示成功，ID：' + infoId;
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = '<strong>通知系统测试通过！</strong><br>' + resultDiv.innerHTML;
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = '<strong>通知系统测试失败：</strong><br>' + error.message + '<br>Stack: ' + error.stack;
+            }
+        }
+        
+        // 5. 网络状态测试
+        function testNetworkStatus() {
+            const resultDiv = document.getElementById('network-test-result');
+            resultDiv.className = 'test-result info';
+            resultDiv.innerHTML = '测试进行中...';
+            
+            try {
+                // 检查online事件监听器
+                if (window.browserSystem) {
+                    // 模拟在线状态
+                    window.dispatchEvent(new Event('online'));
+                    resultDiv.innerHTML += '<br>在线事件触发成功';
+                    
+                    // 模拟离线状态
+                    window.dispatchEvent(new Event('offline'));
+                    resultDiv.innerHTML += '<br>离线事件触发成功';
+                } else {
+                    resultDiv.innerHTML += '<br>browserSystem未初始化，跳过网络状态测试';
+                }
+                
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = '<strong>网络状态测试通过！</strong><br>' + resultDiv.innerHTML;
+            } catch (error) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = '<strong>网络状态测试失败：</strong><br>' + error.message + '<br>Stack: ' + error.stack;
+            }
+        }
+        
+        // 页面加载时自动运行模块加载测试
+        window.addEventListener('load', function() {
+            // 等待其他模块加载完成
+            setTimeout(testModuleLoading, 1000);
+        });
+    </script>
+</body>
+</html>

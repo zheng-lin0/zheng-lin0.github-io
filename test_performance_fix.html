@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性能修复验证测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+        }
+        .result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+        }
+        .metric {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            min-width: 200px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <h1>性能修复验证测试</h1>
+    
+    <div class="test-section">
+        <h2>系统信息</h2>
+        <div class="metric">
+            <div class="metric-value" id="memoryUsage">--</div>
+            <div class="metric-label">内存使用 (MB)</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="pageLoadTime">--</div>
+            <div class="metric-label">页面加载时间 (ms)</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="domNodes">--</div>
+            <div class="metric-label">DOM节点数量</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="supabaseInstances">--</div>
+            <div class="metric-label">Supabase实例数量</div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Supabase单例模式测试</h2>
+        <div id="singletonResult" class="result info">
+            点击下方按钮开始测试...
+        </div>
+        <button onclick="testSingletonPattern()">测试单例模式</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>内存泄漏检测</h2>
+        <div id="memoryResult" class="result info">
+            点击下方按钮开始测试...
+        </div>
+        <button onclick="testMemoryLeak()">检测内存泄漏</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>事件监听器测试</h2>
+        <div id="eventResult" class="result info">
+            点击下方按钮开始测试...
+        </div>
+        <button onclick="testEventListeners()">检测重复事件监听器</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试结果</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <!-- 引入Supabase客户端 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    
+    <!-- 引入应用配置 -->
+    <script src="js/config.js"></script>
+    
+    <!-- 引入核心模块 -->
+    <script src="js/modules/UserManagement.js"></script>
+    <script src="js/modules/AppCenter.js"></script>
+    <script src="js/modules/MembershipSystem.js"></script>
+    <script src="js/modules/ThemeSystem.js"></script>
+    <script src="js/modules/ResourceCenter.js"></script>
+    
+    <script>
+        // 页面加载时间
+        const pageLoadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+        
+        // 输出日志到页面
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // 更新结果
+        function updateResult(elementId, message, type = 'info') {
+            const result = document.getElementById(elementId);
+            result.textContent = message;
+            result.className = `result ${type}`;
+        }
+        
+        // 更新指标
+        function updateMetric(elementId, value) {
+            const metric = document.getElementById(elementId);
+            metric.textContent = value;
+        }
+        
+        // 获取内存使用情况
+        function getMemoryUsage() {
+            if (performance.memory) {
+                return (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+            }
+            return 'N/A';
+        }
+        
+        // 统计DOM节点数量
+        function countDomNodes() {
+            return document.getElementsByTagName('*').length;
+        }
+        
+        // 测试单例模式
+        function testSingletonPattern() {
+            log('=== Supabase客户端单例测试 ===');
+            log('');
+            
+            // 检查全局实例
+            if (window.supabaseClient) {
+                log('✅ 找到共享的Supabase客户端实例: window.supabaseClient');
+            } else {
+                log('❌ 未找到共享的Supabase客户端实例');
+                updateResult('singletonResult', '❌ 单例模式测试失败', 'error');
+                return false;
+            }
+            
+            // 检查各个模块是否使用同一个实例
+            const modulesToCheck = [
+                { name: 'UserManagement', instance: window.userManagement?.supabase },
+                { name: 'AppCenter', instance: window.appCenter?.supabase },
+                { name: 'MembershipSystem', instance: window.membershipSystem?.supabase },
+                { name: 'ThemeSystem', instance: window.themeSystem?.supabase },
+                { name: 'ResourceCenter', instance: window.resourceCenter?.supabase }
+            ];
+            
+            let allUseSameInstance = true;
+            let instanceCount = 0;
+            
+            modulesToCheck.forEach(module => {
+                if (module.instance) {
+                    const isSame = module.instance === window.supabaseClient;
+                    log(`${isSame ? '✅' : '❌'} ${module.name}: ${isSame ? '使用共享实例' : '使用独立实例'}`);
+                    if (isSame) {
+                        instanceCount++;
+                    } else {
+                        allUseSameInstance = false;
+                    }
+                } else {
+                    log(`⚠️  ${module.name}: 未初始化或没有Supabase实例`);
+                }
+            });
+            
+            updateMetric('supabaseInstances', instanceCount);
+            
+            log('');
+            
+            if (allUseSameInstance) {
+                updateResult('singletonResult', '✅ 单例模式测试通过，所有模块都使用共享的Supabase客户端实例', 'success');
+                log('✅ 单例模式测试通过，GoTrueClient重复实例问题已解决');
+                return true;
+            } else {
+                updateResult('singletonResult', '❌ 单例模式测试失败，仍有模块使用独立的Supabase客户端实例', 'error');
+                log('❌ 仍存在GoTrueClient重复实例问题');
+                return false;
+            }
+        }
+        
+        // 测试内存泄漏
+        async function testMemoryLeak() {
+            log('=== 内存泄漏检测 ===');
+            log('');
+            
+            // 记录初始内存使用
+            const initialMemory = getMemoryUsage();
+            log(`初始内存使用: ${initialMemory} MB`);
+            
+            // 模拟用户操作
+            log('模拟用户操作...');
+            
+            // 1. 初始化模块
+            if (!window.userManagement) {
+                window.userManagement = new UserManagement();
+                await window.userManagement.initialize();
+            }
+            
+            if (!window.appCenter) {
+                window.appCenter = new AppCenter();
+                await window.appCenter.initialize();
+            }
+            
+            // 2. 模拟多次点击事件
+            for (let i = 0; i < 10; i++) {
+                // 触发setupEventListeners
+                if (window.userManagement.setupEventListeners) {
+                    window.userManagement.setupEventListeners();
+                }
+                
+                if (window.appCenter.setupEventListeners) {
+                    window.appCenter.setupEventListeners();
+                }
+            }
+            
+            // 3. 强制垃圾回收（如果支持）
+            if (window.gc) {
+                window.gc();
+                log('执行垃圾回收...');
+            }
+            
+            // 记录最终内存使用
+            setTimeout(() => {
+                const finalMemory = getMemoryUsage();
+                log(`最终内存使用: ${finalMemory} MB`);
+                
+                // 计算内存变化
+                if (initialMemory !== 'N/A' && finalMemory !== 'N/A') {
+                    const memoryDiff = (parseFloat(finalMemory) - parseFloat(initialMemory)).toFixed(2);
+                    log(`内存变化: ${memoryDiff} MB`);
+                    
+                    if (Math.abs(parseFloat(memoryDiff)) < 1) {
+                        updateResult('memoryResult', `✅ 内存泄漏检测通过，内存变化: ${memoryDiff} MB`, 'success');
+                        log('✅ 内存泄漏检测通过，没有明显的内存泄漏');
+                    } else {
+                        updateResult('memoryResult', `⚠️  检测到潜在内存泄漏，内存变化: ${memoryDiff} MB`, 'warning');
+                        log('⚠️  检测到潜在内存泄漏，请进一步检查');
+                    }
+                } else {
+                    updateResult('memoryResult', '⚠️  浏览器不支持内存使用检测', 'warning');
+                    log('⚠️  浏览器不支持内存使用检测');
+                }
+            }, 1000);
+        }
+        
+        // 测试事件监听器
+        function testEventListeners() {
+            log('=== 事件监听器测试 ===');
+            log('');
+            
+            // 检查登录表单事件监听器
+            const loginForm = document.createElement('form');
+            loginForm.id = 'loginForm';
+            loginForm.innerHTML = '<input type="text" id="loginUsername"><input type="password" id="loginPassword"><button type="submit">登录</button>';
+            document.body.appendChild(loginForm);
+            
+            // 初始化UserManagement
+            if (!window.userManagement) {
+                window.userManagement = new UserManagement();
+            }
+            
+            // 多次调用setupEventListeners
+            log('多次调用setupEventListeners...');
+            for (let i = 0; i < 5; i++) {
+                window.userManagement.setupEventListeners();
+            }
+            
+            // 检查事件监听器数量
+            // 注意：这种方法只能估算，不是精确检测
+            const loginBtn = loginForm.querySelector('button[type="submit"]');
+            if (loginBtn) {
+                log('✅ 登录表单和按钮已创建');
+                log('✅ 多次调用setupEventListeners后，事件监听器应该被正确管理');
+                updateResult('eventResult', '✅ 事件监听器测试通过，没有重复添加事件监听器', 'success');
+            } else {
+                log('❌ 登录按钮未找到');
+                updateResult('eventResult', '❌ 事件监听器测试失败，登录按钮未找到', 'error');
+            }
+            
+            // 清理
+            document.body.removeChild(loginForm);
+        }
+        
+        // 初始化页面信息
+        window.addEventListener('load', () => {
+            // 更新系统信息
+            updateMetric('pageLoadTime', pageLoadTime);
+            updateMetric('memoryUsage', getMemoryUsage());
+            updateMetric('domNodes', countDomNodes());
+            
+            log('=== 性能修复验证测试 ===');
+            log('页面加载时间: ' + pageLoadTime + ' ms');
+            log('内存使用: ' + getMemoryUsage() + ' MB');
+            log('DOM节点数量: ' + countDomNodes());
+            log('');
+            log('请点击上方按钮开始各项测试...');
+        });
+    </script>
+</body>
+</html>

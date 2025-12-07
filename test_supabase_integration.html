@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase 集成测试</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { padding: 8px 16px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Supabase 集成测试</h1>
+    
+    <div id="test-results"></div>
+    
+    <h2>测试步骤</h2>
+    <ol>
+        <li>检查 Supabase 配置</li>
+        <li>初始化 Supabase 客户端</li>
+        <li>测试 UserManagement 模块</li>
+    </ol>
+    
+    <h2>登录测试</h2>
+    <input type="text" id="test-username" placeholder="用户名">
+    <input type="password" id="test-password" placeholder="密码">
+    <button onclick="testLogin()">测试登录</button>
+    <button onclick="testLogout()">测试登出</button>
+    
+    <h2>用户列表</h2>
+    <div id="user-list"></div>
+
+    <script>
+        // 测试结果输出函数
+        function logResult(message, type = 'info') {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.textContent = message;
+            resultsDiv.appendChild(resultDiv);
+        }
+        
+        // 测试 Supabase 配置
+        function testSupabaseConfig() {
+            logResult('开始测试 Supabase 配置...');
+            
+            if (window.appConfig && window.appConfig.services && window.appConfig.services.supabase) {
+        const supabaseConfig = window.appConfig.services.supabase;
+                
+                if (supabaseConfig.url && supabaseConfig.url !== '') {
+                    logResult('✓ Supabase URL 已配置', 'success');
+                } else {
+                    logResult('✗ Supabase URL 未配置', 'error');
+                }
+                
+                if (supabaseConfig.anonKey && supabaseConfig.anonKey !== '') {
+                    logResult('✓ Supabase 匿名密钥 已配置', 'success');
+                } else {
+                    logResult('✗ Supabase 匿名密钥 未配置', 'error');
+                }
+                
+                return true;
+            } else {
+                logResult('✗ Supabase 配置未找到', 'error');
+                return false;
+            }
+        }
+        
+        // 测试 Supabase 客户端初始化
+        function testSupabaseClient() {
+            logResult('开始测试 Supabase 客户端初始化...');
+            
+            try {
+                if (testSupabaseConfig()) {
+                    // 使用共享的Supabase客户端实例
+                    if (window.supabaseClient) {
+                        logResult('✓ Supabase 客户端初始化成功', 'success');
+                        return window.supabaseClient;
+                    } else {
+                        logResult('✗ 共享Supabase客户端未找到', 'error');
+                        return null;
+                    }
+                }
+            } catch (error) {
+                logResult(`✗ Supabase 客户端初始化失败: ${error.message}`, 'error');
+                return null;
+            }
+            
+            return null;
+        }
+        
+        // 测试登录功能
+        async function testLogin() {
+            const username = document.getElementById('test-username').value;
+            const password = document.getElementById('test-password').value;
+            
+            if (!username || !password) {
+                logResult('请输入用户名和密码', 'error');
+                return;
+            }
+            
+            logResult(`开始测试登录: ${username}...`);
+            
+            try {
+                // 直接使用 Supabase 客户端测试登录
+                const supabase = testSupabaseClient();
+                if (!supabase) return;
+                
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: username, // 假设用户名是邮箱
+                    password: password
+                });
+                
+                if (error) {
+                    logResult(`✗ 登录失败: ${error.message}`, 'error');
+                    logResult(`错误详情: ${JSON.stringify(error)}`, 'error');
+                } else {
+                    logResult('✓ 登录成功', 'success');
+                    logResult(`用户信息: ${JSON.stringify(data.user, null, 2)}`, 'success');
+                    
+                    // 获取用户资料
+                    const { data: profileData, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    if (profileError) {
+                        logResult(`获取用户资料失败: ${profileError.message}`, 'error');
+                    } else {
+                        logResult(`用户资料: ${JSON.stringify(profileData, null, 2)}`, 'success');
+                    }
+                }
+            } catch (error) {
+                logResult(`✗ 登录过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 测试登出功能
+        async function testLogout() {
+            logResult('开始测试登出...');
+            
+            try {
+                const supabase = testSupabaseClient();
+                if (!supabase) return;
+                
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    logResult(`✗ 登出失败: ${error.message}`, 'error');
+                } else {
+                    logResult('✓ 登出成功', 'success');
+                }
+            } catch (error) {
+                logResult(`✗ 登出过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 获取用户列表
+        async function getUserList() {
+            logResult('开始获取用户列表...');
+            
+            try {
+                const supabase = testSupabaseClient();
+                if (!supabase) return;
+                
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('*');
+                
+                if (error) {
+                    logResult(`✗ 获取用户列表失败: ${error.message}`, 'error');
+                } else {
+                    logResult(`✓ 获取用户列表成功，共 ${data.length} 个用户`, 'success');
+                    
+                    const userListDiv = document.getElementById('user-list');
+                    userListDiv.innerHTML = '<ul>';
+                    data.forEach(user => {
+                        userListDiv.innerHTML += `<li>${user.username} (${user.role}) - ${user.email}</li>`;
+                    });
+                    userListDiv.innerHTML += '</ul>';
+                }
+            } catch (error) {
+                logResult(`✗ 获取用户列表过程中发生错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 页面加载完成后自动运行测试
+        window.addEventListener('load', () => {
+            logResult('页面加载完成，开始自动测试...');
+            testSupabaseConfig();
+            testSupabaseClient();
+            getUserList();
+        });
+    </script>
+</body>
+</html>

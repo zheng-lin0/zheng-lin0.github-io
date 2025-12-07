@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>修复验证测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <h1>修复验证测试页面</h1>
+    <p>这个页面用于验证所有修复是否有效，包括:</p>
+    <ul>
+        <li>多个GoTrueClient实例问题</li>
+        <li>内存使用过高问题</li>
+        <li>统一测试面板加载问题</li>
+    </ul>
+
+    <div id="test-results"></div>
+    <div id="console-output"><h3>控制台输出:</h3><pre id="console"></pre></div>
+
+    <button onclick="runAllTests()">运行所有测试</button>
+    <button onclick="clearOutput()">清空输出</button>
+
+    <!-- 引入必要的脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/UserManagement.js"></script>
+    <script src="js/AppCenter.js"></script>
+    <script src="js/MembershipSystem.js"></script>
+    <script src="js/ThemeSystem.js"></script>
+    <script src="js/ResourceCenter.js"></script>
+    <script src="test_supabase_integration.html"></script>
+    <script src="unified_test_panel.js"></script>
+    <script src="test_login_fix.js"></script>
+    <script src="test_email_verification_disabled.js"></script>
+    <script src="migrate_users_to_supabase.js"></script>
+    <script src="test_supabase_user_save.js"></script>
+
+    <script>
+        // 重定向控制台输出到页面
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        const consoleOutput = document.getElementById('console');
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            logToPage(args, 'log');
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            logToPage(args, 'error');
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            logToPage(args, 'warn');
+        };
+        
+        function logToPage(args, type) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => {
+                if (typeof arg === 'object') {
+                    return JSON.stringify(arg, null, 2);
+                }
+                return arg;
+            }).join(' ');
+            
+            const formattedMessage = `[${timestamp}] [${type}] ${message}`;
+            consoleOutput.textContent += formattedMessage + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        }
+        
+        function clearOutput() {
+            consoleOutput.textContent = '';
+            document.getElementById('test-results').innerHTML = '';
+        }
+        
+        function addTestResult(message, passed) {
+            const resultsDiv = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.textContent = message;
+            resultsDiv.appendChild(div);
+        }
+        
+        async function runAllTests() {
+            clearOutput();
+            
+            console.log('开始运行所有测试...');
+            
+            // 测试1: 检查共享Supabase客户端实例
+            addTestResult('1. 检查共享Supabase客户端实例...', true);
+            if (window.supabaseClient) {
+                addTestResult('   ✓ window.supabaseClient 已创建', true);
+                console.log('共享Supabase客户端实例:', window.supabaseClient);
+            } else {
+                addTestResult('   ✗ window.supabaseClient 未创建', false);
+                console.error('共享Supabase客户端实例未创建');
+            }
+            
+            // 测试2: 检查UserManagement是否使用共享实例
+            addTestResult('2. 检查UserManagement是否使用共享实例...', true);
+            if (window.userManagement) {
+                if (window.userManagement.supabase) {
+                    addTestResult('   ✓ UserManagement.supabase 已创建', true);
+                    addTestResult(`   ✓ UserManagement.supabase === window.supabaseClient: ${window.userManagement.supabase === window.supabaseClient}`, window.userManagement.supabase === window.supabaseClient);
+                } else {
+                    addTestResult('   ✗ UserManagement.supabase 未创建', false);
+                }
+            } else {
+                addTestResult('   ✗ UserManagement 未初始化', false);
+            }
+            
+            // 测试3: 检查AppCenter是否使用共享实例
+            addTestResult('3. 检查AppCenter是否使用共享实例...', true);
+            if (window.appCenter) {
+                if (window.appCenter.supabase) {
+                    addTestResult('   ✓ AppCenter.supabase 已创建', true);
+                    addTestResult(`   ✓ AppCenter.supabase === window.supabaseClient: ${window.appCenter.supabase === window.supabaseClient}`, window.appCenter.supabase === window.supabaseClient);
+                } else {
+                    addTestResult('   ✗ AppCenter.supabase 未创建', false);
+                }
+            } else {
+                addTestResult('   ✗ AppCenter 未初始化', false);
+            }
+            
+            // 测试4: 检查MembershipSystem是否使用共享实例
+            addTestResult('4. 检查MembershipSystem是否使用共享实例...', true);
+            if (window.membershipSystem) {
+                if (window.membershipSystem.supabase) {
+                    addTestResult('   ✓ MembershipSystem.supabase 已创建', true);
+                    addTestResult(`   ✓ MembershipSystem.supabase === window.supabaseClient: ${window.membershipSystem.supabase === window.supabaseClient}`, window.membershipSystem.supabase === window.supabaseClient);
+                } else {
+                    addTestResult('   ✗ MembershipSystem.supabase 未创建', false);
+                }
+            } else {
+                addTestResult('   ✗ MembershipSystem 未初始化', false);
+            }
+            
+            // 测试5: 检查ThemeSystem是否使用共享实例
+            addTestResult('5. 检查ThemeSystem是否使用共享实例...', true);
+            if (window.themeSystem) {
+                if (window.themeSystem.supabase) {
+                    addTestResult('   ✓ ThemeSystem.supabase 已创建', true);
+                    addTestResult(`   ✓ ThemeSystem.supabase === window.supabaseClient: ${window.themeSystem.supabase === window.supabaseClient}`, window.themeSystem.supabase === window.supabaseClient);
+                } else {
+                    addTestResult('   ✗ ThemeSystem.supabase 未创建', false);
+                }
+            } else {
+                addTestResult('   ✗ ThemeSystem 未初始化', false);
+            }
+            
+            // 测试6: 检查ResourceCenter是否使用共享实例
+            addTestResult('6. 检查ResourceCenter是否使用共享实例...', true);
+            if (window.resourceCenter) {
+                if (window.resourceCenter.supabase) {
+                    addTestResult('   ✓ ResourceCenter.supabase 已创建', true);
+                    addTestResult(`   ✓ ResourceCenter.supabase === window.supabaseClient: ${window.resourceCenter.supabase === window.supabaseClient}`, window.resourceCenter.supabase === window.supabaseClient);
+                } else {
+                    addTestResult('   ✗ ResourceCenter.supabase 未创建', false);
+                }
+            } else {
+                addTestResult('   ✗ ResourceCenter 未初始化', false);
+            }
+            
+            // 测试7: 检查统一测试面板是否加载
+            addTestResult('7. 检查统一测试面板是否加载...', true);
+            if (window.unifiedTestPanel) {
+                addTestResult('   ✓ 统一测试面板已加载', true);
+            } else {
+                addTestResult('   ✗ 统一测试面板未加载', false);
+            }
+            
+            // 测试8: 检查所有测试脚本是否加载
+            addTestResult('8. 检查所有测试脚本是否加载...', true);
+            
+            const testScripts = [
+                { name: 'runLoginFixTests', expected: typeof window.runLoginFixTests === 'function' },
+                { name: 'testEmailVerification', expected: typeof window.testEmailVerification === 'function' },
+                { name: 'migrateUsersToSupabase', expected: typeof window.migrateUsersToSupabase === 'function' },
+                { name: 'testSupabaseUserSave', expected: typeof window.testSupabaseUserSave === 'function' },
+                { name: 'testSupabaseClient', expected: typeof window.testSupabaseClient === 'function' }
+            ];
+            
+            let allTestScriptsLoaded = true;
+            testScripts.forEach(script => {
+                if (script.expected) {
+                    addTestResult(`   ✓ ${script.name} 已加载`, true);
+                } else {
+                    addTestResult(`   ✗ ${script.name} 未加载`, false);
+                    allTestScriptsLoaded = false;
+                }
+            });
+            
+            // 测试9: 检查内存使用
+            addTestResult('9. 检查内存使用...', true);
+            if (performance && performance.memory) {
+                const memory = performance.memory;
+                const usedMemoryMB = (memory.usedJSHeapSize / 1024 / 1024).toFixed(2);
+                const totalMemoryMB = (memory.totalJSHeapSize / 1024 / 1024).toFixed(2);
+                const memoryUsage = ((memory.usedJSHeapSize / memory.totalJSHeapSize) * 100).toFixed(2);
+                
+                addTestResult(`   ✓ 已使用内存: ${usedMemoryMB} MB`, true);
+                addTestResult(`   ✓ 总内存: ${totalMemoryMB} MB`, true);
+                addTestResult(`   ✓ 内存使用率: ${memoryUsage}%`, memoryUsage < 80);
+                
+                console.log('内存使用情况:', {
+                    used: `${usedMemoryMB} MB`,
+                    total: `${totalMemoryMB} MB`,
+                    usage: `${memoryUsage}%`
+                });
+            }
+            
+            console.log('所有测试运行完成!');
+        }
+        
+        // 页面加载完成后自动运行测试
+        window.addEventListener('load', function() {
+            setTimeout(runAllTests, 1000);
+        });
+    </script>
+</body>
+</html>

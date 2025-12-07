@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录问题修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 3px;
+        }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #log-container {
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>登录问题修复测试</h1>
+        <p>此页面用于测试登录后仍提示登录的问题修复效果</p>
+
+        <div class="test-section">
+            <div class="test-title">测试步骤：</div>
+            <ol>
+                <li>点击"初始化用户管理"按钮</li>
+                <li>点击"登录用户"按钮</li>
+                <li>点击"检查用户状态"按钮</li>
+                <li>点击"调用loadCurrentUser"按钮（模拟页面重新加载或模块重新初始化）</li>
+                <li>再次点击"检查用户状态"按钮，验证登录状态是否保持</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">测试操作：</div>
+            <button onclick="initializeUserManagement()">1. 初始化用户管理</button>
+            <button onclick="loginUser()">2. 登录用户</button>
+            <button onclick="checkUserStatus()">3. 检查用户状态</button>
+            <button onclick="callLoadCurrentUser()">4. 调用loadCurrentUser</button>
+            <button onclick="resetTest()">5. 重置测试</button>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">测试结果：</div>
+            <div id="test-result" class="result info">请点击按钮开始测试</div>
+        </div>
+
+        <div class="test-section">
+            <div class="test-title">日志：</div>
+            <div id="log-container"></div>
+        </div>
+    </div>
+
+    <!-- 引入实际的UserManagement模块 -->
+    <script src="js/modules/UserManagement.js"></script>
+
+    <script>
+        let userManagement = null;
+
+        // 日志函数
+        function log(message) {
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // 初始化用户管理
+        async function initializeUserManagement() {
+            const resultDiv = document.getElementById('test-result');
+            try {
+                log('开始初始化用户管理...');
+                userManagement = new UserManagement();
+                await userManagement.initUsers();
+                await userManagement.loadCurrentUser();
+                resultDiv.className = 'result pass';
+                resultDiv.textContent = '✅ 用户管理初始化成功';
+                log('用户管理初始化成功');
+                checkUserStatus();
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '❌ 用户管理初始化失败: ' + error.message;
+                log('用户管理初始化失败: ' + error.message);
+            }
+        }
+
+        // 登录用户
+        async function loginUser() {
+            if (!userManagement) {
+                alert('请先初始化用户管理');
+                return;
+            }
+
+            const resultDiv = document.getElementById('test-result');
+            try {
+                log('开始登录用户...');
+                
+                // 填充表单字段
+                const usernameInput = document.createElement('input');
+                usernameInput.id = 'loginUsername';
+                usernameInput.value = 'zhenglin';
+                document.body.appendChild(usernameInput);
+
+                const passwordInput = document.createElement('input');
+                passwordInput.id = 'loginPassword';
+                passwordInput.value = '134625';
+                document.body.appendChild(passwordInput);
+
+                // 模拟登录表单提交
+                const e = { preventDefault: () => log('阻止默认表单提交行为') };
+                await userManagement.handleLogin(e);
+
+                // 清理临时元素
+                document.body.removeChild(usernameInput);
+                document.body.removeChild(passwordInput);
+
+                resultDiv.className = 'result pass';
+                resultDiv.textContent = '✅ 用户登录成功';
+                log('用户登录成功');
+                checkUserStatus();
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '❌ 用户登录失败: ' + error.message;
+                log('用户登录失败: ' + error.message);
+            }
+        }
+
+        // 检查用户状态
+        function checkUserStatus() {
+            if (!userManagement) {
+                alert('请先初始化用户管理');
+                return;
+            }
+
+            const resultDiv = document.getElementById('test-result');
+            try {
+                const currentUser = userManagement.getCurrentUser();
+                log('当前用户状态: ' + (currentUser ? JSON.stringify(currentUser) : '未登录'));
+                
+                if (currentUser) {
+                    resultDiv.className = 'result pass';
+                    resultDiv.innerHTML = `✅ 用户已登录<br>用户名: ${currentUser.username || currentUser.email}<br>角色: ${currentUser.role}`;
+                } else {
+                    resultDiv.className = 'result fail';
+                    resultDiv.textContent = '❌ 用户未登录';
+                }
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '❌ 检查用户状态失败: ' + error.message;
+                log('检查用户状态失败: ' + error.message);
+            }
+        }
+
+        // 调用loadCurrentUser（模拟页面重新加载或模块重新初始化）
+        async function callLoadCurrentUser() {
+            if (!userManagement) {
+                alert('请先初始化用户管理');
+                return;
+            }
+
+            const resultDiv = document.getElementById('test-result');
+            try {
+                log('调用loadCurrentUser方法...');
+                await userManagement.loadCurrentUser();
+                resultDiv.className = 'result info';
+                resultDiv.textContent = 'ℹ️ loadCurrentUser调用完成';
+                log('loadCurrentUser调用完成');
+                checkUserStatus();
+            } catch (error) {
+                resultDiv.className = 'result fail';
+                resultDiv.textContent = '❌ loadCurrentUser调用失败: ' + error.message;
+                log('loadCurrentUser调用失败: ' + error.message);
+            }
+        }
+
+        // 重置测试
+        function resetTest() {
+            log('重置测试...');
+            userManagement = null;
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('users');
+            const resultDiv = document.getElementById('test-result');
+            resultDiv.className = 'result info';
+            resultDiv.textContent = '测试已重置，请重新开始';
+            log('测试已重置');
+        }
+
+        // 页面加载时自动初始化
+        window.onload = function() {
+            log('页面加载完成，准备测试登录问题修复效果...');
+        };
+    </script>
+</body>
+</html>

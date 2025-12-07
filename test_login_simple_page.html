@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录功能简单测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .form-error { color: red; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h1>登录功能测试</h1>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="loginUsername">用户名</label>
+            <input type="text" id="loginUsername" placeholder="请输入用户名">
+            <div id="loginUsernameError" class="form-error"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="loginPassword">密码</label>
+            <input type="password" id="loginPassword" placeholder="请输入密码">
+            <div id="loginPasswordError" class="form-error"></div>
+        </div>
+        
+        <button type="submit">登录</button>
+    </form>
+    
+    <div style="margin-top: 20px;">
+        <h3>测试按钮</h3>
+        <button onclick="login('zhenglin', '123456')">直接登录 zhenglin/123456</button>
+        <button onclick="login('admin', 'admin123')">直接登录 admin/admin123</button>
+        <button onclick="login('test', 'test123')">直接登录 test/test123</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px; padding: 10px; background: #f8f9fa;"></div>
+    
+    <!-- 引入必要的脚本 -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/modules/CoreFramework.js"></script>
+    <script src="js/modules/ModalSystem.js"></script>
+    <script src="js/modules/NotificationSystem.js"></script>
+    <script src="js/modules/ThemeSystem.js"></script>
+    <script src="js/modules/NavigationSystem.js"></script>
+    <script src="js/modules/UserManagement.js"></script>
+    
+    <script>
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('测试页面加载完成');
+            
+            // 初始化UserManagement
+            userManagement.initialize();
+            
+            // 添加登录结果显示
+            const resultDiv = document.getElementById('result');
+            
+            // 重写updateUserInterface方法，添加测试结果显示
+            const originalUpdateUI = userManagement.updateUserInterface;
+            userManagement.updateUserInterface = function() {
+                originalUpdateUI.call(this);
+                
+                // 显示当前用户信息
+                if (userManagement.currentUser) {
+                    resultDiv.innerHTML = '<strong>登录成功！</strong><br>当前用户: ' + userManagement.currentUser.username + '<br>角色: ' + userManagement.currentUser.role;
+                    resultDiv.style.backgroundColor = '#d4edda';
+                } else {
+                    resultDiv.innerHTML = '<strong>已登出</strong>';
+                    resultDiv.style.backgroundColor = '#f8d7da';
+                }
+            };
+        });
+        
+        // 简单的closeModal函数
+        function closeModal() {
+            console.log('模态框关闭');
+        }
+    </script>
+</body>
+</html>

@@ -1,6 +1,10 @@
 // 应用配置文件
 
-window.appConfig = {
+// 创建共享的Supabase客户端实例
+window.supabaseClient = null;
+
+// 应用配置对象
+const appConfig = {
     // 应用基本信息
     appInfo: {
         name: '智能导航中心',
@@ -43,8 +47,12 @@ window.appConfig = {
     // 第三方服务配置
     services: {
         supabase: {
-            url: '', // 预留Supabase URL
-            anonKey: '' // 预留Supabase匿名密钥
+            url: 'https://zrxtmrsfnycdcfolgwiq.supabase.co', // 替换为你的Supabase项目URL
+            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpyeHRtcnNmbnljZGNmb2xnd2lxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzg4MzUsImV4cCI6MjA4MDY1NDgzNX0.dOrxsRZR9zE-BZ1s_t-RT418sOyAdUmbeNG_1G7-NV4', // 替换为你的Supabase匿名密钥
+            auth: {
+                persistSession: true,
+                autoRefreshToken: true
+            }
         },
         chartjs: {
             version: '4.4.0'
@@ -83,3 +91,40 @@ window.appConfig = {
         }
     }
 };
+
+// 设置appConfig到全局
+window.appConfig = appConfig;
+
+// 创建并配置Supabase客户端
+console.log('开始初始化Supabase客户端...');
+console.log('Supabase库是否可用:', typeof window.supabase !== 'undefined');
+console.log('Supabase配置:', appConfig.services.supabase);
+
+if (typeof window.supabase !== 'undefined' && appConfig.services && appConfig.services.supabase) {
+    try {
+        // 创建Supabase客户端实例
+        window.supabaseClient = window.supabase.createClient(
+            appConfig.services.supabase.url,
+            appConfig.services.supabase.anonKey,
+            {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    detectSessionInUrl: true
+                }
+            }
+        );
+        console.log('✅ Supabase客户端已初始化');
+        
+        // 测试连接
+        window.supabaseClient.from('users').select('*').limit(1)
+            .then(() => console.log('✅ Supabase连接测试成功'))
+            .catch(error => console.warn('⚠️ Supabase连接测试失败:', error.message));
+    } catch (error) {
+        console.error('❌ Supabase客户端创建失败:', error);
+        window.supabaseClient = null;
+    }
+} else {
+    console.warn('❌ Supabase配置未找到或客户端库未加载，应用将以本地模式运行');
+    window.supabaseClient = null;
+}

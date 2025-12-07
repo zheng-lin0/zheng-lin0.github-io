@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录功能控制台测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .result.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .result.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .result.info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>登录功能控制台测试</h1>
+        
+        <div class="test-section">
+            <div class="test-title">测试步骤：</div>
+            <ol>
+                <li>打开浏览器控制台（按F12）</li>
+                <li>点击下方按钮执行测试</li>
+                <li>在控制台查看测试结果</li>
+            </ol>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">测试功能：</div>
+            <button onclick="testUserManagementLoad()">1. 测试UserManagement加载</button><br>
+            <button onclick="testUserList()">2. 测试用户列表</button><br>
+            <button onclick="testLogin('zhenglin', '123456')">3. 测试登录（zhenglin/123456）</button><br>
+            <button onclick="testLogin('test', 'test123')">4. 测试登录（test/test123）</button><br>
+            <button onclick="testLogout()">5. 测试登出</button><br>
+            <button onclick="clearLocalStorage()">6. 清除本地存储</button>
+        </div>
+        
+        <div class="test-section">
+            <div class="test-title">测试结果：</div>
+            <div id="testResult" class="result info">请点击按钮开始测试</div>
+        </div>
+    </div>
+    
+    <!-- 引入UserManagement模块 -->
+    <script src="js/modules/UserManagement.js"></script>
+    
+    <script>
+        // 测试UserManagement加载
+        function testUserManagementLoad() {
+            const resultDiv = document.getElementById('testResult');
+            try {
+                if (typeof UserManagement !== 'undefined') {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = '✓ UserManagement模块加载成功';
+                    console.log('UserManagement模块加载成功');
+                    console.log('UserManagement:', UserManagement);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '✗ UserManagement模块未加载';
+                    console.error('UserManagement模块未加载');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ 测试UserManagement加载失败: ' + error.message;
+                console.error('测试UserManagement加载失败:', error);
+            }
+        }
+        
+        // 测试用户列表
+        function testUserList() {
+            const resultDiv = document.getElementById('testResult');
+            try {
+                // 直接调用initUsers方法获取用户列表
+                const userManagement = new UserManagement();
+                const users = userManagement.initUsers();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = `✓ 获取用户列表成功，共${users.length}个用户`;
+                console.log('获取用户列表成功:');
+                console.log(users);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ 测试用户列表失败: ' + error.message;
+                console.error('测试用户列表失败:', error);
+            }
+        }
+        
+        // 测试登录
+        function testLogin(username, password) {
+            const resultDiv = document.getElementById('testResult');
+            try {
+                const userManagement = new UserManagement();
+                userManagement.users = userManagement.initUsers(); // 手动加载用户列表
+                
+                // 模拟登录表单
+                document.getElementById = function(id) {
+                    if (id === 'loginUsername') {
+                        return { value: username };
+                    } else if (id === 'loginPassword') {
+                        return { value: password };
+                    } else if (id === 'loginUsernameError') {
+                        return { textContent: '' };
+                    }
+                    return null;
+                };
+                
+                // 模拟事件对象
+                const event = { preventDefault: function() {} };
+                
+                // 调用登录处理函数
+                userManagement.handleLogin(event);
+                
+                if (userManagement.currentUser) {
+                    resultDiv.className = 'result success';
+                    resultDiv.textContent = `✓ 登录成功！欢迎 ${userManagement.currentUser.username}（${userManagement.currentUser.role}）`;
+                    console.log('登录成功:', userManagement.currentUser);
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.textContent = '✗ 登录失败：用户名或密码错误';
+                    console.error('登录失败：用户名或密码错误');
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ 测试登录失败: ' + error.message;
+                console.error('测试登录失败:', error);
+            }
+        }
+        
+        // 测试登出
+        function testLogout() {
+            const resultDiv = document.getElementById('testResult');
+            try {
+                const userManagement = new UserManagement();
+                userManagement.logout();
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✓ 登出成功';
+                console.log('登出成功');
+                console.log('当前用户:', userManagement.currentUser);
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ 测试登出失败: ' + error.message;
+                console.error('测试登出失败:', error);
+            }
+        }
+        
+        // 清除本地存储
+        function clearLocalStorage() {
+            const resultDiv = document.getElementById('testResult');
+            try {
+                localStorage.removeItem('users');
+                localStorage.removeItem('currentUser');
+                
+                resultDiv.className = 'result success';
+                resultDiv.textContent = '✓ 本地存储已清除';
+                console.log('本地存储已清除');
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.textContent = '✗ 清除本地存储失败: ' + error.message;
+                console.error('清除本地存储失败:', error);
+            }
+        }
+        
+        // 页面加载时自动测试
+        window.addEventListener('load', function() {
+            console.log('测试页面加载完成');
+            console.log('UserManagement是否可用:', typeof UserManagement !== 'undefined');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会员等级系统测试</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .level-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .user-level {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .speed-info {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        .btn-test {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="text-center mb-4">会员等级系统测试</h1>
+        
+        <!-- 用户信息显示测试 -->
+        <div class="test-section">
+            <h2><i class="fas fa-user"></i> 用户信息显示测试</h2>
+            <div id="userProfile" style="display: flex; align-items: center; gap: 15px;">
+                <span>欢迎，</span>
+                <span id="userName">未登录</span>
+                <span id="userLevel" class="user-level regular">普通会员</span>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-primary btn-test" onclick="testLogin()">测试登录</button>
+                <button class="btn btn-danger btn-test" onclick="testLogout()">测试登出</button>
+                <button class="btn btn-warning btn-test" onclick="changeUserLevel('普通会员')">普通会员</button>
+                <button class="btn btn-info btn-test" onclick="changeUserLevel('高级会员')">高级会员</button>
+                <button class="btn btn-success btn-test" onclick="changeUserLevel('VIP会员')">VIP会员</button>
+                <button class="btn btn-purple btn-test" onclick="changeUserLevel('钻石会员')">钻石会员</button>
+            </div>
+        </div>
+        
+        <!-- 下载速度测试 -->
+        <div class="test-section">
+            <h2><i class="fas fa-download"></i> 下载速度限制测试</h2>
+            <div id="downloadSpeedInfo" class="speed-info">
+                当前下载速度：未登录用户默认1x
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-primary btn-test" onclick="testDownloadSpeed()">测试当前下载速度</button>
+            </div>
+        </div>
+        
+        <!-- 会员特权测试 -->
+        <div class="test-section">
+            <h2><i class="fas fa-crown"></i> 会员特权测试</h2>
+            <div id="membershipPrivileges">
+                <p>请先登录以查看会员特权</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 引入核心模块 -->
+    <script src="js/config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/supabase@2.21.0/dist/umd/supabase.min.js"></script>
+    <script src="js/modules/SupabaseClient.js"></script>
+    <script src="js/modules/UserManagement.js"></script>
+    <script src="js/modules/ResourceManager.js"></script>
+    <script src="js/modules/MembershipSystem.js"></script>
+    <script src="js/modules/NotificationSystem.js"></script>
+    
+    <script>
+        // 初始化系统
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('测试页面初始化');
+            
+            // 初始化模块
+            if (window.userManagement) {
+                await window.userManagement.initialize();
+            }
+            
+            if (window.membershipSystem) {
+                await window.membershipSystem.initialize();
+            }
+            
+            // 更新界面
+            updateUserInterface();
+        });
+        
+        // 测试登录
+        function testLogin() {
+            const testUser = {
+                id: 'test-user-123',
+                username: '测试用户',
+                email: 'test@example.com',
+                role: '普通用户',
+                level: '普通会员',
+                points: 0,
+                joinDate: new Date().toISOString()
+            };
+            
+            // 设置当前用户
+            if (window.userManagement) {
+                window.userManagement.currentUser = testUser;
+                localStorage.setItem('currentUser', JSON.stringify(testUser));
+                updateUserInterface();
+                
+                if (window.notificationSystem) {
+                    window.notificationSystem.showNotification('测试登录成功', 'success');
+                }
+            }
+        }
+        
+        // 测试登出
+        function testLogout() {
+            if (window.userManagement) {
+                window.userManagement.currentUser = null;
+                localStorage.removeItem('currentUser');
+                updateUserInterface();
+                
+                if (window.notificationSystem) {
+                    window.notificationSystem.showNotification('测试登出成功', 'info');
+                }
+            }
+        }
+        
+        // 更改用户等级
+        function changeUserLevel(level) {
+            if (window.userManagement && window.userManagement.currentUser) {
+                // 更新当前用户的等级和积分
+                const user = window.userManagement.currentUser;
+                
+                // 根据等级设置积分
+                let points = 0;
+                switch(level) {
+                    case '普通会员':
+                        points = 500;
+                        break;
+                    case '高级会员':
+                        points = 2000;
+                        break;
+                    case 'VIP会员':
+                        points = 8000;
+                        break;
+                    case '钻石会员':
+                        points = 20000;
+                        break;
+                }
+                
+                user.level = level;
+                user.points = points;
+                
+                // 更新用户信息
+                window.userManagement.currentUser = user;
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                
+                // 更新界面
+                updateUserInterface();
+                
+                if (window.notificationSystem) {
+                    window.notificationSystem.showNotification(`已切换到${level}`, 'success');
+                }
+            } else {
+                alert('请先测试登录');
+            }
+        }
+        
+        // 测试下载速度
+        function testDownloadSpeed() {
+            const downloadSpeedInfo = document.getElementById('downloadSpeedInfo');
+            
+            if (window.resourceManager) {
+                const speedDescription = window.resourceManager.getCurrentUserDownloadSpeed();
+                const speedMultiplier = window.resourceManager.getCurrentUserDownloadSpeedMultiplier();
+                
+                downloadSpeedInfo.innerHTML = `
+                    <div>当前下载速度：${speedDescription}</div>
+                    <div>速度倍数：${speedMultiplier}x</div>
+                `;
+            } else {
+                downloadSpeedInfo.innerHTML = '<div>ResourceManager模块未加载</div>';
+            }
+        }
+        
+        // 更新用户界面
+        function updateUserInterface() {
+            if (window.userManagement) {
+                window.userManagement.updateUserInterface();
+            }
+            
+            // 更新会员特权
+            updateMembershipPrivileges();
+        }
+        
+        // 更新会员特权
+        function updateMembershipPrivileges() {
+            const privilegesContainer = document.getElementById('membershipPrivileges');
+            const currentUser = window.userManagement ? window.userManagement.getCurrentUser() : null;
+            
+            if (!currentUser) {
+                privilegesContainer.innerHTML = '<p>请先登录以查看会员特权</p>';
+                return;
+            }
+            
+            let level = currentUser.level || '普通会员';
+            
+            // 获取会员特权
+            let privileges = [];
+            switch(level) {
+                case '普通会员':
+                    privileges = ['基础下载功能', '1x 下载速度', '1GB 云存储空间'];
+                    break;
+                case '高级会员':
+                    privileges = ['基础下载功能', '2x 下载速度', '10GB 云存储空间', '优先客服'];
+                    break;
+                case 'VIP会员':
+                    privileges = ['基础下载功能', '5x 下载速度', '50GB 云存储空间', '优先客服', '无广告体验'];
+                    break;
+                case '钻石会员':
+                    privileges = ['基础下载功能', '10x 下载速度', '200GB 云存储空间', '专属客服', '无广告体验', 'AI助手基础版'];
+                    break;
+            }
+            
+            let html = '<ul>';
+            privileges.forEach(privilege => {
+                html += `<li><i class="fas fa-check text-success"></i> ${privilege}</li>`;
+            });
+            html += '</ul>';
+            
+            privilegesContainer.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

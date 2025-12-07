@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supabase客户端单例测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .result {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Supabase客户端单例测试</h1>
+    
+    <div id="result" class="info">
+        正在加载测试...
+    </div>
+    
+    <h2>测试结果</h2>
+    <pre id="output"></pre>
+
+    <!-- 引入Supabase客户端 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.38.4/dist/umd/supabase.min.js"></script>
+    
+    <!-- 引入应用配置 -->
+    <script src="js/config.js"></script>
+    
+    <!-- 引入核心模块 -->
+    <script src="js/UserManagement.js"></script>
+    <script src="js/AppCenter.js"></script>
+    <script src="js/MembershipSystem.js"></script>
+    <script src="js/ThemeSystem.js"></script>
+    <script src="js/ResourceCenter.js"></script>
+    
+    <script>
+        // 输出日志到页面
+        function log(message) {
+            const output = document.getElementById('output');
+            output.textContent += message + '\n';
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        // 更新结果
+        function updateResult(message, type = 'info') {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = `result ${type}`;
+        }
+        
+        // 测试单例模式
+        function testSingletonPattern() {
+            log('=== Supabase客户端单例测试 ===');
+            log('');
+            
+            // 检查全局实例
+            if (window.supabaseClient) {
+                log('✅ 找到共享的Supabase客户端实例: window.supabaseClient');
+                log(`   实例ID: ${window.supabaseClient._instanceId || '未知'}`);
+            } else {
+                log('❌ 未找到共享的Supabase客户端实例');
+                return false;
+            }
+            
+            // 检查各个模块是否使用同一个实例
+            const modulesToCheck = [
+                { name: 'UserManagement', instance: window.userManagement?.supabase },
+                { name: 'AppCenter', instance: window.appCenter?.supabase },
+                { name: 'MembershipSystem', instance: window.membershipSystem?.supabase },
+                { name: 'ThemeSystem', instance: window.themeSystem?.supabase },
+                { name: 'ResourceCenter', instance: window.resourceCenter?.supabase }
+            ];
+            
+            let allUseSameInstance = true;
+            
+            modulesToCheck.forEach(module => {
+                if (module.instance) {
+                    const isSame = module.instance === window.supabaseClient;
+                    log(`${isSame ? '✅' : '❌'} ${module.name}: ${isSame ? '使用共享实例' : '使用独立实例'}`);
+                    if (!isSame) {
+                        allUseSameInstance = false;
+                    }
+                } else {
+                    log(`⚠️  ${module.name}: 未初始化或没有Supabase实例`);
+                }
+            });
+            
+            log('');
+            
+            return allUseSameInstance;
+        }
+        
+        // 页面加载完成后运行测试
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('页面加载完成，开始测试...');
+                log('');
+                
+                const isSingleton = testSingletonPattern();
+                
+                if (isSingleton) {
+                    updateResult('✅ 单例模式测试通过，所有模块都使用共享的Supabase客户端实例', 'success');
+                    log('=== 测试结论 ===');
+                    log('✅ GoTrueClient重复实例问题已解决');
+                    log('✅ 内存使用应该已经优化');
+                } else {
+                    updateResult('❌ 单例模式测试失败，仍有模块使用独立的Supabase客户端实例', 'error');
+                    log('=== 测试结论 ===');
+                    log('❌ 仍存在GoTrueClient重复实例问题');
+                    log('❌ 内存使用可能仍然过高');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

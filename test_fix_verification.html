@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨域修复验证</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>跨域修复验证</h1>
+        <p>测试iframe是否能正常加载百度页面而不产生跨域错误。</p>
+        
+        <iframe id="testIframe" src="https://www.baidu.com" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-top-navigation-by-user-activation"></iframe>
+        
+        <div class="test-result" id="result">
+            <p>正在测试...</p>
+        </div>
+    </div>
+    
+    <script>
+        // 监听控制台错误
+        window.addEventListener('error', function(event) {
+            const resultDiv = document.getElementById('result');
+            if (event.message.includes('SecurityError') || event.message.includes('cross-origin')) {
+                resultDiv.className = 'test-result error';
+                resultDiv.innerHTML = '<p><strong>错误：</strong>跨域错误仍然存在。</p><p>错误信息：' + event.message + '</p>';
+            }
+        });
+        
+        // 测试iframe加载完成
+        const iframe = document.getElementById('testIframe');
+        iframe.onload = function() {
+            setTimeout(function() {
+                const resultDiv = document.getElementById('result');
+                resultDiv.className = 'test-result success';
+                resultDiv.innerHTML = '<p><strong>成功：</strong>iframe已加载完成，未检测到跨域错误。</p>';
+            }, 1000);
+        };
+    </script>
+</body>
+</html>

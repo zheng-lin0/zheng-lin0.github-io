@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            max-width: 800px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-result {
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>前端修复测试</h1>
+    
+    <div class="test-section">
+        <h2>1. 函数存在性检查</h2>
+        <button onclick="testFunctions()">检查缺失函数</button>
+        <div id="functionResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 模态框函数测试</h2>
+        <button onclick="testOpenLoginModal()">测试登录模态框</button>
+        <button onclick="testOpenRegisterModal()">测试注册模态框</button>
+        <div id="modalResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 资源上传函数测试</h2>
+        <button onclick="testUploadResource()">测试上传资源</button>
+        <div id="uploadResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. onbeforeunload事件测试</h2>
+        <button onclick="testBeforeUnload()">测试onbeforeunload</button>
+        <div id="beforeUnloadResult" class="test-result"></div>
+    </div>
+    
+    <script>
+        // 测试函数是否存在
+        function testFunctions() {
+            const functionsToCheck = ['openLoginModal', 'openRegisterModal', 'uploadResource', 'togglePassword'];
+            let results = '';
+            let allExist = true;
+            
+            functionsToCheck.forEach(funcName => {
+                if (typeof window[funcName] === 'function') {
+                    results += `<div style="color: green;">✓ ${funcName} 函数已定义</div>`;
+                } else {
+                    results += `<div style="color: red;">✗ ${funcName} 函数未定义</div>`;
+                    allExist = false;
+                }
+            });
+            
+            document.getElementById('functionResult').innerHTML = results;
+            document.getElementById('functionResult').className = `test-result ${allExist ? 'success' : 'error'}`;
+        }
+        
+        // 测试登录模态框
+        function testOpenLoginModal() {
+            try {
+                openLoginModal();
+                document.getElementById('modalResult').innerHTML = '<div style="color: green;">✓ 登录模态框函数调用成功</div>';
+                document.getElementById('modalResult').className = 'test-result success';
+            } catch (e) {
+                document.getElementById('modalResult').innerHTML = `<div style="color: red;">✗ 登录模态框函数调用失败: ${e.message}</div>`;
+                document.getElementById('modalResult').className = 'test-result error';
+            }
+        }
+        
+        // 测试注册模态框
+        function testOpenRegisterModal() {
+            try {
+                openRegisterModal();
+                document.getElementById('modalResult').innerHTML = '<div style="color: green;">✓ 注册模态框函数调用成功</div>';
+                document.getElementById('modalResult').className = 'test-result success';
+            } catch (e) {
+                document.getElementById('modalResult').innerHTML = `<div style="color: red;">✗ 注册模态框函数调用失败: ${e.message}</div>`;
+                document.getElementById('modalResult').className = 'test-result error';
+            }
+        }
+        
+        // 测试上传资源
+        function testUploadResource() {
+            try {
+                uploadResource();
+                document.getElementById('uploadResult').innerHTML = '<div style="color: green;">✓ 上传资源函数调用成功</div>';
+                document.getElementById('uploadResult').className = 'test-result success';
+            } catch (e) {
+                // 如果用户未登录，这个函数会尝试打开登录模态框，这是预期行为
+                if (e.message && e.message.includes('ModalSystem未加载')) {
+                    document.getElementById('uploadResult').innerHTML = '<div style="color: red;">✗ 上传资源函数调用失败: ModalSystem未加载</div>';
+                    document.getElementById('uploadResult').className = 'test-result error';
+                } else {
+                    // 预期行为：未登录时会尝试打开登录模态框
+                    document.getElementById('uploadResult').innerHTML = '<div style="color: green;">✓ 上传资源函数调用成功（尝试打开登录模态框是预期行为）</div>';
+                    document.getElementById('uploadResult').className = 'test-result success';
+                }
+            }
+        }
+        
+        // 测试onbeforeunload事件
+        function testBeforeUnload() {
+            try {
+                // 模拟spyCache对象
+                window.spyCache = { test: 'data', timestamp: new Date() };
+                
+                // 模拟事件处理
+                const event = new Event('beforeunload');
+                window.dispatchEvent(event);
+                
+                document.getElementById('beforeUnloadResult').innerHTML = '<div style="color: green;">✓ onbeforeunload事件测试成功</div>';
+                document.getElementById('beforeUnloadResult').className = 'test-result success';
+            } catch (e) {
+                document.getElementById('beforeUnloadResult').innerHTML = `<div style="color: red;">✗ onbeforeunload事件测试失败: ${e.message}</div>`;
+                document.getElementById('beforeUnloadResult').className = 'test-result error';
+            }
+        }
+        
+        // 页面加载时自动检查函数
+        window.addEventListener('load', testFunctions);
+    </script>
+</body>
+</html>

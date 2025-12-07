@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨域错误修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .iframe-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 1px solid #ccc;
+        }
+        .button-group {
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            margin-right: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .log-container {
+            margin-top: 20px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin-bottom: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <h1>跨域错误修复测试</h1>
+    
+    <div class="test-container">
+        <h2>BrowserSystem跨域问题测试</h2>
+        
+        <div class="iframe-container">
+            <h3>测试iframe</h3>
+            <iframe id="browserIframe" src="https://www.baidu.com"></iframe>
+            <div class="button-group">
+                <button onclick="reloadIframe()">重新加载iframe</button>
+                <button onclick="changeUrl()">更改URL</button>
+                <button onclick="clearLogs()">清除日志</button>
+            </div>
+        </div>
+        
+        <div class="log-container">
+            <h3>控制台日志</h3>
+            <div id="logs"></div>
+        </div>
+    </div>
+
+    <script src="js/utils.js"></script>
+    <script src="js/modules/BrowserSystem.js"></script>
+    <script>
+        // 重写console.log以捕获日志
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        const logsDiv = document.getElementById('logs');
+        
+        function addLog(message, type = 'info') {
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+        
+        console.log = function(...args) {
+            addLog(args.join(' '), 'info');
+            originalConsoleLog.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            addLog(args.join(' '), 'error');
+            originalConsoleError.apply(console, args);
+        };
+        
+        console.warn = function(...args) {
+            addLog(args.join(' '), 'warn');
+            originalConsoleWarn.apply(console, args);
+        };
+        
+        // 创建BrowserSystem实例并初始化
+        const browserSystem = new BrowserSystem();
+        browserSystem.init();
+        
+        function reloadIframe() {
+            const iframe = document.getElementById('browserIframe');
+            iframe.src = iframe.src;
+            addLog('iframe重新加载中...', 'info');
+        }
+        
+        function changeUrl() {
+            const iframe = document.getElementById('browserIframe');
+            const urls = ['https://www.baidu.com', 'https://www.google.com', 'https://www.bing.com'];
+            const currentUrl = iframe.src;
+            const nextUrl = urls.find(url => url !== currentUrl) || urls[0];
+            iframe.src = nextUrl;
+            addLog(`iframe URL更改为: ${nextUrl}`, 'info');
+        }
+        
+        function clearLogs() {
+            logsDiv.innerHTML = '';
+        }
+        
+        // 测试完成后显示结果
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                if (document.querySelector('.log-entry.error') === null) {
+                    addLog('✅ 测试通过：没有发现跨域错误！', 'success');
+                } else {
+                    addLog('❌ 测试失败：发现跨域错误！', 'error');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

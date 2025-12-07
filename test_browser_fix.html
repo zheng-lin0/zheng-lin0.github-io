@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浏览器功能修复测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>浏览器功能修复测试</h1>
+    
+    <div class="test-section">
+        <h2>测试跨域访问处理</h2>
+        <p>此页面将测试修复后的浏览器功能，特别关注跨域安全错误处理。</p>
+        <button onclick="loadBaidu()">加载百度首页</button>
+        <button onclick="loadLocalPage()">加载本地页面</button>
+        <button onclick="clearIframe()">清空iframe</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>浏览器iframe</h2>
+        <div id="iframeLoading" style="display: none; color: blue;">正在加载...</div>
+        <iframe id="testIframe" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+    </div>
+    
+    <div class="test-section">
+        <h2>控制台日志</h2>
+        <div id="consoleLog" style="width: 100%; height: 200px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; font-family: monospace;"></div>
+    </div>
+    
+    <script>
+        // 简单的日志记录功能
+        function log(message) {
+            const logDiv = document.getElementById('consoleLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        // 加载百度首页
+        function loadBaidu() {
+            log('正在加载百度首页...');
+            const iframe = document.getElementById('testIframe');
+            const loading = document.getElementById('iframeLoading');
+            
+            loading.style.display = 'block';
+            
+            // 使用try-catch包装iframe加载
+            try {
+                iframe.onload = () => {
+                    log('百度首页加载完成');
+                    loading.style.display = 'none';
+                    checkIframeAccess();
+                };
+                
+                iframe.onerror = (error) => {
+                    log('百度首页加载错误: ' + error);
+                    loading.style.display = 'none';
+                };
+                
+                iframe.src = 'https://www.baidu.com';
+            } catch (error) {
+                log('加载过程中发生错误: ' + error);
+                loading.style.display = 'none';
+            }
+        }
+        
+        // 加载本地页面
+        function loadLocalPage() {
+            log('正在加载本地页面...');
+            const iframe = document.getElementById('testIframe');
+            const loading = document.getElementById('iframeLoading');
+            
+            loading.style.display = 'block';
+            
+            iframe.onload = () => {
+                log('本地页面加载完成');
+                loading.style.display = 'none';
+                checkIframeAccess();
+            };
+            
+            iframe.onerror = (error) => {
+                log('本地页面加载错误: ' + error);
+                loading.style.display = 'none';
+            };
+            
+            iframe.src = 'test_login_fix.html';
+        }
+        
+        // 清空iframe
+        function clearIframe() {
+            log('清空iframe...');
+            const iframe = document.getElementById('testIframe');
+            iframe.src = 'about:blank';
+        }
+        
+        // 检查iframe内容可访问性（修复后的方法）
+        function checkIframeAccess() {
+            log('检查iframe内容可访问性...');
+            const iframe = document.getElementById('testIframe');
+            let canAccessContent = false;
+            
+            try {
+                // 使用修复后的安全方法检查
+                const contentWindow = iframe.contentWindow;
+                if (contentWindow && contentWindow.document) {
+                    const doc = contentWindow.document;
+                    const readyState = doc.readyState;
+                    if (readyState) {
+                        canAccessContent = true;
+                        log('可以访问iframe内容，readyState: ' + readyState);
+                        
+                        // 尝试获取标题（如果可能）
+                        try {
+                            const title = doc.title;
+                            if (title) {
+                                log('页面标题: ' + title);
+                            }
+                        } catch (e) {
+                            log('无法获取页面标题（跨域限制）');
+                        }
+                    }
+                }
+            } catch (crossOriginError) {
+                log('无法访问iframe内容（跨域限制）');
+            }
+            
+            log('iframe访问检查完成，可访问: ' + canAccessContent);
+        }
+        
+        // 初始化
+        log('测试页面加载完成');
+    </script>
+</body>
+</html>

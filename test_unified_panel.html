@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>统一测试面板测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>统一测试面板测试</h1>
+        <p>这是一个测试页面，用于验证统一测试面板是否能正常工作。</p>
+        <p>请检查页面右上角是否有一个"测试工具面板"按钮。</p>
+        <p>点击该按钮可以展开/折叠测试工具面板，其中包含以下功能：</p>
+        <ul>
+            <li>迁移用户到 Supabase</li>
+            <li>测试 Supabase 用户保存</li>
+            <li>运行登录修复测试</li>
+            <li>关闭面板</li>
+        </ul>
+    </div>
+
+    <!-- 引入必要的库和脚本 -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/modules/CoreFramework.js"></script>
+    <script src="js/modules/ModalSystem.js"></script>
+    <script src="js/modules/NotificationSystem.js"></script>
+    <script src="js/modules/ThemeSystem.js"></script>
+    <script src="js/modules/NavigationSystem.js"></script>
+    <script src="js/modules/UserManagement.js"></script>
+
+    <!-- 测试脚本 -->
+    <script src="migrate_users_to_supabase.js"></script>
+    <script src="test_supabase_user_save.js"></script>
+    <script src="test_login_fix.js"></script>
+
+    <!-- 统一测试工具面板 -->
+    <script src="unified_test_panel.js"></script>
+</body>
+</html>

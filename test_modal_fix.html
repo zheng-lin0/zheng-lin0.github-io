@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模态框修复测试</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body>
+    <h1>模态框修复测试</h1>
+    <p>此页面用于测试修复后的登录和注册模态框功能</p>
+
+    <div class="test-section">
+        <h2>1. 测试登录模态框</h2>
+        <button class="btn" onclick="testLoginModal()">打开登录模态框</button>
+        <div id="loginModalResult" class="test-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 测试注册模态框</h2>
+        <button class="btn" onclick="testRegisterModal()">打开注册模态框</button>
+        <div id="registerModalResult" class="test-result"></div>
+    </div>
+
+    <!-- 登录模态框 -->
+    <div class="modal" id="loginModal">
+        <div class="modal-overlay" onclick="closeModal('loginModal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>用户登录</h3>
+                <button class="modal-close" onclick="closeModal('loginModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="loginForm" class="modal-form">
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text" id="loginUsername" required>
+                    <div class="error-message" id="loginUsernameError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <div class="password-input">
+                        <input type="password" id="loginPassword" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="loginPasswordError"></div>
+                </div>
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox"> 记住密码
+                    </label>
+                    <a href="#">忘记密码？</a>
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+            </form>
+            <div class="modal-footer">
+                <p>还没有账号？<a href="#" onclick="openRegisterModal(); closeModal('loginModal')">立即注册</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div class="modal" id="registerModal">
+        <div class="modal-overlay" onclick="closeModal('registerModal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>用户注册</h3>
+                <button class="modal-close" onclick="closeModal('registerModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="registerForm" class="modal-form">
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" required>
+                    <div class="error-message" id="registerUsernameError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">邮箱</label>
+                    <input type="email" id="registerEmail" required>
+                    <div class="error-message" id="registerEmailError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <div class="password-input">
+                        <input type="password" id="registerPassword" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength"></div>
+                    <div class="error-message" id="registerPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <div class="password-input">
+                        <input type="password" id="confirmPassword" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-match" id="passwordMatch"></div>
+                </div>
+                <div class="form-options">
+                    <label class="checkbox">
+                        <input type="checkbox" required> 我已阅读并同意<a href="#">用户协议</a>和<a href="#">隐私政策</a>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+            </form>
+            <div class="modal-footer">
+                <p>已有账号？<a href="#" onclick="openLoginModal(); closeModal('registerModal')">立即登录</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript引用 -->
+    <script src="js/utils.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/modules/CoreFramework.js"></script>
+    <script src="js/modules/ModalSystem.js"></script>
+    <script src="js/modules/NotificationSystem.js"></script>
+    <script src="js/modules/UserManagement.js"></script>
+    <script>
+        // 测试函数
+        function testLoginModal() {
+            const resultDiv = document.getElementById('loginModalResult');
+            resultDiv.innerHTML = '<div class="warning">正在打开登录模态框...</div>';
+            
+            try {
+                openLoginModal();
+                setTimeout(() => {
+                    const modal = document.getElementById('loginModal');
+                    if (modal && modal.style.display === 'block') {
+                        resultDiv.innerHTML = '<div class="success">✓ 登录模态框成功打开</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">✗ 登录模态框未能正确显示</div>';
+                    }
+                }, 500);
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">✗ 打开登录模态框时发生错误: ${error.message}</div>`;
+            }
+        }
+
+        function testRegisterModal() {
+            const resultDiv = document.getElementById('registerModalResult');
+            resultDiv.innerHTML = '<div class="warning">正在打开注册模态框...</div>';
+            
+            try {
+                openRegisterModal();
+                setTimeout(() => {
+                    const modal = document.getElementById('registerModal');
+                    if (modal && modal.style.display === 'block') {
+                        resultDiv.innerHTML = '<div class="success">✓ 注册模态框成功打开</div>';
+                    } else {
+                        resultDiv.innerHTML = '<div class="error">✗ 注册模态框未能正确显示</div>';
+                    }
+                }, 500);
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">✗ 打开注册模态框时发生错误: ${error.message}</div>`;
+            }
+        }
+
+        // 初始化测试
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('测试页面加载完成');
+            console.log('ModalSystem:', window.modalSystem);
+            console.log('UserManagement:', window.userManagement);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrowserSystem 测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>BrowserSystem 测试页面</h1>
+    
+    <div class="test-section">
+        <h2>1. 模块加载测试</h2>
+        <div id="module-status" class="status">正在加载...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. BrowserSystem 实例测试</h2>
+        <div id="instance-status" class="status">正在检查...</div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 功能测试</h2>
+        <button onclick="testCreateNewTab()">创建新标签页</button>
+        <button onclick="testNavigate()">导航到百度</button>
+        <button onclick="testToggleBookmarks()">切换书签面板</button>
+        <div id="function-status" class="status"></div>
+    </div>
+    
+    <!-- 引入必要的JavaScript文件 -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/modules/CoreFramework.js"></script>
+    <script src="js/modules/BrowserSystem.js"></script>
+    
+    <script>
+        // 测试模块加载
+        window.addEventListener('DOMContentLoaded', function() {
+            const moduleStatus = document.getElementById('module-status');
+            const instanceStatus = document.getElementById('instance-status');
+            
+            // 检查模块是否加载
+            if (typeof BrowserSystem !== 'undefined') {
+                moduleStatus.className = 'status success';
+                moduleStatus.textContent = '✅ BrowserSystem 模块加载成功';
+            } else {
+                moduleStatus.className = 'status error';
+                moduleStatus.textContent = '❌ BrowserSystem 模块加载失败';
+            }
+            
+            // 检查实例是否创建
+            if (typeof browserSystem !== 'undefined') {
+                instanceStatus.className = 'status success';
+                instanceStatus.textContent = '✅ browserSystem 实例创建成功';
+            } else {
+                instanceStatus.className = 'status error';
+                instanceStatus.textContent = '❌ browserSystem 实例创建失败';
+            }
+        });
+        
+        // 测试创建新标签页
+        function testCreateNewTab() {
+            if (typeof browserSystem !== 'undefined') {
+                try {
+                    browserSystem.createNewTab();
+                    updateFunctionStatus('✅ 创建新标签页成功');
+                } catch (error) {
+                    updateFunctionStatus('❌ 创建新标签页失败: ' + error.message);
+                }
+            } else {
+                updateFunctionStatus('❌ browserSystem 实例不存在');
+            }
+        }
+        
+        // 测试导航功能
+        function testNavigate() {
+            if (typeof browserSystem !== 'undefined') {
+                try {
+                    browserSystem.loadUrl('https://www.baidu.com');
+                    updateFunctionStatus('✅ 导航到百度成功');
+                } catch (error) {
+                    updateFunctionStatus('❌ 导航失败: ' + error.message);
+                }
+            } else {
+                updateFunctionStatus('❌ browserSystem 实例不存在');
+            }
+        }
+        
+        // 测试切换书签面板
+        function testToggleBookmarks() {
+            if (typeof browserSystem !== 'undefined') {
+                try {
+                    browserSystem.toggleBookmarks();
+                    updateFunctionStatus('✅ 切换书签面板成功');
+                } catch (error) {
+                    updateFunctionStatus('❌ 切换书签面板失败: ' + error.message);
+                }
+            } else {
+                updateFunctionStatus('❌ browserSystem 实例不存在');
+            }
+        }
+        
+        // 更新功能测试状态
+        function updateFunctionStatus(message) {
+            const functionStatus = document.getElementById('function-status');
+            functionStatus.textContent = message;
+            functionStatus.className = message.includes('✅') ? 'status success' : 'status error';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>模块测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-section {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>网站模块化重构 - 模块测试</h1>
+    
+    <div class="test-section">
+        <h2>核心框架 (CoreFramework)</h2>
+        <div id="coreFrameworkTest" class="test-result"></div>
+        <button onclick="testCoreFramework()">测试核心框架</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>模态框系统 (ModalSystem)</h2>
+        <div id="modalSystemTest" class="test-result"></div>
+        <button onclick="testModalSystem()">测试模态框系统</button>
+        <button onclick="openTestModal()">打开测试模态框</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>通知系统 (NotificationSystem)</h2>
+        <div id="notificationSystemTest" class="test-result"></div>
+        <button onclick="testNotificationSystem()">测试通知系统</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>主题系统 (ThemeSystem)</h2>
+        <div id="themeSystemTest" class="test-result"></div>
+        <button onclick="testThemeSystem()">测试主题系统</button>
+        <button onclick="toggleTheme()">切换主题</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>导航系统 (NavigationSystem)</h2>
+        <div id="navigationSystemTest" class="test-result"></div>
+        <button onclick="testNavigationSystem()">测试导航系统</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>搜索系统 (SearchSystem)</h2>
+        <div id="searchSystemTest" class="test-result"></div>
+        <button onclick="testSearchSystem()">测试搜索系统</button>
+    </div>
+    
+    <!-- 测试模态框 -->
+    <div id="testModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>测试模态框</h3>
+                <button class="modal-close" data-modal-close="testModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>这是一个用于测试模态框系统的测试模态框。</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 搜索输入 -->
+    <input type="text" id="navSearchInput" class="nav-search-input" placeholder="搜索测试" style="display: none;">
+    <div id="searchResults" class="search-results" style="display: none;"></div>
+    
+    <!-- 引入配置文件 -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    
+    <!-- 引入模块 -->
+    <script src="js/modules/CoreFramework.js"></script>
+    <script src="js/modules/ModalSystem.js"></script>
+    <script src="js/modules/NotificationSystem.js"></script>
+    <script src="js/modules/ThemeSystem.js"></script>
+    <script src="js/modules/NavigationSystem.js"></script>
+    <script src="js/modules/SearchSystem.js"></script>
+    
+    <script>
+        // 测试核心框架
+        function testCoreFramework() {
+            const resultDiv = document.getElementById('coreFrameworkTest');
+            try {
+                const coreFramework = window.CoreFramework.getInstance();
+                coreFramework.initialize();
+                resultDiv.className = 'test-result pass';
+                resultDiv.innerHTML = '✅ 核心框架加载成功！版本: ' + coreFramework.version;
+            } catch (error) {
+                resultDiv.className = 'test-result fail';
+                resultDiv.innerHTML = '❌ 核心框架加载失败: ' + error.message;
+            }
+        }
+        
+        // 测试模态框系统
+        function testModalSystem() {
+            const resultDiv = document.getElementById('modalSystemTest');
+            try {
+                const modalSystem = window.ModalSystem.getInstance();
+                modalSystem.initialize();
+                resultDiv.className = 'test-result pass';
+                resultDiv.innerHTML = '✅ 模态框系统加载成功！';
+            } catch (error) {
+                resultDiv.className = 'test-result fail';
+                resultDiv.innerHTML = '❌ 模态框系统加载失败: ' + error.message;
+            }
+        }
+        
+        // 打开测试模态框
+        function openTestModal() {
+            try {
+                const modalSystem = window.ModalSystem.getInstance();
+                modalSystem.open('testModal');
+            } catch (error) {
+                alert('打开模态框失败: ' + error.message);
+            }
+        }
+        
+        // 测试通知系统
+        function testNotificationSystem() {
+            const resultDiv = document.getElementById('notificationSystemTest');
+            try {
+                const notificationSystem = window.NotificationSystem.getInstance();
+                notificationSystem.initialize();
+                notificationSystem.show('测试通知', 'success', 3000);
+                resultDiv.className = 'test-result pass';
+                resultDiv.innerHTML = '✅ 通知系统加载成功！已发送测试通知。';
+            } catch (error) {
+                resultDiv.className = 'test-result fail';
+                resultDiv.innerHTML = '❌ 通知系统加载失败: ' + error.message;
+            }
+        }
+        
+        // 测试主题系统
+        function testThemeSystem() {
+            const resultDiv = document.getElementById('themeSystemTest');
+            try {
+                const themeSystem = window.ThemeSystem.getInstance();
+                themeSystem.initialize();
+                resultDiv.className = 'test-result pass';
+                resultDiv.innerHTML = '✅ 主题系统加载成功！当前主题: ' + themeSystem.currentTheme;
+            } catch (error) {
+                resultDiv.className = 'test-result fail';
+                resultDiv.innerHTML = '❌ 主题系统加载失败: ' + error.message;
+            }
+        }
+        
+        // 切换主题
+        function toggleTheme() {
+            try {
+                const themeSystem = window.ThemeSystem.getInstance();
+                themeSystem.toggleTheme();
+            } catch (error) {
+                alert('切换主题失败: ' + error.message);
+            }
+        }
+        
+        // 测试导航系统
+        function testNavigationSystem() {
+            const resultDiv = document.getElementById('navigationSystemTest');
+            try {
+                const navigationSystem = window.NavigationSystem.getInstance();
+                navigationSystem.initialize();
+                resultDiv.className = 'test-result pass';
+                resultDiv.innerHTML = '✅ 导航系统加载成功！';
+            } catch (error) {
+                resultDiv.className = 'test-result fail';
+                resultDiv.innerHTML = '❌ 导航系统加载失败: ' + error.message;
+            }
+        }
+        
+        // 测试搜索系统
+        function testSearchSystem() {
+            const resultDiv = document.getElementById('searchSystemTest');
+            try {
+                const searchSystem = window.SearchSystem.getInstance();
+                searchSystem.initialize();
+                resultDiv.className = 'test-result pass';
+                resultDiv.innerHTML = '✅ 搜索系统加载成功！';
+            } catch (error) {
+                resultDiv.className = 'test-result fail';
+                resultDiv.innerHTML = '❌ 搜索系统加载失败: ' + error.message;
+            }
+        }
+        
+        // 页面加载完成后自动测试所有模块
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('开始自动测试所有模块...');
+            
+            // 等待一下确保所有模块都已加载
+            setTimeout(function() {
+                testCoreFramework();
+                testModalSystem();
+                testNotificationSystem();
+                testThemeSystem();
+                testNavigationSystem();
+                testSearchSystem();
+                console.log('模块测试完成！');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

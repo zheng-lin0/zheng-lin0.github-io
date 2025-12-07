@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录修复最终测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            background-color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        #log-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>登录修复测试页面</h1>
+    
+    <div class="test-section">
+        <h2>测试说明</h2>
+        <p>此页面用于测试登录修复效果，模拟UserManagement类的登录逻辑。</p>
+        <p>点击下面的按钮进行不同的测试场景。</p>
+    </div>
+
+    <div class="test-section">
+        <h2>测试操作</h2>
+        <button onclick="testValidLogin()">测试1: 正确登录 (zhenglin/134625)</button>
+        <button onclick="testInvalidPassword()">测试2: 错误密码 (zhenglin/wrong)</button>
+        <button onclick="testOtherUser()">测试3: 其他用户 (admin/admin123)</button>
+        <button onclick="testCaseInsensitive()">测试4: 大小写不敏感 (ZHENGLIN/134625)</button>
+        <button onclick="runAllTests()">运行所有测试</button>
+    </div>
+
+    <div class="test-section">
+        <h2>测试结果</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>测试日志</h2>
+        <div id="log-container"></div>
+    </div>
+
+    <script>
+        // 模拟UserManagement类的关键功能
+        class MockUserManagement {
+            constructor() {
+                this.currentUser = null;
+                this.users = [];
+                this.supabase = null; // 模拟Supabase未配置
+            }
+
+            // 模拟initUsers方法
+            async initUsers() {
+                log('初始化用户数据...');
+                
+                // 默认用户数据
+                const defaultUsers = [
+                    { username: 'zhenglin', password: '134625', email: 'zhenglin@example.com', role: '超级管理员' },
+                    { username: 'admin', password: 'admin123', email: 'admin@example.com', role: '管理员' },
+                    { username: 'test', password: 'test123', email: 'test@example.com', role: '普通用户' }
+                ];
+
+                log('使用默认用户数据:', defaultUsers);
+                this.users = defaultUsers;
+                return defaultUsers;
+            }
+
+            // 模拟handleLocalStorageLogin方法
+            handleLocalStorageLogin(username, password) {
+                log(`\n尝试登录: ${username}/${password}`);
+                
+                // 默认用户数据
+                const defaultUsers = [
+                    { username: 'zhenglin', password: '134625', email: 'zhenglin@example.com', role: '超级管理员' },
+                    { username: 'admin', password: 'admin123', email: 'admin@example.com', role: '管理员' },
+                    { username: 'test', password: 'test123', email: 'test@example.com', role: '普通用户' }
+                ];
+                
+                // 首先尝试从当前用户列表中查找
+                let user = this.users.find(u => 
+                    (u.username === username || u.username.toLowerCase() === username.toLowerCase()) && 
+                    u.password === password
+                );
+                
+                // 如果当前用户列表中没有找到，直接从默认用户列表中查找
+                if (!user) {
+                    user = defaultUsers.find(u => 
+                        (u.username === username || u.username.toLowerCase() === username.toLowerCase()) && 
+                        u.password === password
+                    );
+                    
+                    // 如果从默认用户列表中找到了用户，更新用户列表
+                    if (user) {
+                        log('从默认用户列表中找到用户，更新用户数据');
+                        this.users = defaultUsers;
+                    }
+                }
+                
+                log('找到的用户:', user);
+                
+                if (user) {
+                    this.currentUser = user;
+                    log('✅ 登录成功！当前用户:', this.currentUser);
+                    return true;
+                } else {
+                    log('❌ 登录失败：用户名或密码错误');
+                    
+                    // 显示所有用户详细信息
+                    log('=== 所有用户详细信息 ===');
+                    this.users.forEach((user, index) => {
+                        log(`用户${index + 1}:`, {
+                            username: user.username,
+                            password: user.password,
+                            matchUsername: user.username === username,
+                            matchPassword: user.password === password
+                        });
+                    });
+                    return false;
+                }
+            }
+        }
+
+        // 全局变量
+        let userManagement;
+        let testResults = [];
+
+        // 日志函数
+        function log(...args) {
+            const logContainer = document.getElementById('log-container');
+            const logEntry = document.createElement('div');
+            
+            // 格式化参数
+            const message = args.map(arg => {
+                if (typeof arg === 'object') {
+                    return JSON.stringify(arg, null, 2);
+                }
+                return arg;
+            }).join(' ');
+            
+            logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // 添加测试结果
+        function addTestResult(testName, passed, details) {
+            const resultsContainer = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.innerHTML = `<strong>${testName}:</strong> ${passed ? '✅ 通过' : '❌ 失败'}${details ? ` - ${details}` : ''}`;
+            resultsContainer.appendChild(resultDiv);
+        }
+
+        // 测试1: 正确的用户名和密码
+        async function testValidLogin() {
+            log('\n=== 测试1: 正确的用户名和密码 (zhenglin/134625) ===');
+            const result = userManagement.handleLocalStorageLogin('zhenglin', '134625');
+            addTestResult('测试1: 正确登录', result, result ? '登录成功' : '登录失败');
+            return result;
+        }
+
+        // 测试2: 错误的密码
+        async function testInvalidPassword() {
+            log('\n=== 测试2: 错误的密码 (zhenglin/wrong) ===');
+            const result = userManagement.handleLocalStorageLogin('zhenglin', 'wrong');
+            addTestResult('测试2: 错误密码', !result, !result ? '正确显示错误' : '错误地允许登录');
+            return !result;
+        }
+
+        // 测试3: 其他用户
+        async function testOtherUser() {
+            log('\n=== 测试3: 其他用户 (admin/admin123) ===');
+            const result = userManagement.handleLocalStorageLogin('admin', 'admin123');
+            addTestResult('测试3: 其他用户', result, result ? '登录成功' : '登录失败');
+            return result;
+        }
+
+        // 测试4: 大小写不敏感
+        async function testCaseInsensitive() {
+            log('\n=== 测试4: 大小写不敏感 (ZHENGLIN/134625) ===');
+            const result = userManagement.handleLocalStorageLogin('ZHENGLIN', '134625');
+            addTestResult('测试4: 大小写不敏感', result, result ? '登录成功' : '登录失败');
+            return result;
+        }
+
+        // 运行所有测试
+        async function runAllTests() {
+            // 清空之前的结果
+            document.getElementById('test-results').innerHTML = '';
+            document.getElementById('log-container').innerHTML = '';
+            
+            log('=== 开始运行所有测试 ===');
+            
+            // 初始化用户管理
+            userManagement = new MockUserManagement();
+            await userManagement.initUsers();
+            
+            // 运行测试
+            const results = [
+                await testValidLogin(),
+                await testInvalidPassword(),
+                await testOtherUser(),
+                await testCaseInsensitive()
+            ];
+            
+            // 统计通过的测试数
+            const passedTests = results.filter(Boolean).length;
+            const totalTests = results.length;
+            
+            log(`\n=== 测试完成 ===`);
+            log(`通过测试数: ${passedTests}/${totalTests}`);
+            
+            // 添加总结果
+            const totalResult = document.createElement('div');
+            totalResult.className = `test-result ${passedTests === totalTests ? 'pass' : 'fail'}`;
+            totalResult.innerHTML = `<strong>总测试结果:</strong> ${passedTests}/${totalTests} 个测试通过`;
+            document.getElementById('test-results').appendChild(totalResult);
+        }
+
+        // 页面加载时初始化
+        window.onload = async function() {
+            log('页面加载完成，准备测试登录修复效果...');
+            
+            // 初始化用户管理
+            userManagement = new MockUserManagement();
+            await userManagement.initUsers();
+            
+            log('可以开始测试了！');
+        };
+    </script>
+</body>
+</html>

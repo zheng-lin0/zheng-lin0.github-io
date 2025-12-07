@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录问题调试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f0f0f0;
+        }
+        .test-section {
+            background-color: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .debug-info {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #4CAF50;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .error {
+            border-left-color: #f44336;
+        }
+    </style>
+</head>
+<body>
+    <h1>登录问题调试</h1>
+
+    <div class="test-section">
+        <h2>1. 测试环境初始化</h2>
+        <button onclick="initDebug()">初始化调试环境</button>
+        <div id="initDebug" class="debug-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. 直接登录测试</h2>
+        <input type="text" id="testUsername" value="zhenglin" placeholder="用户名">
+        <input type="password" id="testPassword" value="134625" placeholder="密码">
+        <button onclick="testLogin()">执行登录</button>
+        <div id="loginDebug" class="debug-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. 用户状态检查</h2>
+        <button onclick="checkUserState()">检查当前用户状态</button>
+        <div id="userStateDebug" class="debug-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. 界面状态检查</h2>
+        <button onclick="checkUIState()">检查界面元素状态</button>
+        <div id="uiStateDebug" class="debug-info"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>5. 登录后等待检查</h2>
+        <button onclick="testLoginWithWait()">登录后等待5秒检查</button>
+        <div id="waitDebug" class="debug-info"></div>
+    </div>
+
+    <!-- 引入必要的脚本 -->
+    <script>
+        // 模拟UserManagement类的关键功能用于调试
+        class DebugUserManagement {
+            constructor() {
+                this.currentUser = null;
+                this.users = [];
+                this.isInitialized = false;
+            }
+
+            // 模拟初始化用户数据
+            async initUsers() {
+                this.users = [
+                    { username: 'zhenglin', password: '134625', email: 'zhenglin@example.com', role: '超级管理员' },
+                    { username: 'admin', password: 'admin123', email: 'admin@example.com', role: '管理员' },
+                    { username: 'test', password: 'test123', email: 'test@example.com', role: '普通用户' }
+                ];
+                localStorage.setItem('users', JSON.stringify(this.users));
+                return this.users;
+            }
+
+            // 模拟登录
+            handleLocalStorageLogin(username, password) {
+                const log = document.getElementById('loginDebug');
+                log.innerHTML += `尝试登录: ${username}/${password}\n`;
+
+                // 从用户列表中查找
+                let user = this.users.find(u => 
+                    (u.username === username || u.username.toLowerCase() === username.toLowerCase()) && 
+                    u.password === password
+                );
+
+                log.innerHTML += `找到用户: ${JSON.stringify(user)}\n`;
+
+                if (user) {
+                    this.currentUser = user;
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    log.innerHTML += `登录成功！当前用户: ${JSON.stringify(this.currentUser)}\n`;
+                    this.updateUserInterface();
+                    return true;
+                } else {
+                    log.innerHTML += '登录失败: 用户名或密码错误\n';
+                    return false;
+                }
+            }
+
+            // 模拟更新界面
+            updateUserInterface() {
+                const log = document.getElementById('loginDebug');
+                log.innerHTML += `更新界面，当前用户: ${JSON.stringify(this.currentUser)}\n`;
+            }
+
+            // 模拟加载当前用户
+            loadCurrentUser() {
+                const storedUser = localStorage.getItem('currentUser');
+                if (storedUser) {
+                    this.currentUser = JSON.parse(storedUser);
+                }
+            }
+        }
+
+        // 创建全局调试实例
+        let debugUserMgmt;
+
+        // 初始化调试环境
+        function initDebug() {
+            const log = document.getElementById('initDebug');
+            log.innerHTML = '初始化调试环境...\n';
+            
+            // 清除旧的用户数据
+            localStorage.removeItem('users');
+            localStorage.removeItem('currentUser');
+            log.innerHTML += '清除旧的localStorage数据\n';
+            
+            // 创建调试实例
+            debugUserMgmt = new DebugUserManagement();
+            
+            // 初始化用户
+            debugUserMgmt.initUsers().then(users => {
+                log.innerHTML += `初始化用户列表: ${JSON.stringify(users)}\n`;
+                log.innerHTML += '调试环境初始化完成！\n';
+            });
+        }
+
+        // 测试登录
+        function testLogin() {
+            const username = document.getElementById('testUsername').value;
+            const password = document.getElementById('testPassword').value;
+            const log = document.getElementById('loginDebug');
+            
+            log.innerHTML = '=== 开始登录测试 ===\n';
+            
+            if (!debugUserMgmt) {
+                log.innerHTML += '错误：调试环境未初始化！请先点击"初始化调试环境"\n';
+                log.className = 'debug-info error';
+                return;
+            }
+            
+            const success = debugUserMgmt.handleLocalStorageLogin(username, password);
+            
+            // 登录后立即检查状态
+            log.innerHTML += '=== 登录后立即检查 ===\n';
+            log.innerHTML += `currentUser: ${JSON.stringify(debugUserMgmt.currentUser)}\n`;
+            log.innerHTML += `localStorage.currentUser: ${localStorage.getItem('currentUser')}\n`;
+        }
+
+        // 检查用户状态
+        function checkUserState() {
+            const log = document.getElementById('userStateDebug');
+            log.innerHTML = '=== 用户状态检查 ===\n';
+            
+            if (debugUserMgmt) {
+                log.innerHTML += `currentUser: ${JSON.stringify(debugUserMgmt.currentUser)}\n`;
+            } else {
+                log.innerHTML += 'debugUserMgmt未初始化\n';
+            }
+            
+            log.innerHTML += `localStorage.currentUser: ${localStorage.getItem('currentUser')}\n`;
+            log.innerHTML += `localStorage.users: ${localStorage.getItem('users')}\n`;
+        }
+
+        // 检查界面状态
+        function checkUIState() {
+            const log = document.getElementById('uiStateDebug');
+            log.innerHTML = '=== 界面状态检查 ===\n';
+            
+            // 检查登录相关元素
+            const loginButton = document.querySelector('.btn.btn-outline');
+            log.innerHTML += `登录按钮存在: ${!!loginButton}\n`;
+            if (loginButton) {
+                log.innerHTML += `登录按钮样式: ${loginButton.style.cssText}\n`;
+            }
+            
+            const userProfile = document.getElementById('userProfile');
+            log.innerHTML += `用户资料区域存在: ${!!userProfile}\n`;
+            if (userProfile) {
+                log.innerHTML += `用户资料区域样式: ${userProfile.style.cssText}\n`;
+            }
+            
+            // 检查登录表单
+            const loginForm = document.getElementById('loginForm');
+            log.innerHTML += `登录表单存在: ${!!loginForm}\n`;
+        }
+
+        // 登录后等待检查
+        function testLoginWithWait() {
+            const username = document.getElementById('testUsername').value;
+            const password = document.getElementById('testPassword').value;
+            const log = document.getElementById('waitDebug');
+            
+            log.innerHTML = '=== 登录后等待测试 ===\n';
+            
+            if (!debugUserMgmt) {
+                log.innerHTML += '错误：调试环境未初始化！\n';
+                log.className = 'debug-info error';
+                return;
+            }
+            
+            // 执行登录
+            const success = debugUserMgmt.handleLocalStorageLogin(username, password);
+            
+            log.innerHTML += `登录成功: ${success}\n`;
+            log.innerHTML += `登录后立即 - currentUser: ${JSON.stringify(debugUserMgmt.currentUser)}\n`;
+            
+            // 等待5秒后再次检查
+            setTimeout(() => {
+                log.innerHTML += '\n=== 等待5秒后检查 ===\n';
+                log.innerHTML += `currentUser: ${JSON.stringify(debugUserMgmt.currentUser)}\n`;
+                log.innerHTML += `localStorage.currentUser: ${localStorage.getItem('currentUser')}\n`;
+                
+                // 检查是否有其他地方修改了localStorage
+                const storedUser = localStorage.getItem('currentUser');
+                if (storedUser) {
+                    log.innerHTML += 'localStorage中仍有用户数据\n';
+                } else {
+                    log.innerHTML += 'ERROR: localStorage中的用户数据丢失！\n';
+                    log.className = 'debug-info error';
+                }
+            }, 5000);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            const log = document.getElementById('initDebug');
+            log.innerHTML = '页面加载完成，点击"初始化调试环境"开始调试\n';
+        });
+    </script>
+</body>
+</html>
