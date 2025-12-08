@@ -32,17 +32,16 @@ class MembershipSystem {
      */
     initMemberLevels() {
         return [
-            { level: 1, name: '初级会员', minPoints: 0, maxPoints: 999, color: '#808080', icon: 'fa-star', privileges: ['基础功能'] },
-            { level: 2, name: '中级会员', minPoints: 1000, maxPoints: 2999, color: '#C0C0C0', icon: 'fa-star', privileges: ['基础功能', '普通下载速度'] },
-            { level: 3, name: '高级会员', minPoints: 3000, maxPoints: 5999, color: '#FFD700', icon: 'fa-star', privileges: ['基础功能', '普通下载速度', '10GB云存储空间'] },
-            { level: 4, name: '黄金会员', minPoints: 6000, maxPoints: 9999, color: '#FFA500', icon: 'fa-crown', privileges: ['基础功能', '快速下载速度', '50GB云存储空间', '优先客服'] },
-            { level: 5, name: '铂金会员', minPoints: 10000, maxPoints: 14999, color: '#E5E4E2', icon: 'fa-crown', privileges: ['基础功能', '快速下载速度', '100GB云存储空间', '优先客服', '无广告体验'] },
-            { level: 6, name: '钻石会员', minPoints: 15000, maxPoints: 19999, color: '#B9F2FF', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '200GB云存储空间', '优先客服', '无广告体验', 'AI助手基础版'] },
-            { level: 7, name: '翡翠会员', minPoints: 20000, maxPoints: 24999, color: '#00FF7F', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '300GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版'] },
-            { level: 8, name: '蓝宝石会员', minPoints: 25000, maxPoints: 29999, color: '#0000FF', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '500GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源'] },
-            { level: 9, name: '红宝石会员', minPoints: 30000, maxPoints: 39999, color: '#FF0000', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '1TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动'] },
-            { level: 10, name: '皇冠会员', minPoints: 40000, maxPoints: 49999, color: '#FFD700', icon: 'fa-crown', privileges: ['基础功能', '极速下载速度', '2TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动', '定制服务'] },
-            { level: 11, name: '至尊会员', minPoints: 50000, maxPoints: Infinity, color: '#FF00FF', icon: 'fa-crown', privileges: ['全部功能', '极速下载速度', '5TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动', '定制服务', '终身会员'] }
+            { level: 1, name: '会员level1', minPoints: 0, maxPoints: 999, color: '#808080', icon: 'fa-star', privileges: ['基础功能'] },
+            { level: 2, name: '会员level2', minPoints: 1000, maxPoints: 2999, color: '#C0C0C0', icon: 'fa-star', privileges: ['基础功能', '普通下载速度'] },
+            { level: 3, name: '会员level3', minPoints: 3000, maxPoints: 4999, color: '#FFD700', icon: 'fa-star', privileges: ['基础功能', '普通下载速度', '10GB云存储空间'] },
+            { level: 4, name: '会员level4', minPoints: 5000, maxPoints: 9999, color: '#FFA500', icon: 'fa-crown', privileges: ['基础功能', '快速下载速度', '50GB云存储空间', '优先客服'] },
+            { level: 5, name: '会员level5', minPoints: 10000, maxPoints: 14999, color: '#E5E4E2', icon: 'fa-crown', privileges: ['基础功能', '快速下载速度', '100GB云存储空间', '优先客服', '无广告体验'] },
+            { level: 6, name: '会员level6', minPoints: 15000, maxPoints: 19999, color: '#B9F2FF', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '200GB云存储空间', '优先客服', '无广告体验', 'AI助手基础版'] },
+            { level: 7, name: '会员level7', minPoints: 20000, maxPoints: 24999, color: '#00FF7F', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '300GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版'] },
+            { level: 8, name: '会员level8', minPoints: 25000, maxPoints: 29999, color: '#0000FF', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '500GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源'] },
+            { level: 9, name: '会员level9', minPoints: 30000, maxPoints: 39999, color: '#FF0000', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '1TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动'] },
+            { level: 10, name: '会员level10', minPoints: 40000, maxPoints: Infinity, color: '#FFD700', icon: 'fa-crown', privileges: ['基础功能', '极速下载速度', '2TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动', '定制服务'] }
         ];
     }
 
@@ -187,7 +186,7 @@ class MembershipSystem {
                             <div class="upgrade-option">
                                 <h5>年度会员</h5>
                                 <p class="upgrade-price">¥299/年</p>
-                                <p class="upgrade-benefits">立即获得15000积分 + 钻石会员特权</p>
+                                <p class="upgrade-benefits">立即获得15000积分 + 会员level10特权</p>
                                 <button class="btn btn-primary btn-block upgrade-btn" onclick="membershipSystem.purchaseMembership('annual')">立即购买</button>
                             </div>
                         </div>
@@ -265,9 +264,9 @@ class MembershipSystem {
         }
 
         const membershipOptions = {
-            monthly: { points: 1000, price: 29.9, level: 4 },
-            quarterly: { points: 3000, price: 79.9, level: 5 },
-            annual: { points: 15000, price: 299, level: 6 }
+            monthly: { points: 1000, price: 29.9 },
+            quarterly: { points: 3000, price: 79.9 },
+            annual: { points: 15000, price: 299 }
         };
 
         const option = membershipOptions[type];

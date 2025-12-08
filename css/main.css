@@ -2,12 +2,13 @@
         /* ============ CSS架构优化 ============ */
         /* 1. 设计系统变量 - 增强层次感和深度 */
         :root {
-            /* 主题颜色 - 增强对比度 */
-            --primary-color: #1e3c72;
-            --primary-light: #2a5298;
-            --primary-dark: #0d1b3e;
-            --primary-lighter: #3a6ec8;
-            --primary-darker: #060e23;
+            /* 主题颜色 - 增强对比度与现代感 */
+            --primary-color: #2563EB;
+            --primary-light: #3B82F6;
+            --primary-dark: #1D4ED8;
+            --primary-lighter: #60A5FA;
+            --primary-darker: #1E40AF;
+            --primary-glow: rgba(37, 99, 235, 0.3);
             
             --secondary-color: #FF6B35;
             --secondary-light: #FF9A3D;
@@ -91,7 +92,7 @@
             --shadow-inset: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06);
             --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.05);
             --shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-glow: 0 0 40px rgba(42, 82, 152, 0.25);
+            --shadow-glow: 0 0 40px rgba(37, 99, 235, 0.25);
             
             /* 圆角 - 保持一致性 */
             --radius-xs: 4px;
@@ -376,16 +377,16 @@
             left: 0;
             right: 0;
             z-index: var(--z-fixed);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-lg), 0 0 30px rgba(37, 99, 235, 0.2);
             backdrop-filter: blur(15px);
-            background-color: rgba(30, 60, 114, 0.95);
+            background-color: rgba(37, 99, 235, 0.95);
             transition: all var(--transition-base);
         }
 
         .navbar.scrolled {
             padding: var(--space-2) 0;
-            background-color: rgba(30, 60, 114, 0.98);
-            box-shadow: var(--shadow-xl);
+            background-color: rgba(37, 99, 235, 0.98);
+            box-shadow: var(--shadow-xl), 0 0 30px rgba(37, 99, 235, 0.3);
             transform: translateY(0);
         }
 
@@ -542,6 +543,7 @@
             background: rgba(255, 255, 255, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.1);
             overflow: hidden;
+            backdrop-filter: blur(10px);
         }
 
         .nav-link::before {
@@ -561,17 +563,17 @@
 
         .nav-link:hover {
             background: rgba(255, 255, 255, 0.25);
-            border-color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.5);
             transform: translateY(-3px);
             color: white;
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-md), 0 0 20px rgba(255, 255, 255, 0.15);
         }
 
         .nav-link.active {
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+            background: linear-gradient(135deg, var(--primary-lighter) 0%, var(--primary-color) 100%);
             color: white;
-            border-color: transparent;
-            box-shadow: var(--shadow-md);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: var(--shadow-md), 0 0 20px rgba(37, 99, 235, 0.3);
             transform: translateY(-2px);
         }
 
@@ -608,7 +610,7 @@
             width: 36px;
             height: 36px;
             border-radius: var(--radius-full);
-            background: linear-gradient(135deg, var(--secondary-color) 0%, var(--secondary-light) 100%);
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -618,6 +620,7 @@
             border: 2px solid rgba(255, 255, 255, 0.3);
             transition: all var(--transition-base);
             position: relative;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .user-avatar::before {
@@ -628,7 +631,7 @@
             right: -2px;
             bottom: -2px;
             border-radius: var(--radius-full);
-            background: linear-gradient(45deg, var(--secondary-light), var(--secondary-color), var(--primary-color));
+            background: linear-gradient(45deg, var(--primary-lighter), var(--primary-light), var(--primary-color), var(--primary-dark));
             z-index: -1;
             opacity: 0;
             transition: all var(--transition-base);
@@ -646,8 +649,8 @@
 
         .user-avatar:hover {
             transform: scale(1.15);
-            border-color: var(--secondary-light);
-            box-shadow: 0 0 30px rgba(255, 107, 53, 0.4);
+            border-color: var(--primary-lighter);
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.4);
         }
 
         .user-dropdown {
@@ -675,24 +678,34 @@
 
         /* 用户角色徽章样式 */
         .level-badge {
-            padding: 2px 8px;
-            border-radius: 12px;
+            padding: 3px 10px;
+            border-radius: 15px;
             font-size: 12px;
             font-weight: bold;
             margin-left: 8px;
             color: white;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition-base);
+        }
+
+        .level-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
         }
 
         .badge-super-admin {
-            background-color: #e53e3e;
+            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
         }
 
         .badge-admin {
-            background-color: #3182ce;
+            background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary-color) 100%);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
         }
 
         .badge-user {
-            background-color: #38a169;
+            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
 
         @keyframes slideDown {

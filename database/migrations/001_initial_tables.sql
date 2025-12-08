@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     bio TEXT,
     role VARCHAR(20) DEFAULT 'user',
     status VARCHAR(20) DEFAULT 'active',
-    level VARCHAR(20) DEFAULT '普通会员',
+    level VARCHAR(20) DEFAULT '会员level1',
     last_login TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()

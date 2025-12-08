@@ -60,15 +60,15 @@
             <div id="userProfile" style="display: flex; align-items: center; gap: 15px;">
                 <span>欢迎，</span>
                 <span id="userName">未登录</span>
-                <span id="userLevel" class="user-level regular">普通会员</span>
+                <span id="userLevel" class="user-level regular">会员level1</span>
             </div>
             <div class="mt-3">
                 <button class="btn btn-primary btn-test" onclick="testLogin()">测试登录</button>
                 <button class="btn btn-danger btn-test" onclick="testLogout()">测试登出</button>
-                <button class="btn btn-warning btn-test" onclick="changeUserLevel('普通会员')">普通会员</button>
-                <button class="btn btn-info btn-test" onclick="changeUserLevel('高级会员')">高级会员</button>
-                <button class="btn btn-success btn-test" onclick="changeUserLevel('VIP会员')">VIP会员</button>
-                <button class="btn btn-purple btn-test" onclick="changeUserLevel('钻石会员')">钻石会员</button>
+                <button class="btn btn-warning btn-test" onclick="changeUserLevel('会员level1')">会员level1</button>
+                <button class="btn btn-info btn-test" onclick="changeUserLevel('会员level2')">会员level2</button>
+                <button class="btn btn-success btn-test" onclick="changeUserLevel('会员level4')">会员level4</button>
+                <button class="btn btn-purple btn-test" onclick="changeUserLevel('会员level10')">会员level10</button>
             </div>
         </div>
         
@@ -126,7 +126,7 @@
                 username: '测试用户',
                 email: 'test@example.com',
                 role: '普通用户',
-                level: '普通会员',
+                level: '会员level1',
                 points: 0,
                 joinDate: new Date().toISOString()
             };
@@ -165,16 +165,16 @@
                 // 根据等级设置积分
                 let points = 0;
                 switch(level) {
-                    case '普通会员':
+                    case '会员level1':
                         points = 500;
                         break;
-                    case '高级会员':
+                    case '会员level2':
                         points = 2000;
                         break;
-                    case 'VIP会员':
+                    case '会员level4':
                         points = 8000;
                         break;
-                    case '钻石会员':
+                    case '会员level10':
                         points = 20000;
                         break;
                 }
@@ -234,21 +234,21 @@
                 return;
             }
             
-            let level = currentUser.level || '普通会员';
+            let level = currentUser.level || '会员level1';
             
             // 获取会员特权
             let privileges = [];
             switch(level) {
-                case '普通会员':
+                case '会员level1':
                     privileges = ['基础下载功能', '1x 下载速度', '1GB 云存储空间'];
                     break;
-                case '高级会员':
+                case '会员level2':
                     privileges = ['基础下载功能', '2x 下载速度', '10GB 云存储空间', '优先客服'];
                     break;
-                case 'VIP会员':
+                case '会员level4':
                     privileges = ['基础下载功能', '5x 下载速度', '50GB 云存储空间', '优先客服', '无广告体验'];
                     break;
-                case '钻石会员':
+                case '会员level10':
                     privileges = ['基础下载功能', '10x 下载速度', '200GB 云存储空间', '专属客服', '无广告体验', 'AI助手基础版'];
                     break;
             }

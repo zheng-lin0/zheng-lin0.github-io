@@ -703,11 +703,11 @@ class UserManagement {
             
             if (userLevel) {
                 // 显示用户等级
-                let level = this.currentUser.level || '普通会员';
+                let level = this.currentUser.level || '会员level1';
                 
                 // 检查用户角色，如果是管理员或超级管理员，直接设为最高级会员
                 if (this.currentUser.role === '超级管理员' || this.currentUser.role === '管理员') {
-                    level = '至尊会员';
+                    level = '会员level10';
                     this.currentUser.level = level; // 更新当前用户的等级信息
                     localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
                 } 
@@ -723,11 +723,11 @@ class UserManagement {
                 
                 // 根据等级设置徽章样式
                 userLevel.className = 'user-level';
-                if (level === '钻石会员' || level === '超级VIP' || level === '至尊会员') {
+                if (level === '会员level9' || level === '会员level10') {
                     userLevel.classList.add('diamond');
-                } else if (level === '高级会员') {
+                } else if (level === '会员level2') {
                     userLevel.classList.add('premium');
-                } else if (level === 'VIP会员') {
+                } else if (level === '会员level4') {
                     userLevel.classList.add('vip');
                 } else {
                     userLevel.classList.add('regular');
@@ -736,6 +736,8 @@ class UserManagement {
             
             // 添加管理员角色标识
             let adminBadge = document.getElementById('adminBadge');
+            const userInfo = document.querySelector('.user-info');
+            
             if (this.currentUser.role === '超级管理员' || this.currentUser.role === '管理员') {
                 if (!adminBadge) {
                     adminBadge = document.createElement('div');
@@ -751,9 +753,18 @@ class UserManagement {
                     }
                     
                     // 将管理员徽章添加到用户信息区域
-                    const userInfo = document.querySelector('.user-info');
                     if (userInfo) {
                         userInfo.appendChild(adminBadge);
+                        console.log('管理员徽章已添加到用户信息区域');
+                    } else {
+                        // 如果userInfo不存在，尝试将徽章添加到userProfile中
+                        const userProfile = document.getElementById('userProfile');
+                        if (userProfile) {
+                            userProfile.appendChild(adminBadge);
+                            console.log('管理员徽章已添加到用户资料区域');
+                        } else {
+                            console.warn('无法找到用户信息区域添加管理员徽章');
+                        }
                     }
                 } else {
                     // 更新角色文本和类名
@@ -763,9 +774,11 @@ class UserManagement {
                     } else {
                         adminBadge.classList.remove('super-admin');
                     }
+                    console.log('管理员徽章已更新');
                 }
             } else if (adminBadge) {
                 adminBadge.remove();
+                console.log('管理员徽章已移除');
             }
             
             // 根据角色显示管理员功能
@@ -861,7 +874,7 @@ class UserManagement {
      * @returns {string|null} 当前用户等级
      */
     getCurrentUserLevel() {
-        return this.currentUser ? this.currentUser.level || '普通会员' : null;
+        return this.currentUser ? this.currentUser.level || '会员level1' : null;
     }
 
     /**
@@ -877,11 +890,16 @@ class UserManagement {
         }
         
         // 默认等级映射（当MembershipSystem不可用时）
-        if (points >= 15000) return '钻石会员';
-        if (points >= 10000) return '超级VIP';
-        if (points >= 5000) return 'VIP会员';
-        if (points >= 1000) return '高级会员';
-        return '普通会员';
+        if (points >= 40000) return '会员level10';
+        if (points >= 30000) return '会员level9';
+        if (points >= 25000) return '会员level8';
+        if (points >= 20000) return '会员level7';
+        if (points >= 15000) return '会员level6';
+        if (points >= 10000) return '会员level5';
+        if (points >= 5000) return '会员level4';
+        if (points >= 3000) return '会员level3';
+        if (points >= 1000) return '会员level2';
+        return '会员level1';
     }
 
     /**
@@ -892,7 +910,7 @@ class UserManagement {
      * @returns {boolean} 是否设置成功
      */
     async setUserLevel(userId, level) {
-        const validLevels = ['普通会员', '高级会员', 'VIP会员', '超级VIP', '钻石会员'];
+        const validLevels = ['会员level1', '会员level2', '会员level3', '会员level4', '会员level5', '会员level6', '会员level7', '会员level8', '会员level9', '会员level10'];
         if (!validLevels.includes(level)) {
             console.error('无效的用户等级');
             return false;
@@ -954,7 +972,7 @@ class UserManagement {
      * @returns {Array} 会员等级列表
      */
     getAvailableLevels() {
-        return ['普通会员', '高级会员', 'VIP会员', '超级VIP'];
+        return ['会员level1', '会员level2', '会员level3', '会员level4', '会员level5', '会员level6', '会员level7', '会员level8', '会员level9', '会员level10'];
     }
 }
 

@@ -468,19 +468,24 @@ class ResourceManager {
 
     // 获取用户下载速度
     getCurrentUserDownloadSpeed() {
-        if (!this.currentUser) return '普通会员速度 (1x)';
+        if (!this.currentUser) return '会员level1速度 (1x)';
 
         // 直接使用用户的level属性确定会员等级
-        const userLevel = this.currentUser.level || '普通会员';
+        const userLevel = this.currentUser.level || '会员level1';
         const speedMap = {
-            '普通会员': '普通会员速度 (1x)',
-            '高级会员': '高级会员速度 (2x)',
-            'VIP会员': 'VIP会员速度 (5x)',
-            '钻石会员': '钻石会员速度 (10x)',
-            '超级VIP': '超级VIP会员速度 (10x)'
+            '会员level1': '会员level1速度 (1x)',
+            '会员level2': '会员level2速度 (2x)',
+            '会员level3': '会员level3速度 (2x)',
+            '会员level4': '会员level4速度 (5x)',
+            '会员level5': '会员level5速度 (5x)',
+            '会员level6': '会员level6速度 (10x)',
+            '会员level7': '会员level7速度 (10x)',
+            '会员level8': '会员level8速度 (10x)',
+            '会员level9': '会员level9速度 (10x)',
+            '会员level10': '会员level10速度 (10x)'
         };
 
-        return speedMap[userLevel] || speedMap['普通会员'];
+        return speedMap[userLevel] || speedMap['会员level1'];
     }
 
     /**
@@ -492,13 +497,18 @@ class ResourceManager {
         if (!this.currentUser) return 1;
 
         // 直接使用用户的level属性确定会员等级
-        const userLevel = this.currentUser.level || '普通会员';
+        const userLevel = this.currentUser.level || '会员level1';
         const speedMultiplierMap = {
-            '普通会员': 1,
-            '高级会员': 2,
-            'VIP会员': 5,
-            '钻石会员': 10,
-            '超级VIP': 10
+            '会员level1': 1,
+            '会员level2': 2,
+            '会员level3': 2,
+            '会员level4': 5,
+            '会员level5': 5,
+            '会员level6': 10,
+            '会员level7': 10,
+            '会员level8': 10,
+            '会员level9': 10,
+            '会员level10': 10
         };
 
         return speedMultiplierMap[userLevel] || 1;
