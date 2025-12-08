@@ -101,15 +101,22 @@ class NotificationSystem {
             }
             
             .notification {
-                padding: 15px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                padding: 15px 20px;
+                border-radius: 12px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
                 color: white;
                 font-size: 14px;
                 line-height: 1.4;
                 position: relative;
                 overflow: hidden;
-                animation: notificationSlideIn 0.3s ease-out;
+                animation: notificationSlideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+                transform-origin: right top;
+                transition: all 0.2s ease;
+            }
+            
+            .notification:hover {
+                transform: translateX(-5px) translateY(-2px);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
             }
             
             .notification::before {
@@ -140,40 +147,44 @@ class NotificationSystem {
             
             .notification-close {
                 position: absolute;
-                top: 5px;
-                right: 8px;
-                background: none;
+                top: 8px;
+                right: 12px;
+                background: rgba(255, 255, 255, 0.2);
                 border: none;
                 color: white;
-                font-size: 16px;
+                font-size: 14px;
                 cursor: pointer;
-                opacity: 0.8;
-                padding: 2px;
+                opacity: 0.7;
+                padding: 4px 8px;
+                border-radius: 50%;
+                transition: all 0.2s ease;
             }
             
             .notification-close:hover {
                 opacity: 1;
+                background: rgba(255, 255, 255, 0.3);
+                transform: scale(1.1);
             }
             
             @keyframes notificationSlideIn {
                 from {
                     opacity: 0;
-                    transform: translateX(100%);
+                    transform: translateX(100%) translateY(20px) scale(0.8);
                 }
                 to {
                     opacity: 1;
-                    transform: translateX(0);
+                    transform: translateX(0) translateY(0) scale(1);
                 }
             }
             
             @keyframes notificationSlideOut {
                 from {
                     opacity: 1;
-                    transform: translateX(0);
+                    transform: translateX(0) translateY(0) scale(1);
                 }
                 to {
                     opacity: 0;
-                    transform: translateX(100%);
+                    transform: translateX(100%) translateY(20px) scale(0.8);
                 }
             }
             
@@ -221,12 +232,23 @@ class NotificationSystem {
             notification.className = `notification notification-${type}`;
             notification.setAttribute('data-notification-id', notificationId);
             
+            // 添加图标
+            const icons = {
+                info: 'fa-info-circle',
+                success: 'fa-check-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle'
+            };
+            
             // 设置消息内容
             notification.innerHTML = `
-                ${message}
-                <button class="notification-close" aria-label="关闭通知">
-                    <i class="fas fa-times"></i>
-                </button>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas ${icons[type]}" style="font-size: 18px; flex-shrink: 0;"></i>
+                    <div style="flex: 1;">${message}</div>
+                    <button class="notification-close" aria-label="关闭通知">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
             `;
 
             // 设置关闭事件
@@ -234,6 +256,17 @@ class NotificationSystem {
             closeButton.addEventListener('click', () => {
                 this.hideNotification(notificationId, options.onClose);
             });
+
+            // 添加点击外部关闭功能（如果启用）
+            if (options.closeOnClick !== false) {
+                notification.addEventListener('click', () => {
+                    this.hideNotification(notificationId, options.onClose);
+                });
+                // 阻止关闭按钮的事件冒泡
+                closeButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
 
             // 添加到容器
             this.container.appendChild(notification);
@@ -245,14 +278,27 @@ class NotificationSystem {
             // 设置自动关闭
             const duration = options.duration || this.config.defaultDuration;
             if (duration > 0) {
-                // 设置进度条动画
-                notification.style.animation = `notificationSlideIn 0.3s ease-out`;
-                notification.style.setProperty('--duration', `${duration}ms`);
-                notification.style.setProperty('--progress-duration', `${duration - 300}ms`);
+                // 创建进度条
+                const progressBar = document.createElement('div');
+                progressBar.style.cssText = `
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    height: 3px;
+                    background: rgba(255, 255, 255, 0.7);
+                    width: 100%;
+                    animation: notificationProgressBar ${duration}ms linear;
+                    border-radius: 0 0 0 12px;
+                `;
+                notification.appendChild(progressBar);
                 
-                setTimeout(() => {
+                // 设置定时器关闭通知
+                const timer = setTimeout(() => {
                     this.hideNotification(notificationId, options.onClose);
                 }, duration);
+                
+                // 保存定时器引用
+                notification.setAttribute('data-timer-id', timer.toString());
             }
 
             console.log(`通知显示: ${notificationId}`);

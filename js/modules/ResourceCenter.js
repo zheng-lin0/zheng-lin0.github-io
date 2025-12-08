@@ -150,12 +150,29 @@ class ResourceCenter {
         // 尝试从Supabase加载下载历史
         if (this.supabase && window.userManagement) {
             await this.loadDownloadHistoryFromSupabase();
+            await this.loadFavoritesFromSupabase();
         } else {
             // 从本地存储加载下载历史
             const storedDownloadHistory = localStorage.getItem('downloadHistory');
             if (storedDownloadHistory) {
                 this.downloadHistory = JSON.parse(storedDownloadHistory);
             }
+            
+            // 从本地存储加载收藏列表
+            const storedFavorites = localStorage.getItem('userFavorites');
+            if (storedFavorites) {
+                this.favorites = JSON.parse(storedFavorites);
+            } else {
+                this.favorites = [];
+            }
+        }
+        
+        // 加载浏览历史
+        const storedViewHistory = localStorage.getItem('viewHistory');
+        if (storedViewHistory) {
+            this.viewHistory = JSON.parse(storedViewHistory);
+        } else {
+            this.viewHistory = [];
         }
     }
 
@@ -197,6 +214,14 @@ class ResourceCenter {
             const searchBtn = e.target.closest('.resource-search-btn');
             if (searchBtn) {
                 this.searchResources();
+                return;
+            }
+            
+            // 收藏按钮点击
+            const favoriteBtn = e.target.closest('.favorite-btn');
+            if (favoriteBtn) {
+                const resourceId = favoriteBtn.dataset.resourceId;
+                this.toggleFavorite(resourceId);
                 return;
             }
         });
@@ -292,12 +317,19 @@ class ResourceCenter {
             );
         }
         
-        return resourcesToRender.map(resource => `
+        return resourcesToRender.map(resource => {
+            const isFavorite = this.favorites.some(fav => fav.resourceId === resource.id);
+            return `
             <div class="resource-card" data-resource-id="${resource.id}">
                 <div class="resource-thumbnail">
                     <img src="${resource.thumbnail}" alt="${resource.title}">
                     <span class="resource-type-badge">${resource.type}</span>
                     ${!resource.isFree ? `<span class="resource-price-badge">¥${resource.price}</span>` : ''}
+                    <button class="favorite-btn ${isFavorite ? 'favorited' : ''}" 
+                            data-resource-id="${resource.id}" 
+                            title="${isFavorite ? '取消收藏' : '添加到收藏夹'}">
+                        ${isFavorite ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>'}
+                    </button>
                 </div>
                 <div class="resource-info">
                     <h4 class="resource-title">${resource.title}</h4>
@@ -324,7 +356,8 @@ class ResourceCenter {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
     }
 
     filterResourcesByCategory(category) {
@@ -542,6 +575,349 @@ class ResourceCenter {
                 this.downloadHistory = JSON.parse(storedDownloadHistory);
             }
         }
+    }
+    
+    // 加载收藏列表的方法（从Supabase）
+    async loadFavoritesFromSupabase() {
+        if (!this.supabase || !window.userManagement) return;
+        
+        try {
+            const currentUser = window.userManagement.getCurrentUser();
+            if (!currentUser) return;
+            
+            const { data, error } = await this.supabase
+                .from('user_favorites')
+                .select('*')
+                .eq('user_id', currentUser.id);
+            
+            if (data && data.length > 0) {
+                this.favorites = data.map(item => ({
+                    resourceId: item.resource_id,
+                    title: item.resource_title,
+                    category: item.category,
+                    thumbnail: item.thumbnail,
+                    dateAdded: item.date_added
+                }));
+                localStorage.setItem('userFavorites', JSON.stringify(this.favorites));
+            }
+        } catch (error) {
+            console.error('从Supabase加载收藏列表失败:', error);
+        }
+    }
+    
+    // 切换资源收藏状态
+    async toggleFavorite(resourceId) {
+        // 检查用户是否登录
+        if (!window.userManagement || !window.userManagement.currentUser) {
+            if (window.notificationSystem) {
+                window.notificationSystem.showNotification('请先登录后再使用收藏功能', 'warning');
+            }
+            return;
+        }
+        
+        const resourceIndex = this.favorites.findIndex(fav => fav.resourceId === resourceId);
+        
+        if (resourceIndex > -1) {
+            // 取消收藏
+            this.favorites.splice(resourceIndex, 1);
+            this.saveFavorites();
+            if (window.notificationSystem) {
+                window.notificationSystem.showNotification('已取消收藏该资源', 'success');
+            }
+        } else {
+            // 添加收藏
+            const resource = this.resources.find(res => res.id === resourceId);
+            if (resource) {
+                this.favorites.push({
+                    resourceId: resourceId,
+                    title: resource.title,
+                    category: resource.category,
+                    thumbnail: resource.thumbnail,
+                    dateAdded: new Date().toISOString()
+                });
+                this.saveFavorites();
+                if (window.notificationSystem) {
+                    window.notificationSystem.showNotification('已添加到收藏夹', 'success');
+                }
+            }
+        }
+        
+        // 更新UI
+        this.updateFavoriteButtons();
+    }
+    
+    // 保存收藏列表
+    async saveFavorites() {
+        if (this.supabase && window.userManagement) {
+            try {
+                const currentUser = window.userManagement.getCurrentUser();
+                if (!currentUser) return;
+                
+                // 先删除所有收藏记录
+                await this.supabase
+                    .from('user_favorites')
+                    .delete()
+                    .eq('user_id', currentUser.id);
+                
+                // 插入新的收藏记录
+                if (this.favorites.length > 0) {
+                    const favoritesData = this.favorites.map(fav => ({
+                        user_id: currentUser.id,
+                        resource_id: fav.resourceId,
+                        resource_title: fav.title,
+                        category: fav.category,
+                        thumbnail: fav.thumbnail,
+                        date_added: fav.dateAdded
+                    }));
+                    
+                    const { error } = await this.supabase
+                        .from('user_favorites')
+                        .insert(favoritesData);
+                    
+                    if (error) {
+                        console.error('保存收藏列表到Supabase失败:', error);
+                    }
+                }
+            } catch (error) {
+                console.error('保存收藏列表时发生错误:', error);
+            }
+        } else {
+            // 保存到本地存储
+            localStorage.setItem('userFavorites', JSON.stringify(this.favorites));
+        }
+    }
+    
+    // 更新所有收藏按钮的状态
+    updateFavoriteButtons() {
+        const favoriteButtons = document.querySelectorAll('.favorite-btn');
+        favoriteButtons.forEach(btn => {
+            const resourceId = btn.dataset.resourceId;
+            const isFavorite = this.favorites.some(fav => fav.resourceId === resourceId);
+            btn.classList.toggle('favorited', isFavorite);
+            btn.innerHTML = isFavorite ? '<i class="fas fa-heart"></i>' : '<i class="far fa-heart"></i>';
+        });
+    }
+    
+    // 添加资源到浏览历史
+    addToViewHistory(resourceId) {
+        const resource = this.resources.find(res => res.id === resourceId);
+        if (!resource) return;
+        
+        // 移除已存在的相同资源
+        this.viewHistory = this.viewHistory.filter(item => item.resourceId !== resourceId);
+        
+        // 添加到历史记录开头
+        this.viewHistory.unshift({
+            resourceId: resourceId,
+            title: resource.title,
+            category: resource.category,
+            thumbnail: resource.thumbnail,
+            dateViewed: new Date().toISOString()
+        });
+        
+        // 限制历史记录数量为20条
+        if (this.viewHistory.length > 20) {
+            this.viewHistory = this.viewHistory.slice(0, 20);
+        }
+        
+        // 保存到本地存储
+        localStorage.setItem('viewHistory', JSON.stringify(this.viewHistory));
+    }
+    
+    // 获取个性化推荐资源
+    getRecommendedResources(limit = 6) {
+        if (this.viewHistory.length === 0) {
+            // 如果没有浏览历史，返回最新资源
+            return [...this.resources].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, limit);
+        }
+        
+        // 基于浏览历史的分类偏好进行推荐
+        const categoryCounts = {};
+        this.viewHistory.forEach(item => {
+            categoryCounts[item.category] = (categoryCounts[item.category] || 0) + 1;
+        });
+        
+        // 计算分类权重
+        const totalViews = this.viewHistory.length;
+        const categoryWeights = {};
+        for (const [category, count] of Object.entries(categoryCounts)) {
+            categoryWeights[category] = count / totalViews;
+        }
+        
+        // 为每个资源计算推荐分数
+        const scoredResources = this.resources.map(resource => {
+            let score = 0;
+            
+            // 基于分类偏好的分数
+            if (categoryWeights[resource.category]) {
+                score += categoryWeights[resource.category] * 10;
+            }
+            
+            // 基于下载量的分数
+            score += resource.downloads / 1000;
+            
+            // 基于评分的分数
+            score += resource.rating * 2;
+            
+            // 基于日期的分数（越新分数越高）
+            const daysSinceUpload = (new Date() - new Date(resource.date)) / (1000 * 60 * 60 * 24);
+            score += Math.max(0, 30 - daysSinceUpload) / 3;
+            
+            return { ...resource, score };
+        });
+        
+        // 按分数排序并返回推荐资源
+        return scoredResources
+            .sort((a, b) => b.score - a.score)
+            .slice(0, limit);
+    }
+    
+    // 显示收藏夹页面
+    showFavorites() {
+        // 隐藏其他主要部分
+        document.querySelector('#resources').style.display = 'none';
+        document.querySelector('#browser').style.display = 'none';
+        document.querySelector('#upload').style.display = 'none';
+        
+        // 显示收藏夹部分
+        document.querySelector('#favorites').style.display = 'block';
+        
+        // 渲染收藏的资源
+        this.renderFavorites();
+        
+        // 设置搜索和排序事件监听
+        this.setupFavoritesEventListeners();
+    }
+    
+    // 显示资源库页面
+    showResources() {
+        // 隐藏其他主要部分
+        document.querySelector('#favorites').style.display = 'none';
+        document.querySelector('#browser').style.display = 'none';
+        document.querySelector('#upload').style.display = 'none';
+        
+        // 显示资源库部分
+        document.querySelector('#resources').style.display = 'block';
+        
+        // 重新渲染资源列表
+        this.renderResourceList();
+    }
+    
+    // 渲染收藏的资源
+    renderFavorites() {
+        const favoritesGrid = document.getElementById('favoritesGrid');
+        const favoritesEmpty = document.getElementById('favoritesEmpty');
+        
+        if (this.favorites.length === 0) {
+            favoritesEmpty.style.display = 'block';
+            favoritesGrid.innerHTML = '';
+            return;
+        }
+        
+        favoritesEmpty.style.display = 'none';
+        
+        // 获取收藏的资源详情
+        const favoriteResources = this.favorites.map(fav => {
+            const resource = this.resources.find(r => r.id === fav.resourceId);
+            return resource ? { ...resource, favoritedDate: fav.date } : null;
+        }).filter(Boolean);
+        
+        // 按收藏日期降序排序
+        favoriteResources.sort((a, b) => new Date(b.favoritedDate) - new Date(a.favoritedDate));
+        
+        // 渲染资源卡片
+        const resourceCards = favoriteResources.map(resource => {
+            const isFavorite = this.favorites.some(fav => fav.resourceId === resource.id);
+            return this.createResourceCard(resource, isFavorite);
+        }).join('');
+        
+        favoritesGrid.innerHTML = resourceCards;
+        
+        // 更新收藏按钮状态
+        this.updateFavoriteButtons();
+    }
+    
+    // 设置收藏夹页面的事件监听
+    setupFavoritesEventListeners() {
+        // 搜索功能
+        const favoritesSearch = document.getElementById('favoritesSearch');
+        favoritesSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            this.filterFavorites(searchTerm);
+        });
+        
+        // 排序功能
+        const sortOptions = document.querySelectorAll('#favorites .sort-option');
+        sortOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                // 更新激活状态
+                sortOptions.forEach(opt => opt.classList.remove('active'));
+                e.target.closest('.sort-option').classList.add('active');
+                
+                // 执行排序
+                const sortType = e.target.closest('.sort-option').dataset.sort;
+                this.sortFavorites(sortType);
+            });
+        });
+    }
+    
+    // 筛选收藏的资源
+    filterFavorites(searchTerm) {
+        const favoritesGrid = document.getElementById('favoritesGrid');
+        const resourceCards = favoritesGrid.querySelectorAll('.resource-card');
+        
+        resourceCards.forEach(card => {
+            const title = card.querySelector('.resource-title').textContent.toLowerCase();
+            const description = card.querySelector('.resource-description').textContent.toLowerCase();
+            
+            if (title.includes(searchTerm) || description.includes(searchTerm)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    // 排序收藏的资源
+    sortFavorites(sortType) {
+        const favoritesGrid = document.getElementById('favoritesGrid');
+        const resourceCards = Array.from(favoritesGrid.querySelectorAll('.resource-card'));
+        
+        let sortedCards;
+        
+        switch (sortType) {
+            case 'newest':
+                // 按收藏日期排序
+                sortedCards = resourceCards.sort((a, b) => {
+                    const aId = a.dataset.resourceId;
+                    const bId = b.dataset.resourceId;
+                    const aFav = this.favorites.find(f => f.resourceId === aId);
+                    const bFav = this.favorites.find(f => f.resourceId === bId);
+                    return new Date(bFav.date) - new Date(aFav.date);
+                });
+                break;
+            case 'name':
+                // 按名称排序
+                sortedCards = resourceCards.sort((a, b) => {
+                    const aTitle = a.querySelector('.resource-title').textContent;
+                    const bTitle = b.querySelector('.resource-title').textContent;
+                    return aTitle.localeCompare(bTitle, 'zh-CN');
+                });
+                break;
+            case 'date':
+                // 按上传日期排序
+                sortedCards = resourceCards.sort((a, b) => {
+                    const aDate = a.querySelector('.resource-date').textContent;
+                    const bDate = b.querySelector('.resource-date').textContent;
+                    return new Date(bDate) - new Date(aDate);
+                });
+                break;
+            default:
+                sortedCards = resourceCards;
+        }
+        
+        // 重新排列卡片
+        sortedCards.forEach(card => favoritesGrid.appendChild(card));
     }
     
     /**

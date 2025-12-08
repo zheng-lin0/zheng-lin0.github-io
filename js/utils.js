@@ -326,12 +326,82 @@ utils.openRegisterModal = function() {
     }
 };
 
+// 打开反馈模态框
+utils.openFeedbackModal = function() {
+    if (window.modalSystem) {
+        window.modalSystem.openModal('feedbackModal');
+    } else {
+        console.error('ModalSystem未加载');
+    }
+};
+
 // 上传资源
 utils.uploadResource = function() {
     if (window.resourceManager) {
         window.resourceManager.uploadResource();
     } else {
         console.error('ResourceManager未加载');
+    }
+};
+
+// 初始化反馈表单
+utils.initFeedbackForm = function() {
+    const feedbackForm = document.getElementById('feedbackForm');
+    if (feedbackForm) {
+        feedbackForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            utils.submitFeedback();
+        });
+    }
+};
+
+// 提交反馈
+utils.submitFeedback = function() {
+    const feedbackType = document.getElementById('feedbackType').value;
+    const feedbackTitle = document.getElementById('feedbackTitle').value;
+    const feedbackContent = document.getElementById('feedbackContent').value;
+    const feedbackContact = document.getElementById('feedbackContact').value;
+    
+    // 验证表单数据
+    if (!feedbackType || !feedbackTitle || !feedbackContent) {
+        if (window.notificationSystem) {
+            window.notificationSystem.showNotification('请填写必要的反馈信息', 'error');
+        } else {
+            alert('请填写必要的反馈信息');
+        }
+        return;
+    }
+    
+    // 构建反馈数据对象
+    const feedbackData = {
+        type: feedbackType,
+        title: feedbackTitle,
+        content: feedbackContent,
+        contact: feedbackContact,
+        timestamp: new Date().toISOString(),
+        userId: window.userManager ? window.userManager.getCurrentUser()?.id : 'guest'
+    };
+    
+    // 这里可以添加实际的反馈提交逻辑
+    // 例如：发送到服务器、存储到本地等
+    console.log('反馈数据:', feedbackData);
+    
+    // 保存到本地存储（示例）
+    let feedbacks = JSON.parse(localStorage.getItem('userFeedbacks') || '[]');
+    feedbacks.push(feedbackData);
+    localStorage.setItem('userFeedbacks', JSON.stringify(feedbacks));
+    
+    // 显示成功通知
+    if (window.notificationSystem) {
+        window.notificationSystem.showNotification('反馈提交成功！感谢您的支持和建议', 'success');
+    } else {
+        alert('反馈提交成功！感谢您的支持和建议');
+    }
+    
+    // 关闭模态框并重置表单
+    if (window.modalSystem) {
+        window.modalSystem.closeModal('feedbackModal');
+        document.getElementById('feedbackForm').reset();
     }
 };
 

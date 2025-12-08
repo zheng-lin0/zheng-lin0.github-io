@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试未登录状态</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>测试未登录状态下的界面显示</h1>
+    
+    <div class="test-section">
+        <h2>1. 清除localStorage中的用户信息</h2>
+        <button onclick="clearLocalStorage()">清除localStorage</button>
+        <div id="localStorageResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 检查当前用户状态</h2>
+        <button onclick="checkCurrentUser()">检查当前用户</button>
+        <div id="currentUserResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 测试用户界面更新</h2>
+        <button onclick="testUpdateUI()">测试界面更新</button>
+        <div id="uiUpdateResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 模拟未登录状态</h2>
+        <button onclick="simulateLoggedOut()">模拟未登录</button>
+        <div id="simulateResult"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. 检查DOM元素状态</h2>
+        <button onclick="checkDOMElements()">检查DOM元素</button>
+        <div id="domResult"></div>
+    </div>
+
+    <script>
+        function clearLocalStorage() {
+            const resultDiv = document.getElementById('localStorageResult');
+            try {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('users');
+                resultDiv.innerHTML = '<span class="success">localStorage已清除</span>';
+                console.log('localStorage已清除');
+            } catch (e) {
+                resultDiv.innerHTML = '<span class="error">清除localStorage失败: ' + e.message + '</span>';
+                console.error('清除localStorage失败:', e);
+            }
+        }
+        
+        function checkCurrentUser() {
+            const resultDiv = document.getElementById('currentUserResult');
+            let currentUser = null;
+            
+            // 检查全局userManagement对象
+            if (typeof window.userManagement !== 'undefined' && window.userManagement.currentUser) {
+                currentUser = window.userManagement.currentUser;
+                resultDiv.innerHTML = '<span class="info">当前用户: </span>' + JSON.stringify(currentUser);
+            } else {
+                resultDiv.innerHTML = '<span class="success">currentUser为null (未登录)</span>';
+            }
+            
+            // 检查localStorage
+            const storedUser = localStorage.getItem('currentUser');
+            if (storedUser) {
+                resultDiv.innerHTML += '<br><span class="warning">localStorage中存在用户信息: ' + storedUser + '</span>';
+            } else {
+                resultDiv.innerHTML += '<br><span class="success">localStorage中没有用户信息</span>';
+            }
+        }
+        
+        function testUpdateUI() {
+            const resultDiv = document.getElementById('uiUpdateResult');
+            
+            if (typeof window.userManagement !== 'undefined') {
+                // 强制设置为未登录状态
+                window.userManagement.currentUser = null;
+                // 调用更新界面方法
+                window.userManagement.updateUserInterface();
+                resultDiv.innerHTML = '<span class="success">已强制调用updateUserInterface()，currentUser设为null</span>';
+            } else {
+                resultDiv.innerHTML = '<span class="error">userManagement模块未加载</span>';
+            }
+        }
+        
+        function simulateLoggedOut() {
+            const resultDiv = document.getElementById('simulateResult');
+            
+            // 清除localStorage
+            clearLocalStorage();
+            
+            // 如果userManagement存在，强制设置为未登录
+            if (typeof window.userManagement !== 'undefined') {
+                window.userManagement.currentUser = null;
+                window.userManagement.updateUserInterface();
+                resultDiv.innerHTML = '<span class="success">已模拟未登录状态</span>';
+            } else {
+                resultDiv.innerHTML = '<span class="info">已清除localStorage，但userManagement模块未加载</span>';
+            }
+            
+            // 刷新页面以测试
+            setTimeout(() => {
+                if (confirm('是否刷新页面以测试？')) {
+                    window.location.reload();
+                }
+            }, 1000);
+        }
+        
+        function checkDOMElements() {
+            const resultDiv = document.getElementById('domResult');
+            
+            // 检查userProfile元素
+            const userProfile = document.getElementById('userProfile');
+            if (userProfile) {
+                resultDiv.innerHTML = '<span class="info">userProfile元素存在</span>';
+                resultDiv.innerHTML += '<br>display样式: ' + userProfile.style.display;
+                resultDiv.innerHTML += '<br>实际可见性: ' + (userProfile.offsetParent !== null ? '可见' : '隐藏');
+                
+                // 检查内部内容
+                const innerHTML = userProfile.innerHTML;
+                resultDiv.innerHTML += '<br>内部内容: ' + (innerHTML.length > 100 ? innerHTML.substring(0, 100) + '...' : innerHTML);
+            } else {
+                resultDiv.innerHTML = '<span class="error">userProfile元素不存在</span>';
+            }
+            
+            // 检查登录按钮
+            const loginButtons = document.querySelectorAll('.navbar-buttons button');
+            resultDiv.innerHTML += '<br><br>登录按钮数量: ' + loginButtons.length;
+            loginButtons.forEach((button, index) => {
+                resultDiv.innerHTML += '<br>按钮 ' + index + ' display样式: ' + button.style.display;
+            });
+        }
+        
+        // 页面加载时自动检查
+        window.onload = function() {
+            console.log('测试页面已加载');
+            checkCurrentUser();
+            checkDOMElements();
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诊断问题</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .result {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 3px;
+            white-space: pre-wrap;
+        }
+        .btn {
+            padding: 8px 15px;
+            margin: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>诊断未登录时显示管理员账号的问题</h1>
+    
+    <div class="test-section">
+        <h2>1. 清除本地存储</h2>
+        <button class="btn" onclick="clearLocalStorage()">清除localStorage中的用户信息</button>
+        <div id="clearResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. 检查当前用户状态</h2>
+        <button class="btn" onclick="checkCurrentUser()">检查当前用户</button>
+        <div id="userResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. 检查用户资料区域</h2>
+        <button class="btn" onclick="checkUserProfile()">检查userProfile元素</button>
+        <div id="profileResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. 手动更新用户界面</h2>
+        <button class="btn" onclick="updateUI()">调用updateUserInterface</button>
+        <div id="updateResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>5. 完整诊断</h2>
+        <button class="btn" onclick="runFullDiagnostic()">运行完整诊断</button>
+        <div id="fullResult" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>用户资料预览</h2>
+        <div id="userProfilePreview" style="margin-top: 10px;">
+            <div class="user-menu" id="userProfile" style="display: none;">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName"></div>
+                    <div class="user-level" id="userLevel"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function clearLocalStorage() {
+            const resultDiv = document.getElementById('clearResult');
+            
+            try {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('users');
+                localStorage.removeItem('spyCacheBackup');
+                
+                resultDiv.innerHTML = '✅ 已清除以下localStorage项：<br>';
+                resultDiv.innerHTML += '- currentUser<br>';
+                resultDiv.innerHTML += '- users<br>';
+                resultDiv.innerHTML += '- spyCacheBackup<br>';
+                
+                // 重置当前用户
+                if (window.userManagement) {
+                    window.userManagement.currentUser = null;
+                    resultDiv.innerHTML += '✅ 已重置userManagement.currentUser为null<br>';
+                }
+                
+            } catch (error) {
+                resultDiv.innerHTML = '❌ 清除localStorage失败：' + error.message;
+            }
+        }
+        
+        function checkCurrentUser() {
+            const resultDiv = document.getElementById('userResult');
+            
+            resultDiv.innerHTML = '🔍 检查当前用户状态...<br>';
+            
+            if (window.userManagement) {
+                resultDiv.innerHTML += 'userManagement存在: ✅<br>';
+                resultDiv.innerHTML += 'currentUser: ' + JSON.stringify(window.userManagement.currentUser) + '<br>';
+                resultDiv.innerHTML += 'isInitialized: ' + window.userManagement.isInitialized + '<br>';
+            } else {
+                resultDiv.innerHTML += 'userManagement不存在: ❌<br>';
+            }
+            
+            resultDiv.innerHTML += 'localStorage.currentUser: ' + localStorage.getItem('currentUser') + '<br>';
+            resultDiv.innerHTML += 'localStorage.users: ' + localStorage.getItem('users') + '<br>';
+        }
+        
+        function checkUserProfile() {
+            const resultDiv = document.getElementById('profileResult');
+            const userProfile = document.getElementById('userProfile');
+            
+            resultDiv.innerHTML = '🔍 检查用户资料区域...<br>';
+            
+            if (userProfile) {
+                resultDiv.innerHTML += 'userProfile元素存在: ✅<br>';
+                resultDiv.innerHTML += 'display样式: ' + userProfile.style.display + '<br>';
+                resultDiv.innerHTML += '完整样式: ' + userProfile.style.cssText + '<br>';
+                resultDiv.innerHTML += '实际显示状态: ' + (userProfile.offsetParent !== null ? '可见' : '隐藏') + '<br>';
+            } else {
+                resultDiv.innerHTML += 'userProfile元素不存在: ❌<br>';
+            }
+        }
+        
+        function updateUI() {
+            const resultDiv = document.getElementById('updateResult');
+            
+            resultDiv.innerHTML = '🔄 调用updateUserInterface...<br>';
+            
+            if (window.userManagement && window.userManagement.updateUserInterface) {
+                try {
+                    window.userManagement.updateUserInterface();
+                    resultDiv.innerHTML += '✅ 调用成功<br>';
+                    
+                    // 检查更新后的状态
+                    const userProfile = document.getElementById('userProfile');
+                    if (userProfile) {
+                        resultDiv.innerHTML += '更新后display样式: ' + userProfile.style.display + '<br>';
+                        resultDiv.innerHTML += '更新后实际显示状态: ' + (userProfile.offsetParent !== null ? '可见' : '隐藏') + '<br>';
+                    }
+                } catch (error) {
+                    resultDiv.innerHTML += '❌ 调用失败: ' + error.message + '<br>';
+                }
+            } else {
+                resultDiv.innerHTML += '❌ updateUserInterface方法不存在<br>';
+            }
+        }
+        
+        function runFullDiagnostic() {
+            const resultDiv = document.getElementById('fullResult');
+            
+            resultDiv.innerHTML = '🔍 运行完整诊断...<br>';
+            
+            // 1. 清除所有用户数据
+            clearLocalStorage();
+            
+            // 2. 重置用户管理模块
+            if (window.userManagement) {
+                window.userManagement.currentUser = null;
+            }
+            
+            // 3. 检查初始状态
+            setTimeout(() => {
+                resultDiv.innerHTML += '<br>=== 初始状态检查 ===<br>';
+                resultDiv.innerHTML += 'localStorage.currentUser: ' + localStorage.getItem('currentUser') + '<br>';
+                resultDiv.innerHTML += 'userManagement.currentUser: ' + JSON.stringify(window.userManagement?.currentUser) + '<br>';
+                
+                // 4. 检查userProfile
+                const userProfile = document.getElementById('userProfile');
+                if (userProfile) {
+                    resultDiv.innerHTML += '初始userProfile.display: ' + userProfile.style.display + '<br>';
+                    resultDiv.innerHTML += '初始userProfile可见性: ' + (userProfile.offsetParent !== null ? '可见' : '隐藏') + '<br>';
+                }
+                
+                // 5. 调用updateUserInterface
+                if (window.userManagement?.updateUserInterface) {
+                    try {
+                        window.userManagement.updateUserInterface();
+                        resultDiv.innerHTML += '<br>=== 更新界面后 ===<br>';
+                        
+                        if (userProfile) {
+                            resultDiv.innerHTML += '更新后userProfile.display: ' + userProfile.style.display + '<br>';
+                            resultDiv.innerHTML += '更新后userProfile可见性: ' + (userProfile.offsetParent !== null ? '可见' : '隐藏') + '<br>';
+                        }
+                        
+                        resultDiv.innerHTML += '更新后currentUser: ' + JSON.stringify(window.userManagement.currentUser) + '<br>';
+                        
+                    } catch (error) {
+                        resultDiv.innerHTML += '❌ 更新界面失败: ' + error.message + '<br>';
+                    }
+                }
+                
+                // 6. 检查是否有其他代码修改currentUser
+                resultDiv.innerHTML += '<br>=== 最终检查 ===<br>';
+                resultDiv.innerHTML += 'localStorage.currentUser: ' + localStorage.getItem('currentUser') + '<br>';
+                resultDiv.innerHTML += 'userManagement.currentUser: ' + JSON.stringify(window.userManagement?.currentUser) + '<br>';
+                
+            }, 500);
+        }
+        
+        // 页面加载时自动运行检查
+        window.addEventListener('load', () => {
+            console.log('诊断页面加载完成');
+            checkCurrentUser();
+            checkUserProfile();
+        });
+    </script>
+</body>
+</html>

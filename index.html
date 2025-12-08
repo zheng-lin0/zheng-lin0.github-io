@@ -11,32 +11,32 @@
 </head>
 <body>
     <!-- 顶部导航栏 -->
-    <nav class="navbar navbar-modern">
+    <nav class="navbar">
         <div class="container">
             <div class="navbar-brand">
                 <i class="fas fa-cloud-download-alt logo-icon"></i>
                 <span class="logo-text">智能资源下载站</span>
             </div>
             
-            <button class="navbar-toggle" onclick="toggleNavMenu()" aria-label="切换菜单">
+            <button class="menu-toggle" onclick="toggleNavMenu()" aria-label="切换菜单">
                 <i class="fas fa-bars"></i>
             </button>
             
-            <div class="navbar-menu" id="navbarMenu">
-                <div class="navbar-search">
-                    <input type="text" placeholder="搜索资源..." class="search-input" id="resourceSearch">
-                    <button class="search-btn" onclick="searchResources()">
+            <div class="nav-menu" id="navbarMenu">
+                <div class="nav-search">
+                    <input type="text" placeholder="搜索资源..." class="nav-search-input" id="resourceSearch">
+                    <button class="nav-search-btn" onclick="searchResources()">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
                 
-                <ul class="navbar-links">
+                <ul class="nav-links">
                     <li><a href="#resources" class="nav-link"><i class="fas fa-database"></i> 资源库</a></li>
                     <li><a href="#browser" class="nav-link"><i class="fas fa-globe"></i> 在线浏览器</a></li>
                     <li><a href="#upload" class="nav-link"><i class="fas fa-upload"></i> 上传资源</a></li>
                 </ul>
                 
-                <div class="navbar-actions" id="userActions">
+                <div class="nav-actions" id="userActions">
                     <button class="btn btn-outline" onclick="openLoginModal()">
                         <i class="fas fa-sign-in-alt"></i> 登录
                     </button>
@@ -45,7 +45,7 @@
                     </button>
                 </div>
                 
-                <div class="navbar-user" id="userProfile" style="display: none;">
+                <div class="user-menu" id="userProfile" style="display: none;">
                     <div class="user-avatar">
                         <i class="fas fa-user-circle"></i>
                     </div>
@@ -56,10 +56,11 @@
                     <div class="user-dropdown">
                         <i class="fas fa-chevron-down"></i>
                         <div class="dropdown-menu">
-                            <a href="#userCenter"><i class="fas fa-user"></i> 个人中心</a>
-                            <a href="#settings"><i class="fas fa-cog"></i> 设置</a>
-                            <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
-                        </div>
+                        <a href="#userCenter"><i class="fas fa-user"></i> 个人中心</a>
+                        <a href="#favorites" onclick="showFavorites()"><i class="fas fa-heart"></i> 我的收藏</a>
+                        <a href="#settings"><i class="fas fa-cog"></i> 设置</a>
+                        <a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -119,6 +120,10 @@
             <div class="section-header">
                 <h2 class="section-title">资源库</h2>
                 <p class="section-subtitle">浏览和下载各类资源</p>
+            </div>
+            
+            <!-- 资源筛选与搜索区域 -->
+            <div class="resource-controls">
                 <div class="resource-filters">
                     <button class="filter-btn active" data-filter="all">全部资源</button>
                     <button class="filter-btn" data-filter="document">文档</button>
@@ -127,10 +132,77 @@
                     <button class="filter-btn" data-filter="software">软件</button>
                     <button class="filter-btn" data-filter="other">其他</button>
                 </div>
+                
+                <div class="resource-search-container">
+                    <input type="text" id="resourceSearch" placeholder="搜索资源、上传者或标签...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="resource-sort">
+                    <label for="sort">排序方式：</label>
+                    <div class="sort-options">
+                        <button class="sort-option active" data-sort="newest">
+                            <i class="fas fa-clock"></i> 最新上传
+                        </button>
+                        <button class="sort-option" data-sort="popular">
+                            <i class="fas fa-download"></i> 最多下载
+                        </button>
+                        <button class="sort-option" data-sort="oldest">
+                            <i class="fas fa-history"></i> 最早上传
+                        </button>
+                    </div>
+                </div>
             </div>
             
             <div class="resources-grid" id="resourcesGrid">
                 <!-- 资源卡片将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 收藏夹区域 -->
+    <section id="favorites" class="favorites-section" style="display: none;">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">我的收藏</h2>
+                <p class="section-subtitle">查看和管理您收藏的资源</p>
+            </div>
+            
+            <div class="favorites-controls">
+                <div class="favorites-search-container">
+                    <input type="text" id="favoritesSearch" placeholder="搜索收藏的资源...">
+                    <i class="fas fa-search"></i>
+                </div>
+                
+                <div class="favorites-sort">
+                    <label for="favoritesSort">排序方式：</label>
+                    <div class="sort-options">
+                        <button class="sort-option active" data-sort="newest">
+                            <i class="fas fa-clock"></i> 最新收藏
+                        </button>
+                        <button class="sort-option" data-sort="name">
+                            <i class="fas fa-sort-alpha-down"></i> 名称排序
+                        </button>
+                        <button class="sort-option" data-sort="date">
+                            <i class="fas fa-calendar"></i> 上传日期
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="favorites-empty" id="favoritesEmpty" style="display: block;">
+                <div class="empty-state">
+                    <i class="fas fa-heart-broken"></i>
+                    <h3>您还没有收藏任何资源</h3>
+                    <p>浏览资源库，点击心形图标收藏您感兴趣的资源</p>
+                    <button class="btn btn-primary" onclick="showResources()">
+                        <i class="fas fa-database"></i> 浏览资源库
+                    </button>
+                </div>
+            </div>
+            
+            <div class="resources-grid" id="favoritesGrid">
+                <!-- 收藏的资源卡片将通过JavaScript动态生成 -->
             </div>
         </div>
     </section>
@@ -409,23 +481,190 @@
             </div>
         </div>
     </div>
+    
+    <!-- 反馈模态框 -->
+    <div class="modal" id="feedbackModal">
+        <div class="modal-overlay" onclick="closeModal('feedbackModal')"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>用户反馈</h3>
+                <button class="modal-close" onclick="closeModal('feedbackModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="feedbackType">反馈类型</label>
+                        <select id="feedbackType" required>
+                            <option value="">请选择反馈类型</option>
+                            <option value="suggestion">功能建议</option>
+                            <option value="bug">问题报告</option>
+                            <option value="compliment">表扬鼓励</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="feedbackTitle">标题</label>
+                        <input type="text" id="feedbackTitle" required placeholder="请输入反馈标题">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="feedbackContent">详细内容</label>
+                        <textarea id="feedbackContent" rows="5" required placeholder="请详细描述您的反馈内容..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="feedbackContact">联系方式（可选）</label>
+                        <input type="text" id="feedbackContact" placeholder="邮箱或手机号，方便我们联系您">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox">
+                            <input type="checkbox" required> 我已阅读并同意<a href="#">隐私政策</a>
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('feedbackModal')">取消</button>
+                        <button type="submit" class="btn btn-primary">提交反馈</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- JavaScript引用 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js"></script>
+    <!-- 核心脚本同步加载 -->
     <script src="js/utils.js"></script>
     <script src="js/config.js"></script>
     <script src="js/modules/CoreFramework.js"></script>
-    <script src="js/modules/ModalSystem.js"></script>
-    <script src="js/modules/ThemeSystem.js"></script>
-    <script src="js/modules/NavigationSystem.js"></script>
-    <script src="js/modules/NotificationSystem.js"></script>
-    <script src="js/modules/UserManagement.js"></script>
-    <script src="js/modules/MembershipSystem.js"></script>
-    <script src="js/modules/BrowserSystem.js"></script>
-    <script src="js/modules/ResourceManager.js"></script>
-    <script src="js/modules/ResourceCenter.js"></script>
-    <script src="js/modules/AppCenter.js"></script>
-    <script src="js/modules/SearchSystem.js"></script>
     <script src="js/app.js"></script>
+    
+    <!-- 其他脚本延迟加载 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.1/dist/umd/supabase.min.js" defer></script>
+    <script src="js/modules/ModalSystem.js" defer></script>
+    <script src="js/modules/ThemeSystem.js" defer></script>
+    <script src="js/modules/NavigationSystem.js" defer></script>
+    <script src="js/modules/NotificationSystem.js" defer></script>
+    <script src="js/modules/UserManagement.js" defer></script>
+    <script src="js/modules/MembershipSystem.js" defer></script>
+    <script src="js/modules/BrowserSystem.js" defer></script>
+    <script src="js/modules/ResourceManager.js" defer></script>
+    <script src="js/modules/ResourceCenter.js" defer></script>
+    <script src="js/modules/SearchSystem.js" defer></script>
+    
+    <!-- 未登录状态修复脚本 -->
+    <script>
+        // 页面完全加载后执行修复逻辑
+        window.addEventListener('load', function() {
+            // 确保在所有模块加载完成后执行
+            setTimeout(function() {
+                try {
+                    // 清除localStorage中的用户信息（确保未登录状态）
+                    localStorage.removeItem('currentUser');
+                    
+                    // 如果userManagement模块存在，强制设置为未登录状态并更新UI
+                    if (typeof window.userManagement !== 'undefined') {
+                        window.userManagement.currentUser = null;
+                        window.userManagement.updateUserInterface();
+                        console.log('已强制设置为未登录状态并更新UI');
+                    } else {
+                        console.warn('userManagement模块未加载，使用DOM直接修复');
+                        // 直接操作DOM修复
+                        const userProfile = document.getElementById('userProfile');
+                        const loginElements = document.querySelectorAll('.navbar-buttons button');
+                        
+                        if (userProfile) {
+                            userProfile.style.display = 'none';
+                            console.log('已隐藏用户资料');
+                        }
+                        
+                        if (loginElements) {
+                            loginElements.forEach(button => {
+                                button.style.display = 'block';
+                            });
+                            console.log('已显示登录/注册按钮');
+                        }
+                    }
+                } catch (error) {
+                    console.error('未登录状态修复失败:', error);
+                }
+            }, 1000); // 1秒延迟确保所有模块加载完成
+        });
+    </script>
+    
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="logo">
+                        <i class="fas fa-cloud-download-alt logo-icon"></i>
+                        <span class="logo-text">智能资源下载站</span>
+                    </div>
+                    <p class="footer-description">
+                        专业的资源分享平台，为用户提供高质量的资源下载和分享服务
+                    </p>
+                    <div class="footer-social">
+                        <a href="#" class="social-link" aria-label="微信">
+                            <i class="fab fa-weixin"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="微博">
+                            <i class="fab fa-weibo"></i>
+                        </a>
+                        <a href="#" class="social-link" aria-label="GitHub">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>快速导航</h4>
+                    <ul>
+                        <li><a href="#resources">资源库</a></li>
+                        <li><a href="#browser">在线浏览器</a></li>
+                        <li><a href="#upload">上传资源</a></li>
+                        <li><a href="#userCenter">个人中心</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>关于我们</h4>
+                    <ul>
+                        <li><a href="#">网站介绍</a></li>
+                        <li><a href="#">团队成员</a></li>
+                        <li><a href="#">联系我们</a></li>
+                        <li><a href="#">加入我们</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links">
+                    <h4>帮助中心</h4>
+                    <ul>
+                        <li><a href="#">使用指南</a></li>
+                        <li><a href="#">常见问题</a></li>
+                        <li><a href="#">用户协议</a></li>
+                        <li><a href="#">隐私政策</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>&copy; 2025 智能资源下载站. 保留所有权利.</p>
+                </div>
+                <div class="footer-legal">
+                    <a href="#">ICP备案号: 1234567890号</a>
+                </div>
+                <div class="footer-feedback">
+                    <button class="btn btn-outline-light btn-sm" onclick="openFeedbackModal()">
+                        <i class="fas fa-comment-dots"></i> 用户反馈
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>

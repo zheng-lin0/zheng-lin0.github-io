@@ -3,6 +3,7 @@ class ResourceManager {
         this.resources = JSON.parse(localStorage.getItem('resources')) || [];
         this.currentUser = null;
         this.userManagement = null;
+        this.currentSortOption = 'newest'; // 默认按最新上传排序
         this.init();
     }
 
@@ -11,11 +12,13 @@ class ResourceManager {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 this.setupEventListeners();
+                this.setupResourceEventDelegation(); // 设置资源卡片事件委托
                 this.loadResources();
                 this.initializeUserSystem();
             });
         } else {
             this.setupEventListeners();
+            this.setupResourceEventDelegation(); // 设置资源卡片事件委托
             this.loadResources();
             this.initializeUserSystem();
         }
@@ -84,6 +87,21 @@ class ResourceManager {
         document.addEventListener('userManagementInitialized', () => {
             this.initializeUserSystem();
         });
+
+        // 资源排序事件监听
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                const sortOption = e.currentTarget.dataset.sort;
+                this.setResourceSort(sortOption);
+                
+                // 更新排序选项状态
+                document.querySelectorAll('.sort-option').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                e.currentTarget.classList.add('active');
+            });
+        });
     }
 
     // 加载资源列表
@@ -96,8 +114,24 @@ class ResourceManager {
             return;
         }
 
-        resourcesGrid.innerHTML = this.resources.map(resource => this.createResourceCard(resource)).join('');
+        // 使用文档片段来减少DOM操作次数
+        const fragment = document.createDocumentFragment();
+        this.resources.forEach(resource => {
+            const cardElement = this.createResourceCardElement(resource);
+            fragment.appendChild(cardElement);
+        });
+        
+        resourcesGrid.innerHTML = '';
+        resourcesGrid.appendChild(fragment);
         this.attachResourceCardListeners();
+    }
+
+    // 创建资源卡片元素
+    createResourceCardElement(resource) {
+        const cardHTML = this.createResourceCard(resource);
+        const div = document.createElement('div');
+        div.innerHTML = cardHTML.trim();
+        return div.firstChild;
     }
 
     // 创建资源卡片
@@ -114,19 +148,55 @@ class ResourceManager {
             return icons[type] || icons.other;
         };
 
+        // 创建资源预览HTML
+        const createResourcePreview = (resource) => {
+            switch(resource.type) {
+                case 'document':
+                    return `<div class="resource-preview document-preview">
+                                <i class="fas ${getResourceIcon(resource.type)}"></i>
+                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')">
+                                    <i class="fas fa-eye"></i> 预览
+                                </button>
+                            </div>`;
+                case 'video':
+                    return `<div class="resource-preview video-preview">
+                                <i class="fas ${getResourceIcon(resource.type)}"></i>
+                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')">
+                                    <i class="fas fa-play-circle"></i> 播放预览
+                                </button>
+                            </div>`;
+                case 'audio':
+                    return `<div class="resource-preview audio-preview">
+                                <i class="fas ${getResourceIcon(resource.type)}"></i>
+                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')">
+                                    <i class="fas fa-play"></i> 试听
+                                </button>
+                            </div>`;
+                default:
+                    return `<div class="resource-preview">
+                                <i class="fas ${getResourceIcon(resource.type)}"></i>
+                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')" disabled>
+                                    <i class="fas fa-eye-slash"></i> 不可预览
+                                </button>
+                            </div>`;
+            }
+        };
+
         return `
             <div class="resource-card" data-id="${resource.id}">
-                <div class="resource-icon ${resource.type}">
-                    <i class="fas ${getResourceIcon(resource.type)}"></i>
+                <div class="resource-thumbnail">
+                    ${createResourcePreview(resource)}
                 </div>
                 <div class="resource-content">
+                    <div class="resource-category">${this.getResourceTypeName(resource.type)}</div>
                     <h3 class="resource-title">${resource.title}</h3>
                     <p class="resource-description">${resource.description}</p>
                     <div class="resource-meta">
-                        <span class="resource-type">${this.getResourceTypeName(resource.type)}</span>
                         <span class="resource-uploader">上传者: ${resource.uploader}</span>
-                        <span class="resource-date">上传于: ${new Date(resource.uploadDate).toLocaleDateString()}</span>
-                        <span class="resource-downloads">下载: ${resource.downloads || 0}次</span>
+                        <span class="resource-date">${new Date(resource.uploadDate).toLocaleDateString()}</span>
+                        <span class="resource-downloads">
+                            <i class="fas fa-download"></i> ${resource.downloads || 0}
+                        </span>
                     </div>
                     <div class="resource-actions">
                         <button class="btn btn-sm btn-primary download-btn" onclick="resourceManager.downloadResource('${resource.id}')">
@@ -158,34 +228,144 @@ class ResourceManager {
         return typeNames[type] || typeNames.other;
     }
 
-    // 附加资源卡片事件监听器
-    attachResourceCardListeners() {
-        // 下载按钮事件
-        document.querySelectorAll('.download-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const resourceId = e.currentTarget.closest('.resource-card').dataset.id;
+    // 设置资源卡片事件委托
+    setupResourceEventDelegation() {
+        const resourcesGrid = document.getElementById('resourcesGrid');
+        if (!resourcesGrid) return;
+
+        // 使用事件委托处理所有资源卡片按钮的点击事件
+        resourcesGrid.addEventListener('click', (e) => {
+            // 阻止事件冒泡到卡片元素
+            e.stopPropagation();
+            
+            const target = e.target;
+            const resourceCard = target.closest('.resource-card');
+            
+            if (!resourceCard) return;
+            
+            const resourceId = resourceCard.dataset.id;
+            
+            if (target.closest('.download-btn')) {
                 this.downloadResource(resourceId);
-            });
-        });
-
-        // 详情按钮事件
-        document.querySelectorAll('.detail-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const resourceId = e.currentTarget.closest('.resource-card').dataset.id;
+            } else if (target.closest('.detail-btn')) {
                 this.showResourceDetails(resourceId);
-            });
-        });
-
-        // 删除按钮事件
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const resourceId = e.currentTarget.closest('.resource-card').dataset.id;
+            } else if (target.closest('.delete-btn')) {
                 this.deleteResource(resourceId);
-            });
+            } else if (target.closest('.preview-btn')) {
+                this.previewResource(resourceId);
+            }
         });
+    }
+
+    // 附加资源卡片事件监听器（兼容旧代码，实际不再需要）
+    attachResourceCardListeners() {
+        // 由于使用了事件委托，此方法现在是空的
+        // 保留以确保向后兼容
+    }
+
+    // 资源预览功能
+    previewResource(resourceId) {
+        const resource = this.resources.find(r => r.id === resourceId);
+        if (!resource) return;
+
+        // 显示预览模态框
+        this.showPreviewModal(resource);
+    }
+
+    // 显示预览模态框
+    showPreviewModal(resource) {
+        const modalContent = `
+            <div class="preview-modal-content">
+                <div class="preview-header">
+                    <h3>${resource.title}</h3>
+                    <button class="close-btn" onclick="resourceManager.closePreviewModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="preview-body">
+                    <div class="resource-preview-content">
+                        ${this.generatePreviewContent(resource)}
+                    </div>
+                    <div class="preview-info">
+                        <h4>资源信息</h4>
+                        <ul>
+                            <li><strong>类型:</strong> ${this.getResourceTypeName(resource.type)}</li>
+                            <li><strong>上传者:</strong> ${resource.uploader}</li>
+                            <li><strong>上传时间:</strong> ${new Date(resource.uploadDate).toLocaleDateString()}</li>
+                            <li><strong>下载次数:</strong> ${resource.downloads || 0}</li>
+                            <li><strong>描述:</strong> ${resource.description}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <button class="btn btn-primary" onclick="resourceManager.downloadResource('${resource.id}')">
+                        <i class="fas fa-download"></i> 下载
+                    </button>
+                    <button class="btn btn-secondary" onclick="resourceManager.closePreviewModal()">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // 创建模态框元素
+        const modal = document.createElement('div');
+        modal.id = 'previewModal';
+        modal.className = 'modal preview-modal';
+        modal.innerHTML = modalContent;
+
+        // 添加到文档中
+        document.body.appendChild(modal);
+
+        // 显示模态框
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    // 生成预览内容
+    generatePreviewContent(resource) {
+        switch(resource.type) {
+            case 'document':
+                return `<div class="document-preview-content">
+                            <i class="fas fa-file-alt fa-5x"></i>
+                            <p>文档预览功能开发中...</p>
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 直接下载
+                            </button>
+                        </div>`;
+            case 'video':
+                return `<div class="video-preview-content">
+                            <i class="fas fa-file-video fa-5x"></i>
+                            <p>视频预览功能开发中...</p>
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 直接下载
+                            </button>
+                        </div>`;
+            case 'audio':
+                return `<div class="audio-preview-content">
+                            <i class="fas fa-file-audio fa-5x"></i>
+                            <p>音频预览功能开发中...</p>
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 直接下载
+                            </button>
+                        </div>`;
+            default:
+                return `<div class="generic-preview-content">
+                            <i class="fas fa-file fa-5x"></i>
+                            <p>该类型资源不支持预览</p>
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 直接下载
+                            </button>
+                        </div>`;
+        }
+    }
+
+    // 关闭预览模态框
+    closePreviewModal() {
+        const modal = document.getElementById('previewModal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+        }
     }
 
     // 上传资源
@@ -288,10 +468,23 @@ class ResourceManager {
         // 增加下载次数
         resource.downloads = (resource.downloads || 0) + 1;
         this.saveResources();
-        this.loadResources();
+
+        // 更新特定资源卡片的下载次数，避免重新渲染整个列表
+        this.updateResourceDownloadCount(resourceId, resource.downloads);
 
         // 打开下载链接
         window.open(resource.link, '_blank');
+    }
+
+    // 更新资源下载次数显示
+    updateResourceDownloadCount(resourceId, count) {
+        const card = document.querySelector(`[data-id="${resourceId}"]`);
+        if (card) {
+            const downloadCountElement = card.querySelector('.resource-downloads');
+            if (downloadCountElement) {
+                downloadCountElement.innerHTML = `<i class="fas fa-download"></i> ${count}`;
+            }
+        }
     }
 
     // 显示资源详情
@@ -354,33 +547,73 @@ class ResourceManager {
         if (confirm('确定要删除此资源吗？')) {
             this.resources = this.resources.filter(r => r.id !== resourceId);
             this.saveResources();
-            this.loadResources();
+            
+            // 从DOM中移除资源卡片，避免重新渲染整个列表
+            const card = document.querySelector(`[data-id="${resourceId}"]`);
+            if (card) {
+                card.remove();
+                
+                // 检查是否还有资源，如果没有，显示空状态
+                if (this.resources.length === 0) {
+                    const resourcesGrid = document.getElementById('resourcesGrid');
+                    if (resourcesGrid) {
+                        resourcesGrid.innerHTML = '<div class="no-resources">暂无资源，请先上传资源</div>';
+                    }
+                }
+            }
+            
             alert('资源删除成功');
         }
     }
 
     // 搜索资源
     searchResources(query) {
-        if (!query.trim()) {
-            this.loadResources();
-            return;
+        let filteredResources = this.resources;
+        const activeFilter = document.querySelector('.filter-btn.active');
+        const filterType = activeFilter ? activeFilter.dataset.filter : 'all';
+
+        // 应用搜索过滤
+        if (query.trim()) {
+            const searchTerm = query.toLowerCase();
+            filteredResources = filteredResources.filter(resource => 
+                resource.title.toLowerCase().includes(searchTerm) ||
+                resource.description.toLowerCase().includes(searchTerm) ||
+                resource.uploader.toLowerCase().includes(searchTerm) ||
+                resource.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
         }
 
-        const filteredResources = this.resources.filter(resource => 
-            resource.title.toLowerCase().includes(query.toLowerCase()) ||
-            resource.description.toLowerCase().includes(query.toLowerCase()) ||
-            resource.tags.some(tag => tag.toLowerCase().includes(query.toLowerCase()))
-        );
+        // 应用类型过滤
+        if (filterType !== 'all') {
+            filteredResources = filteredResources.filter(resource => resource.type === filterType);
+        }
+
+        // 应用排序
+        filteredResources = this.sortResources(filteredResources, this.currentSortOption);
 
         const resourcesGrid = document.getElementById('resourcesGrid');
         if (!resourcesGrid) return;
 
         if (filteredResources.length === 0) {
-            resourcesGrid.innerHTML = '<div class="no-resources">未找到匹配的资源</div>';
+            resourcesGrid.innerHTML = `
+                <div class="no-resources">
+                    <i class="fas fa-search fa-4x"></i>
+                    <h3>未找到匹配的资源</h3>
+                    <p>请尝试调整搜索条件或过滤选项</p>
+                </div>
+            `;
             return;
         }
 
-        resourcesGrid.innerHTML = filteredResources.map(resource => this.createResourceCard(resource)).join('');
+        // 使用文档片段来减少DOM操作次数
+        const fragment = document.createDocumentFragment();
+        filteredResources.forEach(resource => {
+            const cardElement = this.createResourceCardElement(resource);
+            fragment.appendChild(cardElement);
+        });
+        
+        resourcesGrid.innerHTML = '';
+        resourcesGrid.appendChild(fragment);
         this.attachResourceCardListeners();
     }
 
@@ -390,21 +623,88 @@ class ResourceManager {
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.querySelector(`[data-filter="${type}"]`).classList.add('active');
-
-        const filteredResources = type === 'all' 
-            ? this.resources 
-            : this.resources.filter(resource => resource.type === type);
-
-        const resourcesGrid = document.getElementById('resourcesGrid');
-        if (!resourcesGrid) return;
-
-        if (filteredResources.length === 0) {
-            resourcesGrid.innerHTML = '<div class="no-resources">未找到该类型的资源</div>';
-            return;
+        const activeBtn = document.querySelector(`[data-filter="${type}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
         }
 
-        resourcesGrid.innerHTML = filteredResources.map(resource => this.createResourceCard(resource)).join('');
+        const searchQuery = document.getElementById('resourceSearch')?.value || '';
+        this.searchResources(searchQuery);
+    }
+
+    // 排序资源
+    sortResources(resources, sortOption) {
+        const sorted = [...resources];
+        switch (sortOption) {
+            case 'newest':
+                return sorted.sort((a, b) => b.uploadDate - a.uploadDate);
+            case 'oldest':
+                return sorted.sort((a, b) => a.uploadDate - b.uploadDate);
+            case 'popular':
+                return sorted.sort((a, b) => (b.downloads || 0) - (a.downloads || 0));
+            default:
+                return sorted.sort((a, b) => b.uploadDate - a.uploadDate);
+        }
+    }
+
+    // 设置资源排序
+    setResourceSort(sortOption) {
+        this.currentSortOption = sortOption;
+        
+        // 更新排序按钮状态
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        const activeOption = document.querySelector(`[data-sort="${sortOption}"]`);
+        if (activeOption) {
+            activeOption.classList.add('active');
+        }
+        
+        // 直接重新排序当前显示的资源，避免不必要的搜索和过滤
+        const resourcesGrid = document.getElementById('resourcesGrid');
+        if (!resourcesGrid) return;
+        
+        // 获取当前搜索查询和筛选条件
+        const searchQuery = document.getElementById('resourceSearch')?.value || '';
+        const activeFilter = document.querySelector('.filter-btn.active');
+        const filterType = activeFilter ? activeFilter.dataset.filter : 'all';
+        
+        // 重新应用所有条件
+        let filteredResources = this.resources;
+        
+        // 应用搜索过滤
+        if (searchQuery.trim()) {
+            const searchTerm = searchQuery.toLowerCase();
+            filteredResources = filteredResources.filter(resource => 
+                resource.title.toLowerCase().includes(searchTerm) ||
+                resource.description.toLowerCase().includes(searchTerm) ||
+                resource.uploader.toLowerCase().includes(searchTerm) ||
+                resource.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+            );
+        }
+        
+        // 应用类型过滤
+        if (filterType !== 'all') {
+            filteredResources = filteredResources.filter(resource => resource.type === filterType);
+        }
+        
+        // 应用排序
+        filteredResources = this.sortResources(filteredResources, sortOption);
+        
+        if (filteredResources.length === 0) {
+            resourcesGrid.innerHTML = '<div class="no-resources">未找到匹配的资源</div>';
+            return;
+        }
+        
+        // 使用文档片段来减少DOM操作次数
+        const fragment = document.createDocumentFragment();
+        filteredResources.forEach(resource => {
+            const cardElement = this.createResourceCardElement(resource);
+            fragment.appendChild(cardElement);
+        });
+        
+        resourcesGrid.innerHTML = '';
+        resourcesGrid.appendChild(fragment);
         this.attachResourceCardListeners();
     }
 
@@ -514,9 +814,15 @@ class ResourceManager {
         return speedMultiplierMap[userLevel] || 1;
     }
 
-    // 保存资源到本地存储
+    // 保存资源到本地存储（带防抖处理）
     saveResources() {
-        localStorage.setItem('resources', JSON.stringify(this.resources));
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        this.saveTimeout = setTimeout(() => {
+            localStorage.setItem('resources', JSON.stringify(this.resources));
+            this.saveTimeout = null;
+        }, 100); // 100ms防抖
     }
 
     // 验证URL格式

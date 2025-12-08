@@ -96,6 +96,13 @@ function initializeModules() {
             console.warn('browserSystem模块未加载');
         }
         
+        // 初始化反馈表单
+        if (typeof utils !== 'undefined' && utils.initFeedbackForm) {
+            utils.initFeedbackForm();
+        } else {
+            console.warn('utils模块未加载或initFeedbackForm方法不存在');
+        }
+        
         console.log('所有功能模块已初始化');
     } catch (error) {
         console.error('模块初始化失败:', error);
@@ -105,6 +112,24 @@ function initializeModules() {
         }
     }
 }
+
+// 全局函数：显示收藏夹
+window.showFavorites = function() {
+    if (typeof resourceCenter !== 'undefined') {
+        resourceCenter.showFavorites();
+    } else {
+        console.error('resourceCenter模块未加载');
+    }
+};
+
+// 全局函数：显示资源库
+window.showResources = function() {
+    if (typeof resourceCenter !== 'undefined') {
+        resourceCenter.showResources();
+    } else {
+        console.error('resourceCenter模块未加载');
+    }
+};
 
 // 工具函数已移至 utils.js 模块
 // window.utils 由 utils.js 提供

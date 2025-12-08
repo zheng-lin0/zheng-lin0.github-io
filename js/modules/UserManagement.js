@@ -604,6 +604,9 @@ class UserManagement {
      * @private
      */
     async loadCurrentUser() {
+        // 首先确保currentUser为null
+        this.currentUser = null;
+        
         if (this.supabase) {
             try {
                 // 从Supabase获取当前会话用户
@@ -622,18 +625,17 @@ class UserManagement {
                         localStorage.setItem('currentUser', JSON.stringify(userProfile));
                     }
                 } else {
-                    // Supabase Auth未找到用户，但仍需检查localStorage作为回退
-                    const storedUser = localStorage.getItem('currentUser');
-                    if (storedUser) {
-                        this.currentUser = JSON.parse(storedUser);
-                    }
+                    // Supabase Auth未找到用户，清除localStorage中的用户信息
+                    localStorage.removeItem('currentUser');
                 }
             } catch (error) {
                 console.error('加载当前用户失败:', error);
-                // 回退到localStorage
+                // 回退到localStorage，但如果没有用户信息，保持currentUser为null
                 const storedUser = localStorage.getItem('currentUser');
                 if (storedUser) {
                     this.currentUser = JSON.parse(storedUser);
+                } else {
+                    this.currentUser = null;
                 }
             }
         } else {
@@ -641,6 +643,8 @@ class UserManagement {
             const storedUser = localStorage.getItem('currentUser');
             if (storedUser) {
                 this.currentUser = JSON.parse(storedUser);
+            } else {
+                this.currentUser = null;
             }
         }
     }
@@ -787,15 +791,20 @@ class UserManagement {
             // 用户未登录
             console.log('用户未登录，更新界面以显示登录选项');
             
-            if (userNavItem) {
-                userNavItem.style.display = 'none';
-                console.log('隐藏用户导航项');
+            if (userProfile) {
+                userProfile.style.display = 'none';
+                console.log('隐藏用户资料');
             }
             
-            if (loginButton) {
-                loginButton.style.display = 'block';
-                console.log('显示登录按钮');
+            if (userNavItem) {
+                userNavItem.style.display = 'flex';
+                console.log('显示登录/注册按钮');
             }
+            
+            // 显示所有登录/注册按钮
+            loginElements.forEach(button => {
+                button.style.display = 'block';
+            });
             
             // 显示导航栏中的登录链接（安全的DOM元素查找）
             const loginNavLinkElement = document.querySelector('.nav-link i.fas.fa-sign-in-alt');
