@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统诊断测试</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button { margin: 5px; padding: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>系统诊断测试</h1>
+    <div id="test-results"></div>
+    
+    <!-- 引入必要的JavaScript文件 -->
+    <script src="js/utils.js"></script>
+    <script src="js/modules/CoreFramework.js"></script>
+    <script src="js/modules/ModalSystem.js"></script>
+    <script src="js/modules/NotificationSystem.js"></script>
+    <script src="js/modules/NavigationSystem.js"></script>
+    <script src="js/modules/SearchSystem.js"></script>
+    <script src="js/modules/ThemeSystem.js"></script>
+    <script src="js/modules/UserManagement.js"></script>
+    <script src="js/modules/MembershipSystem.js"></script>
+    <script src="js/modules/ToolManager.js"></script>
+    <script src="js/modules/ResourceManager.js"></script>
+    <script src="js/modules/ResourceCenter.js"></script>
+    <script src="js/app.js"></script>
+    
+    <script>
+        // 诊断测试脚本
+        const testResults = document.getElementById('test-results');
+        
+        function addTestResult(testName, status, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${status}`;
+            div.innerHTML = `<strong>${testName}:</strong> ${message}`;
+            testResults.appendChild(div);
+        }
+        
+        // 测试模块加载
+        function testModuleLoading() {
+            addTestResult('页面加载完成', 'info', '开始系统诊断...');
+            
+            // 测试CoreFramework
+            setTimeout(() => {
+                if (window.coreFramework) {
+                    addTestResult('CoreFramework模块', 'pass', '成功加载');
+                } else {
+                    addTestResult('CoreFramework模块', 'fail', '加载失败');
+                }
+                
+                // 测试ToolManager
+                if (window.toolManager) {
+                    addTestResult('ToolManager模块', 'pass', '成功加载');
+                } else {
+                    addTestResult('ToolManager模块', 'fail', '加载失败');
+                }
+                
+                // 测试ResourceManager
+                if (window.resourceManager) {
+                    addTestResult('ResourceManager模块', 'pass', '成功加载');
+                } else {
+                    addTestResult('ResourceManager模块', 'fail', '加载失败');
+                }
+                
+                // 测试ResourceCenter
+                if (window.resourceCenter) {
+                    addTestResult('ResourceCenter模块', 'pass', '成功加载');
+                } else {
+                    addTestResult('ResourceCenter模块', 'fail', '加载失败');
+                }
+                
+                // 测试UserManagement
+                if (window.userManagement) {
+                    addTestResult('UserManagement模块', 'pass', '成功加载');
+                } else {
+                    addTestResult('UserManagement模块', 'fail', '加载失败');
+                }
+                
+            }, 1000);
+        }
+        
+        // 测试模块初始化
+        function testModuleInitialization() {
+            setTimeout(() => {
+                try {
+                    if (window.toolManager && window.toolManager.initialize) {
+                        window.toolManager.initialize();
+                        addTestResult('ToolManager初始化', 'pass', '成功执行');
+                    }
+                    
+                    if (window.resourceManager && window.resourceManager.initialize) {
+                        window.resourceManager.initialize();
+                        addTestResult('ResourceManager初始化', 'pass', '成功执行');
+                    }
+                    
+                    if (window.resourceCenter && window.resourceCenter.initialize) {
+                        window.resourceCenter.initialize();
+                        addTestResult('ResourceCenter初始化', 'pass', '成功执行');
+                    }
+                    
+                    if (window.userManagement && window.userManagement.initialize) {
+                        window.userManagement.initialize();
+                        addTestResult('UserManagement初始化', 'pass', '成功执行');
+                    }
+                } catch (error) {
+                    addTestResult('模块初始化', 'fail', `错误: ${error.message}`);
+                }
+            }, 2000);
+        }
+        
+        // 页面加载完成后执行测试
+        window.addEventListener('load', () => {
+            // 捕获全局错误
+            window.addEventListener('error', (event) => {
+                addTestResult('JavaScript错误', 'fail', `错误: ${event.message} 在 ${event.filename}:${event.lineno}`);
+            });
+            
+            // 执行测试
+            testModuleLoading();
+            testModuleInitialization();
+        });
+    </script>
+</body>
+</html>

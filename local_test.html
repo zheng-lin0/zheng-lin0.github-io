@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地修复验证测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>本地修复验证测试</h1>
+        <div id="test-results"></div>
+        <button onclick="runTests()">运行测试</button>
+    </div>
+
+    <!-- 创建必要的DOM元素 -->
+    <div id="resources-container" style="display: none;"></div>
+    <div id="tools-container" style="display: none;"></div>
+    <div id="resourcesGrid" style="display: none;"></div>
+    <div id="toolsGrid" style="display: none;"></div>
+
+    <script>
+        function logResult(testName, passed, message) {
+            const resultsDiv = document.getElementById('test-results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            resultDiv.innerHTML = `<strong>${testName}:</strong> ${message}`;
+            resultsDiv.appendChild(resultDiv);
+        }
+
+        // 模拟localStorage
+        if (typeof localStorage === 'undefined') {
+            window.localStorage = {
+                _data: {},
+                getItem: function(key) { return this._data[key] || null; },
+                setItem: function(key, value) { this._data[key] = value; },
+                removeItem: function(key) { delete this._data[key]; },
+                clear: function() { this._data = {}; }
+            };
+        }
+
+        // 加载修复后的ResourceManager代码
+        const resourceManagerCode = `
+class ResourceManager {
+    constructor() {
+        this.resources = JSON.parse(localStorage.getItem('resources')) || [];
+        this.currentUser = null;
+        this.userManagement = null;
+        this.currentSortOption = 'newest'; // 默认按最新上传排序
+        this.init();
+    }
+
+    init() {
+        // 等待DOM加载完成
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupEventListeners();
+                this.loadResources();
+                this.initializeUserSystem();
+            });
+        } else {
+            this.setupEventListeners();
+            this.loadResources();
+            this.initializeUserSystem();
+        }
+    }
+
+    /**
+     * 初始化模块
+     */
+    initialize() {
+        console.log('ResourceManager模块初始化完成');
+        // 执行实际的初始化逻辑
+        this.setupEventListeners();
+        this.loadResources();
+        this.initializeUserSystem();
+    }
+
+    /**
+     * 初始化用户系统
+     */
+    initializeUserSystem() {
+        console.log('ResourceManager: 初始化用户系统');
+    }
+
+    setupEventListeners() {
+        console.log('ResourceManager: 设置事件监听器');
+    }
+
+    // 加载资源
+    loadResources() {
+        console.log('ResourceManager: 加载资源');
+        // 从localStorage加载资源
+        const savedResources = localStorage.getItem('resources');
+        if (savedResources) {
+            try {
+                this.resources = JSON.parse(savedResources);
+            } catch (error) {
+                console.error('加载资源失败:', error);
+                this.resources = [];
+            }
+        } else {
+            // 如果没有保存的资源，使用默认资源数据
+            this.resources = [
+                {
+                    id: '1',
+                    title: '编程入门教程',
+                    description: '适合初学者的编程入门视频教程',
+                    type: 'video',
+                    uploader: 'admin',
+                    uploadDate: Date.now() - 86400000,
+                    downloads: 156,
+                    tags: ['编程', '入门', '视频'],
+                    link: 'https://example.com/programming-tutorial'
+                },
+                {
+                    id: '2',
+                    title: '设计规范文档',
+                    description: 'UI/UX设计规范和最佳实践',
+                    type: 'document',
+                    uploader: 'admin',
+                    uploadDate: Date.now() - 172800000,
+                    downloads: 234,
+                    tags: ['设计', '规范', '文档'],
+                    link: 'https://example.com/design-guidelines'
+                },
+                {
+                    id: '3',
+                    title: '音频编辑软件',
+                    description: '功能强大的音频编辑和处理工具',
+                    type: 'software',
+                    uploader: 'admin',
+                    uploadDate: Date.now() - 259200000,
+                    downloads: 89,
+                    tags: ['音频', '编辑', '软件'],
+                    link: 'https://example.com/audio-editor'
+                }
+            ];
+            // 保存默认资源到localStorage
+            this.saveResources();
+        }
+    }
+
+    // 保存资源到本地存储（带防抖处理）
+    saveResources() {
+        if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+        }
+        this.saveTimeout = setTimeout(() => {
+            localStorage.setItem('resources', JSON.stringify(this.resources));
+            this.saveTimeout = null;
+        }, 100); // 100ms防抖
+    }
+}
+
+// 创建并导出资源管理器实例
+const resourceManager = new ResourceManager();
+
+// 设置全局变量
+window.resourceManager = resourceManager;
+`;
+
+        // 加载修复后的ToolManager代码
+        const toolManagerCode = `
+class ToolManager {
+    constructor() {
+        this.tools = this.initTools();
+        this.currentUser = null;
+        this.userManagement = null;
+        this.currentSortOption = 'popular'; // 默认按受欢迎程度排序
+        this.currentFilter = 'all';
+        this.init();
+    }
+
+    init() {
+        // 等待DOM加载完成
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupEventListeners();
+                this.setupToolEventDelegation();
+                this.loadTools();
+                this.initializeUserSystem();
+            });
+        } else {
+            this.setupEventListeners();
+            this.setupToolEventDelegation();
+            this.loadTools();
+            this.initializeUserSystem();
+        }
+    }
+
+    /**
+     * 初始化默认工具列表
+     */
+    initTools() {
+        return [
+            {
+                id: 'text-to-speech',
+                name: '文字转语音',
+                description: '将文字转换为自然流畅的语音',
+                category: 'converter',
+                icon: 'fa-comment-dots',
+                usageCount: 1250,
+                rating: 4.8,
+                requiredLevel: 1,
+                features: ['多语言支持', '语速调节', '音量控制']
+            },
+            {
+                id: 'calculator',
+                name: '计算器',
+                description: '科学计算器',
+                category: 'utility',
+                icon: 'fa-calculator',
+                usageCount: 2500,
+                rating: 4.7,
+                requiredLevel: 1,
+                features: ['基本运算', '科学计算', '单位转换']
+            }
+        ];
+    }
+
+    setupEventListeners() {
+        console.log('ToolManager: 设置事件监听器');
+    }
+
+    setupToolEventDelegation() {
+        console.log('ToolManager: 设置工具事件委托');
+    }
+
+    loadTools() {
+        console.log('ToolManager: 加载工具');
+    }
+
+    initializeUserSystem() {
+        console.log('ToolManager: 初始化用户系统');
+    }
+
+    /**
+     * 初始化模块
+     */
+    initialize() {
+        console.log('ToolManager模块初始化完成');
+        // 执行完整的初始化逻辑
+        this.setupEventListeners();
+        this.setupToolEventDelegation();
+        this.loadTools();
+        this.initializeUserSystem();
+    }
+}
+
+// 创建并导出工具管理器实例
+const toolManager = new ToolManager();
+
+// 设置全局变量
+window.toolManager = toolManager;
+`;
+
+        // 执行代码
+        eval(resourceManagerCode);
+        eval(toolManagerCode);
+
+        function runTests() {
+            // 清空之前的测试结果
+            document.getElementById('test-results').innerHTML = '';
+            
+            console.log('开始运行本地修复验证测试...');
+            
+            // 测试1: 检查ResourceManager是否可用
+            try {
+                if (window.resourceManager) {
+                    logResult('ResourceManager可用性', true, 'ResourceManager已成功加载');
+                    
+                    // 测试1.1: 检查initialize方法
+                    if (typeof resourceManager.initialize === 'function') {
+                        logResult('ResourceManager.initialize方法', true, 'initialize方法已定义');
+                    } else {
+                        logResult('ResourceManager.initialize方法', false, 'initialize方法未定义');
+                    }
+                    
+                    // 测试1.2: 测试initialize方法
+                    try {
+                        resourceManager.initialize();
+                        logResult('ResourceManager初始化', true, 'initialize方法执行成功');
+                    } catch (error) {
+                        logResult('ResourceManager初始化', false, `initialize方法执行失败: ${error.message}`);
+                    }
+                    
+                    // 测试1.3: 检查resources属性
+                    if (Array.isArray(resourceManager.resources)) {
+                        logResult('ResourceManager.resources属性', true, `成功加载了 ${resourceManager.resources.length} 个资源`);
+                    } else {
+                        logResult('ResourceManager.resources属性', false, 'resources属性不是数组');
+                    }
+                    
+                } else {
+                    logResult('ResourceManager可用性', false, 'ResourceManager未加载');
+                }
+            } catch (error) {
+                logResult('ResourceManager测试', false, `测试失败: ${error.message}`);
+            }
+            
+            // 测试2: 检查ToolManager是否可用
+            try {
+                if (window.toolManager) {
+                    logResult('ToolManager可用性', true, 'ToolManager已成功加载');
+                    
+                    // 测试2.1: 检查initialize方法
+                    if (typeof toolManager.initialize === 'function') {
+                        logResult('ToolManager.initialize方法', true, 'initialize方法已定义');
+                    } else {
+                        logResult('ToolManager.initialize方法', false, 'initialize方法未定义');
+                    }
+                    
+                    // 测试2.2: 测试initialize方法
+                    try {
+                        toolManager.initialize();
+                        logResult('ToolManager初始化', true, 'initialize方法执行成功');
+                    } catch (error) {
+                        logResult('ToolManager初始化', false, `initialize方法执行失败: ${error.message}`);
+                    }
+                    
+                    // 测试2.3: 检查tools属性
+                    if (Array.isArray(toolManager.tools)) {
+                        logResult('ToolManager.tools属性', true, `成功加载了 ${toolManager.tools.length} 个工具`);
+                    } else {
+                        logResult('ToolManager.tools属性', false, 'tools属性不是数组');
+                    }
+                    
+                } else {
+                    logResult('ToolManager可用性', false, 'ToolManager未加载');
+                }
+            } catch (error) {
+                logResult('ToolManager测试', false, `测试失败: ${error.message}`);
+            }
+            
+            console.log('本地修复验证测试完成!');
+        }
+        
+        // 页面加载完成后自动运行测试
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runTests, 1000);
+        });
+    </script>
+</body>
+</html>

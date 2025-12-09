@@ -297,15 +297,6 @@ if (typeof module !== 'undefined' && module.exports) {
     define([], function() { return utils; });
 } else {
     window.utils = utils;
-    // 将常用函数绑定到全局作用域，方便HTML中直接调用
-    window.switchAuthTab = utils.switchAuthTab;
-    window.clearBrowserHistory = utils.clearBrowserHistory;
-    window.toggleBookmarksPanel = utils.toggleBookmarksPanel;
-    window.toggleHistoryPanel = utils.toggleHistoryPanel;
-    window.togglePassword = utils.togglePassword;
-    window.openLoginModal = utils.openLoginModal;
-    window.openRegisterModal = utils.openRegisterModal;
-    window.uploadResource = utils.uploadResource;
 }
 
 // 打开登录模态框
@@ -328,10 +319,22 @@ utils.openRegisterModal = function() {
 
 // 打开反馈模态框
 utils.openFeedbackModal = function() {
+    console.log('Utils.js: openFeedbackModal调用，window.modalSystem:', typeof window.modalSystem, 'window.openModal:', typeof window.openModal);
     if (window.modalSystem) {
         window.modalSystem.openModal('feedbackModal');
+    } else if (window.openModal) {
+        // 直接使用全局openModal函数（ModalSystem.js提供）
+        window.openModal('feedbackModal');
     } else {
-        console.error('ModalSystem未加载');
+        // 作为最后的备选方案，直接操作DOM显示模态框
+        const feedbackModal = document.getElementById('feedbackModal');
+        if (feedbackModal) {
+            feedbackModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            console.log('Utils.js: 直接通过DOM显示反馈模态框');
+        } else {
+            console.error('Utils.js: 无法打开反馈模态框，ModalSystem和DOM元素都不可用');
+        }
     }
 };
 
@@ -404,5 +407,18 @@ utils.submitFeedback = function() {
         document.getElementById('feedbackForm').reset();
     }
 };
+
+// 将常用函数绑定到全局作用域，方便HTML中直接调用
+console.log('Utils.js: 开始绑定全局函数...');
+window.switchAuthTab = utils.switchAuthTab;
+window.clearBrowserHistory = utils.clearBrowserHistory;
+window.toggleBookmarksPanel = utils.toggleBookmarksPanel;
+window.toggleHistoryPanel = utils.toggleHistoryPanel;
+window.togglePassword = utils.togglePassword;
+window.openLoginModal = utils.openLoginModal;
+window.openRegisterModal = utils.openRegisterModal;
+window.openFeedbackModal = utils.openFeedbackModal;
+window.uploadResource = utils.uploadResource;
+console.log('Utils.js: 全局函数绑定完成，openFeedbackModal:', typeof window.openFeedbackModal);
 
 

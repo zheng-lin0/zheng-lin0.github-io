@@ -147,6 +147,17 @@ class ResourceCenter {
         this.resources = this.resourceData.resources;
         this.categories = this.resourceData.categories;
         
+        // 初始化分类和标签管理器
+        if (window.categoryTagManager) {
+            // 注册资源和分类
+            this.resources.forEach(resource => {
+                window.categoryTagManager.registerResource(resource);
+            });
+            
+            // 更新分类列表
+            this.categories = ['全部', ...window.categoryTagManager.getAllCategories()];
+        }
+        
         // 尝试从Supabase加载下载历史
         if (this.supabase && window.userManagement) {
             await this.loadDownloadHistoryFromSupabase();
@@ -187,12 +198,31 @@ class ResourceCenter {
                 return;
             }
             
+            // 预览按钮点击
+            const previewBtn = e.target.closest('.preview-btn');
+            if (previewBtn) {
+                e.stopPropagation();
+                const resourceId = previewBtn.dataset.resourceId;
+                this.previewResource(resourceId);
+                return;
+            }
+            
             // 分类筛选点击
             const categoryFilter = e.target.closest('.category-filter');
             if (categoryFilter) {
                 const category = categoryFilter.dataset.category;
                 this.filterResourcesByCategory(category);
                 return;
+            }
+            
+            // 标签点击
+            const tagItem = e.target.closest('.tag, .tag-cloud-item');
+            if (tagItem) {
+                const tag = tagItem.dataset.tag;
+                if (tag) {
+                    this.filterResourcesByTag(tag);
+                    return;
+                }
             }
             
             // 下载按钮点击
@@ -283,6 +313,33 @@ class ResourceCenter {
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- 标签云 -->
+                        <div class="tag-cloud">
+                            <h4>热门标签</h4>
+                            <div class="tag-cloud-container">
+                                ${window.categoryTagManager ? 
+                                    window.categoryTagManager.getTagCloud().map(tag => `
+                                        <span class="tag-cloud-item" data-tag="${tag.name}">
+                                            ${tag.name} (${tag.count})
+                                        </span>
+                                    `).join('') : ''
+                                }
+                            </div>
+                        </div>
+                        
+                        <!-- 分类统计 -->
+                        <div class="category-stats">
+                            <h4>分类统计</h4>
+                            ${window.categoryTagManager ? 
+                                window.categoryTagManager.getCategoryStats().map(stat => `
+                                    <div class="category-stat-item">
+                                        <span class="category-stat-name">${stat.category}</span>
+                                        <span class="category-stat-count">${stat.count}</span>
+                                    </div>
+                                `).join('') : ''
+                            }
+                        </div>
                     </div>
                     
                     <div class="resource-main">
@@ -340,6 +397,11 @@ class ResourceCenter {
                         <span class="resource-size"><i class="fas fa-hdd"></i> ${resource.size}</span>
                         <span class="resource-date"><i class="fas fa-calendar"></i> ${resource.date}</span>
                     </div>
+                    <div class="resource-tags">
+                        ${resource.tags.map(tag => `
+                            <span class="tag" data-tag="${tag}">${tag}</span>
+                        `).join('')}
+                    </div>
                     <div class="resource-rating-downloads">
                         <span class="resource-rating">
                             <i class="fas fa-star"></i> ${resource.rating}
@@ -350,6 +412,10 @@ class ResourceCenter {
                     </div>
                 </div>
                 <div class="resource-actions">
+                    <button class="btn btn-outline preview-btn" 
+                            data-resource-id="${resource.id}">
+                        <i class="fas fa-eye"></i> 预览
+                    </button>
                     <button class="btn ${resource.isFree ? 'btn-primary' : 'btn-success'} download-btn" 
                             data-resource-id="${resource.id}">
                         ${resource.isFree ? '下载' : '购买并下载'}
@@ -375,6 +441,31 @@ class ResourceCenter {
         const resourceList = document.getElementById('resourceList');
         if (resourceList) {
             resourceList.innerHTML = this.renderResourceList();
+        }
+    }
+    
+    filterResourcesByTag(tag) {
+        // 按标签筛选资源
+        const filteredResources = this.resources.filter(resource => 
+            resource.tags && resource.tags.includes(tag)
+        );
+        
+        // 更新资源列表
+        const resourceList = document.getElementById('resourceList');
+        if (resourceList) {
+            // 保存当前分类以便恢复
+            const originalCategory = this.currentCategory;
+            this.currentCategory = '全部';
+            resourceList.innerHTML = this.renderResourceList(filteredResources);
+            this.currentCategory = originalCategory;
+            
+            // 更新分类按钮状态
+            document.querySelectorAll('.category-filter').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === '全部') {
+                    btn.classList.add('active');
+                }
+            });
         }
     }
 
@@ -444,6 +535,183 @@ class ResourceCenter {
             resourceList.style.display = 'none';
             resourceDetail.style.display = 'block';
         }
+    }
+
+    // 预览资源
+    previewResource(resourceId) {
+        const resource = this.resources.find(resource => resource.id === resourceId);
+        if (!resource) return;
+
+        // 显示预览模态框
+        this.showPreviewModal(resource);
+    }
+
+    // 显示预览模态框
+    showPreviewModal(resource) {
+        // 创建预览内容
+        const previewContent = this.generatePreviewContent(resource);
+
+        const modalContent = `
+            <div class="preview-modal-content">
+                <div class="preview-header">
+                    <h3>${resource.title}</h3>
+                    <button class="close-btn" onclick="resourceCenter.closePreviewModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="preview-body">
+                    <div class="resource-preview-content">
+                        ${previewContent}
+                    </div>
+                    <div class="preview-info">
+                        <h4>资源信息</h4>
+                        <ul>
+                            <li><strong>类型:</strong> ${resource.type}</li>
+                            <li><strong>作者:</strong> ${resource.author}</li>
+                            <li><strong>日期:</strong> ${resource.date}</li>
+                            <li><strong>下载次数:</strong> ${resource.downloads.toLocaleString()}</li>
+                            <li><strong>描述:</strong> ${resource.description}</li>
+                            <li><strong>大小:</strong> ${resource.size}</li>
+                            <li><strong>价格:</strong> ${resource.isFree ? '免费' : `¥${resource.price}`}</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="preview-footer">
+                    <button class="btn ${resource.isFree ? 'btn-primary' : 'btn-success'}" onclick="resourceCenter.downloadResource('${resource.id}')">
+                        <i class="fas fa-download"></i> ${resource.isFree ? '下载' : '购买并下载'}
+                    </button>
+                    <button class="btn btn-secondary" onclick="resourceCenter.closePreviewModal()">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // 创建模态框元素
+        const modal = document.createElement('div');
+        modal.id = 'previewModal';
+        modal.className = 'modal preview-modal';
+        modal.innerHTML = modalContent;
+
+        // 添加到文档中
+        document.body.appendChild(modal);
+
+        // 显示模态框
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+
+    // 关闭预览模态框
+    closePreviewModal() {
+        const modal = document.getElementById('previewModal');
+        if (modal) {
+            // 添加淡出动画
+            modal.classList.remove('show');
+            
+            // 移除模态框
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
+        }
+    }
+
+    // 生成预览内容
+    generatePreviewContent(resource) {
+        // 检查是否有预览URL
+        const previewUrl = resource.previewUrl || resource.url;
+        
+        switch(resource.type) {
+            case '文档':
+                return this.generateDocumentPreview(resource, previewUrl);
+            case '代码':
+                return this.generateCodePreview(resource, previewUrl);
+            case '图片':
+                return this.generateImagePreview(resource, previewUrl);
+            default:
+                return this.generateGenericPreview(resource);
+        }
+    }
+    
+    // 生成文档预览
+    generateDocumentPreview(resource, previewUrl) {
+        if (resource.fileType === 'PDF' && previewUrl) {
+            return `<div class="document-preview-content">
+                        <div class="pdf-preview-container">
+                            <iframe src="${previewUrl}" class="pdf-preview-iframe" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-outline" onclick="resourceCenter.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 下载文档
+                            </button>
+                        </div>
+                    </div>`;
+        } else {
+            return `<div class="document-preview-content">
+                        <i class="fas fa-file-alt fa-5x"></i>
+                        <h4>文档预览</h4>
+                        <p>文件名: ${resource.title}</p>
+                        <p>格式: ${resource.fileType}</p>
+                        <p>大小: ${resource.size}</p>
+                        <button class="btn btn-outline" onclick="resourceCenter.downloadResource('${resource.id}')">
+                            <i class="fas fa-download"></i> 直接下载
+                        </button>
+                    </div>`;
+        }
+    }
+    
+    // 生成代码预览
+    generateCodePreview(resource, previewUrl) {
+        return `<div class="code-preview-content">
+                    <i class="fas fa-file-code fa-5x"></i>
+                    <h4>代码资源</h4>
+                    <p>文件名: ${resource.title}</p>
+                    <p>格式: ${resource.fileType}</p>
+                    <p>大小: ${resource.size}</p>
+                    <button class="btn btn-outline" onclick="resourceCenter.downloadResource('${resource.id}')">
+                        <i class="fas fa-download"></i> 下载代码包
+                    </button>
+                </div>`;
+    }
+    
+    // 生成图片预览
+    generateImagePreview(resource, previewUrl) {
+        if (previewUrl) {
+            return `<div class="image-preview-content">
+                        <div class="image-preview-container">
+                            <img src="${previewUrl}" class="image-preview-img" alt="${resource.title}">
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-outline" onclick="resourceCenter.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 下载图片
+                            </button>
+                        </div>
+                    </div>`;
+        } else {
+            return `<div class="image-preview-content">
+                        <i class="fas fa-file-image fa-5x"></i>
+                        <h4>图片预览</h4>
+                        <p>文件名: ${resource.title}</p>
+                        <p>格式: ${resource.fileType}</p>
+                        <p>大小: ${resource.size}</p>
+                        <button class="btn btn-outline" onclick="resourceCenter.downloadResource('${resource.id}')">
+                            <i class="fas fa-download"></i> 直接下载
+                        </button>
+                    </div>`;
+        }
+    }
+    
+    // 生成通用预览
+    generateGenericPreview(resource) {
+        return `<div class="generic-preview-content">
+                    <i class="fas fa-file fa-5x"></i>
+                    <h4>资源预览</h4>
+                    <p>文件名: ${resource.title}</p>
+                    <p>格式: ${resource.fileType}</p>
+                    <p>大小: ${resource.size}</p>
+                    <p>类型: ${resource.type}</p>
+                    <button class="btn btn-outline" onclick="resourceCenter.downloadResource('${resource.id}')">
+                        <i class="fas fa-download"></i> 下载资源
+                    </button>
+                </div>`;
     }
 
     showResourceList() {
@@ -991,3 +1259,6 @@ document.addEventListener('DOMContentLoaded', () => {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = resourceCenter;
 }
+
+// 设置全局变量
+window.resourceCenter = resourceCenter;

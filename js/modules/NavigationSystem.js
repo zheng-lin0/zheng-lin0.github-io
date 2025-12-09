@@ -50,6 +50,9 @@ class NavigationSystem {
             // 处理响应式导航
             this.setupResponsiveNavigation();
             
+            // 设置滚动事件监听
+            this.setupScrollListeners();
+            
             // 设置初始化完成标志
             this.isInitialized = true;
             
@@ -131,6 +134,47 @@ class NavigationSystem {
         
         // 初始检查
         this.handleWindowResize();
+    }
+    
+    /**
+     * 设置滚动事件监听
+     * @private
+     */
+    setupScrollListeners() {
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+        
+        // 初始检查
+        this.updateNavbarScrollState(navbar);
+        
+        // 监听滚动事件
+        window.addEventListener('scroll', utils.throttle(() => {
+            this.updateNavbarScrollState(navbar);
+        }, 100));
+    }
+    
+    /**
+     * 更新导航栏滚动状态
+     * @private
+     * @param {HTMLElement} navbar - 导航栏元素
+     */
+    updateNavbarScrollState(navbar) {
+        const scrollTop = window.pageYOffset;
+        
+        // 确保导航栏始终保持固定位置
+        navbar.style.transform = 'translateY(0)';
+        navbar.style.position = 'fixed';
+        navbar.style.top = '0';
+        navbar.style.left = '0';
+        navbar.style.right = '0';
+        navbar.style.zIndex = '9999';
+        
+        // 更新scrolled类
+        if (scrollTop > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
     }
 
     /**

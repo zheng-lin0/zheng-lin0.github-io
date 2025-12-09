@@ -12,16 +12,25 @@ class ResourceManager {
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => {
                 this.setupEventListeners();
-                this.setupResourceEventDelegation(); // 设置资源卡片事件委托
                 this.loadResources();
                 this.initializeUserSystem();
             });
         } else {
             this.setupEventListeners();
-            this.setupResourceEventDelegation(); // 设置资源卡片事件委托
             this.loadResources();
             this.initializeUserSystem();
         }
+    }
+
+    /**
+     * 初始化模块
+     */
+    initialize() {
+        console.log('ResourceManager模块初始化完成');
+        // 执行实际的初始化逻辑
+        this.setupEventListeners();
+        this.loadResources();
+        this.initializeUserSystem();
     }
 
     /**
@@ -54,12 +63,6 @@ class ResourceManager {
     }
 
     setupEventListeners() {
-        // 资源上传表单事件监听
-        document.getElementById('uploadForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.uploadResource();
-        });
-
         // 资源搜索事件监听
         document.getElementById('resourceSearch')?.addEventListener('input', (e) => {
             this.searchResources(e.target.value);
@@ -104,163 +107,21 @@ class ResourceManager {
         });
     }
 
-    // 加载资源列表
-    loadResources() {
-        const resourcesGrid = document.getElementById('resourcesGrid');
-        if (!resourcesGrid) return;
+    // 工具相关方法已移除，这些功能属于ToolManager.js
 
-        if (this.resources.length === 0) {
-            resourcesGrid.innerHTML = '<div class="no-resources">暂无资源，请先上传资源</div>';
-            return;
+
+    // 关闭预览模态框
+    closePreviewModal() {
+        const modal = document.getElementById('previewModal');
+        if (modal) {
+            // 添加淡出动画
+            modal.classList.remove('show');
+            
+            // 移除模态框
+            setTimeout(() => {
+                modal.remove();
+            }, 300);
         }
-
-        // 使用文档片段来减少DOM操作次数
-        const fragment = document.createDocumentFragment();
-        this.resources.forEach(resource => {
-            const cardElement = this.createResourceCardElement(resource);
-            fragment.appendChild(cardElement);
-        });
-        
-        resourcesGrid.innerHTML = '';
-        resourcesGrid.appendChild(fragment);
-        this.attachResourceCardListeners();
-    }
-
-    // 创建资源卡片元素
-    createResourceCardElement(resource) {
-        const cardHTML = this.createResourceCard(resource);
-        const div = document.createElement('div');
-        div.innerHTML = cardHTML.trim();
-        return div.firstChild;
-    }
-
-    // 创建资源卡片
-    createResourceCard(resource) {
-        // 获取资源类型对应的图标
-        const getResourceIcon = (type) => {
-            const icons = {
-                document: 'fa-file-alt',
-                video: 'fa-file-video',
-                audio: 'fa-file-audio',
-                software: 'fa-file-code',
-                other: 'fa-file' 
-            };
-            return icons[type] || icons.other;
-        };
-
-        // 创建资源预览HTML
-        const createResourcePreview = (resource) => {
-            switch(resource.type) {
-                case 'document':
-                    return `<div class="resource-preview document-preview">
-                                <i class="fas ${getResourceIcon(resource.type)}"></i>
-                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')">
-                                    <i class="fas fa-eye"></i> 预览
-                                </button>
-                            </div>`;
-                case 'video':
-                    return `<div class="resource-preview video-preview">
-                                <i class="fas ${getResourceIcon(resource.type)}"></i>
-                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')">
-                                    <i class="fas fa-play-circle"></i> 播放预览
-                                </button>
-                            </div>`;
-                case 'audio':
-                    return `<div class="resource-preview audio-preview">
-                                <i class="fas ${getResourceIcon(resource.type)}"></i>
-                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')">
-                                    <i class="fas fa-play"></i> 试听
-                                </button>
-                            </div>`;
-                default:
-                    return `<div class="resource-preview">
-                                <i class="fas ${getResourceIcon(resource.type)}"></i>
-                                <button class="preview-btn" onclick="resourceManager.previewResource('${resource.id}')" disabled>
-                                    <i class="fas fa-eye-slash"></i> 不可预览
-                                </button>
-                            </div>`;
-            }
-        };
-
-        return `
-            <div class="resource-card" data-id="${resource.id}">
-                <div class="resource-thumbnail">
-                    ${createResourcePreview(resource)}
-                </div>
-                <div class="resource-content">
-                    <div class="resource-category">${this.getResourceTypeName(resource.type)}</div>
-                    <h3 class="resource-title">${resource.title}</h3>
-                    <p class="resource-description">${resource.description}</p>
-                    <div class="resource-meta">
-                        <span class="resource-uploader">上传者: ${resource.uploader}</span>
-                        <span class="resource-date">${new Date(resource.uploadDate).toLocaleDateString()}</span>
-                        <span class="resource-downloads">
-                            <i class="fas fa-download"></i> ${resource.downloads || 0}
-                        </span>
-                    </div>
-                    <div class="resource-actions">
-                        <button class="btn btn-sm btn-primary download-btn" onclick="resourceManager.downloadResource('${resource.id}')">
-                            <i class="fas fa-download"></i> 下载
-                        </button>
-                        <button class="btn btn-sm btn-outline detail-btn" onclick="resourceManager.showResourceDetails('${resource.id}')">
-                            <i class="fas fa-info"></i> 详情
-                        </button>
-                        ${this.currentUser && this.currentUser.username === resource.uploader ? `
-                            <button class="btn btn-sm btn-danger delete-btn" onclick="resourceManager.deleteResource('${resource.id}')">
-                                <i class="fas fa-trash"></i> 删除
-                            </button>
-                        ` : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    // 获取资源类型名称
-    getResourceTypeName(type) {
-        const typeNames = {
-            document: '文档',
-            video: '视频',
-            audio: '音频',
-            software: '软件',
-            other: '其他'
-        };
-        return typeNames[type] || typeNames.other;
-    }
-
-    // 设置资源卡片事件委托
-    setupResourceEventDelegation() {
-        const resourcesGrid = document.getElementById('resourcesGrid');
-        if (!resourcesGrid) return;
-
-        // 使用事件委托处理所有资源卡片按钮的点击事件
-        resourcesGrid.addEventListener('click', (e) => {
-            // 阻止事件冒泡到卡片元素
-            e.stopPropagation();
-            
-            const target = e.target;
-            const resourceCard = target.closest('.resource-card');
-            
-            if (!resourceCard) return;
-            
-            const resourceId = resourceCard.dataset.id;
-            
-            if (target.closest('.download-btn')) {
-                this.downloadResource(resourceId);
-            } else if (target.closest('.detail-btn')) {
-                this.showResourceDetails(resourceId);
-            } else if (target.closest('.delete-btn')) {
-                this.deleteResource(resourceId);
-            } else if (target.closest('.preview-btn')) {
-                this.previewResource(resourceId);
-            }
-        });
-    }
-
-    // 附加资源卡片事件监听器（兼容旧代码，实际不再需要）
-    attachResourceCardListeners() {
-        // 由于使用了事件委托，此方法现在是空的
-        // 保留以确保向后兼容
     }
 
     // 资源预览功能
@@ -323,45 +184,236 @@ class ResourceManager {
 
     // 生成预览内容
     generatePreviewContent(resource) {
+        // 检查是否有预览URL
+        const previewUrl = resource.previewUrl || resource.link;
+        
         switch(resource.type) {
             case 'document':
-                return `<div class="document-preview-content">
-                            <i class="fas fa-file-alt fa-5x"></i>
-                            <p>文档预览功能开发中...</p>
-                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
-                                <i class="fas fa-download"></i> 直接下载
-                            </button>
-                        </div>`;
+                return this.generateDocumentPreview(resource, previewUrl);
             case 'video':
-                return `<div class="video-preview-content">
-                            <i class="fas fa-file-video fa-5x"></i>
-                            <p>视频预览功能开发中...</p>
-                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
-                                <i class="fas fa-download"></i> 直接下载
-                            </button>
-                        </div>`;
+                return this.generateVideoPreview(resource, previewUrl);
             case 'audio':
-                return `<div class="audio-preview-content">
-                            <i class="fas fa-file-audio fa-5x"></i>
-                            <p>音频预览功能开发中...</p>
-                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
-                                <i class="fas fa-download"></i> 直接下载
-                            </button>
-                        </div>`;
+                return this.generateAudioPreview(resource, previewUrl);
+            case 'image':
+                return this.generateImagePreview(resource, previewUrl);
+            case 'code':
+                return this.generateCodePreview(resource);
+            case 'software':
+                return this.generateSoftwarePreview(resource);
             default:
-                return `<div class="generic-preview-content">
-                            <i class="fas fa-file fa-5x"></i>
-                            <p>该类型资源不支持预览</p>
-                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
-                                <i class="fas fa-download"></i> 直接下载
-                            </button>
-                        </div>`;
+                return this.generateGenericPreview(resource);
         }
+    }
+    
+    // 生成文档预览
+    generateDocumentPreview(resource, previewUrl) {
+        if (resource.fileType === 'PDF' && previewUrl) {
+            return `<div class="document-preview-content">
+                        <div class="pdf-preview-container">
+                            <iframe src="${previewUrl}" class="pdf-preview-iframe" frameborder="0" allowfullscreen></iframe>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 下载PDF
+                            </button>
+                        </div>
+                    </div>`;
+        } else {
+            return `<div class="document-preview-content">
+                        <i class="fas fa-file-alt fa-5x"></i>
+                        <h4>文档预览</h4>
+                        <p>文件名: ${resource.title}</p>
+                        <p>格式: ${resource.fileType}</p>
+                        <p>大小: ${resource.size || '未知'}</p>
+                        <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                            <i class="fas fa-download"></i> 直接下载
+                        </button>
+                    </div>`;
+        }
+    }
+    
+    // 生成视频预览
+    generateVideoPreview(resource, previewUrl) {
+        if (previewUrl) {
+            return `<div class="video-preview-content">
+                        <div class="video-preview-container">
+                            <video class="video-preview-player" controls preload="metadata">
+                                <source src="${previewUrl}" type="video/mp4">
+                                您的浏览器不支持HTML5视频播放。
+                            </video>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 下载视频
+                            </button>
+                        </div>
+                    </div>`;
+        } else {
+            return `<div class="video-preview-content">
+                        <i class="fas fa-file-video fa-5x"></i>
+                        <h4>视频预览</h4>
+                        <p>文件名: ${resource.title}</p>
+                        <p>格式: ${resource.fileType}</p>
+                        <p>大小: ${resource.size || '未知'}</p>
+                        <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                            <i class="fas fa-download"></i> 直接下载
+                        </button>
+                    </div>`;
+        }
+    }
+    
+    // 生成音频预览
+    generateAudioPreview(resource, previewUrl) {
+        if (previewUrl) {
+            return `<div class="audio-preview-content">
+                        <div class="audio-preview-container">
+                            <audio class="audio-preview-player" controls preload="metadata">
+                                <source src="${previewUrl}" type="audio/mpeg">
+                                您的浏览器不支持HTML5音频播放。
+                            </audio>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 下载音频
+                            </button>
+                        </div>
+                    </div>`;
+        } else {
+            return `<div class="audio-preview-content">
+                        <i class="fas fa-file-audio fa-5x"></i>
+                        <h4>音频预览</h4>
+                        <p>文件名: ${resource.title}</p>
+                        <p>格式: ${resource.fileType}</p>
+                        <p>大小: ${resource.size || '未知'}</p>
+                        <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                            <i class="fas fa-download"></i> 直接下载
+                        </button>
+                    </div>`;
+        }
+    }
+    
+    // 生成图片预览
+    generateImagePreview(resource, previewUrl) {
+        if (previewUrl) {
+            return `<div class="image-preview-content">
+                        <div class="image-preview-container">
+                            <img src="${previewUrl}" class="image-preview-img" alt="${resource.title}">
+                        </div>
+                        <div class="preview-actions">
+                            <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                                <i class="fas fa-download"></i> 下载图片
+                            </button>
+                        </div>
+                    </div>`;
+        } else {
+            return this.generateGenericPreview(resource);
+        }
+    }
+    
+    // 生成代码预览
+    generateCodePreview(resource) {
+        // 简单的代码预览，显示代码片段
+        const codeSnippet = resource.codeSnippet || '// 代码预览不可用';
+        return `<div class="code-preview-content">
+                    <div class="code-preview-container">
+                        <pre><code>${codeSnippet}</code></pre>
+                    </div>
+                    <div class="preview-actions">
+                        <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                            <i class="fas fa-download"></i> 下载代码文件
+                        </button>
+                    </div>
+                </div>`;
+    }
+    
+    // 生成软件预览
+    generateSoftwarePreview(resource) {
+        return `<div class="software-preview-content">
+                    <i class="fas fa-code fa-5x"></i>
+                    <h4>软件包预览</h4>
+                    <p>软件名称: ${resource.title}</p>
+                    <p>版本: ${resource.version || '未知'}</p>
+                    <p>类型: ${resource.fileType}</p>
+                    <p>大小: ${resource.size || '未知'}</p>
+                    <div class="software-info">
+                        <h5>系统要求</h5>
+                        <p>${resource.systemRequirements || '暂无信息'}</p>
+                    </div>
+                    <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                        <i class="fas fa-download"></i> 下载软件
+                    </button>
+                </div>`;
+    }
+    
+    // 生成通用预览
+    generateGenericPreview(resource) {
+        return `<div class="generic-preview-content">
+                    <i class="fas fa-file fa-5x"></i>
+                    <h4>资源预览</h4>
+                    <p>文件名: ${resource.title}</p>
+                    <p>类型: ${this.getResourceTypeName(resource.type)}</p>
+                    <p>格式: ${resource.fileType}</p>
+                    <p>大小: ${resource.size || '未知'}</p>
+                    <button class="btn btn-outline" onclick="resourceManager.downloadResource('${resource.id}')">
+                        <i class="fas fa-download"></i> 直接下载
+                    </button>
+                </div>`;
     }
 
     // 关闭预览模态框
     closePreviewModal() {
         const modal = document.getElementById('previewModal');
+        if (modal) {
+            modal.classList.remove('show');
+            setTimeout(() => modal.remove(), 300);
+        }
+    }
+    
+    // 显示资源评论
+    showComments(resourceId) {
+        // 查找资源
+        const resource = this.resources.find(r => r.id === resourceId);
+        if (!resource) return;
+        
+        // 创建评论模态框内容
+        const modalContent = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-comments"></i> ${resource.title} - 评论</h3>
+                    <button class="btn-close" onclick="resourceManager.closeCommentsModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="comments-container-${resourceId}"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="resourceManager.closeCommentsModal()">
+                        <i class="fas fa-times"></i> 关闭
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        // 创建模态框元素
+        const modal = document.createElement('div');
+        modal.id = 'commentsModal';
+        modal.className = 'modal comments-modal';
+        modal.innerHTML = modalContent;
+        
+        // 添加到文档中
+        document.body.appendChild(modal);
+        
+        // 显示模态框
+        setTimeout(() => modal.classList.add('show'), 10);
+        
+        // 使用评论系统加载评论
+        if (typeof commentSystem !== 'undefined') {
+            commentSystem.renderComments(resourceId, `comments-container-${resourceId}`);
+        }
+    }
+    
+    // 关闭评论模态框
+    closeCommentsModal() {
+        const modal = document.getElementById('commentsModal');
         if (modal) {
             modal.classList.remove('show');
             setTimeout(() => modal.remove(), 300);
@@ -835,6 +887,98 @@ class ResourceManager {
         }
     }
 
+    // 加载资源
+    loadResources() {
+        // 从localStorage加载资源
+        const savedResources = localStorage.getItem('resources');
+        if (savedResources) {
+            try {
+                this.resources = JSON.parse(savedResources);
+            } catch (error) {
+                console.error('加载资源失败:', error);
+                this.resources = [];
+            }
+        } else {
+            // 如果没有保存的资源，使用默认资源数据
+            this.resources = [
+                {
+                    id: '1',
+                    title: '编程入门教程',
+                    description: '适合初学者的编程入门视频教程',
+                    type: 'video',
+                    uploader: 'admin',
+                    uploadDate: Date.now() - 86400000,
+                    downloads: 156,
+                    tags: ['编程', '入门', '视频'],
+                    link: 'https://example.com/programming-tutorial'
+                },
+                {
+                    id: '2',
+                    title: '设计规范文档',
+                    description: 'UI/UX设计规范和最佳实践',
+                    type: 'document',
+                    uploader: 'admin',
+                    uploadDate: Date.now() - 172800000,
+                    downloads: 234,
+                    tags: ['设计', '规范', '文档'],
+                    link: 'https://example.com/design-guidelines'
+                },
+                {
+                    id: '3',
+                    title: '音频编辑软件',
+                    description: '功能强大的音频编辑和处理工具',
+                    type: 'software',
+                    uploader: 'admin',
+                    uploadDate: Date.now() - 259200000,
+                    downloads: 89,
+                    tags: ['音频', '编辑', '软件'],
+                    link: 'https://example.com/audio-editor'
+                }
+            ];
+            // 保存默认资源到localStorage
+            this.saveResources();
+        }
+
+        // 渲染资源到DOM
+        this.renderResources();
+    }
+
+    // 渲染资源列表
+    renderResources() {
+        const resourcesGrid = document.getElementById('resourcesGrid');
+        if (!resourcesGrid) return;
+
+        if (this.resources.length === 0) {
+            resourcesGrid.innerHTML = '<div class="no-resources">暂无资源，请先上传资源</div>';
+            return;
+        }
+
+        // 使用文档片段来减少DOM操作次数
+        const fragment = document.createDocumentFragment();
+        this.resources.forEach(resource => {
+            const cardElement = this.createResourceCardElement(resource);
+            fragment.appendChild(cardElement);
+        });
+
+        resourcesGrid.innerHTML = '';
+        resourcesGrid.appendChild(fragment);
+        this.attachResourceCardListeners();
+    }
+
+    // 显示收藏夹页面
+    showFavorites() {
+        // 简单实现，显示提示信息
+        console.log('显示收藏夹页面');
+        alert('收藏夹功能正在开发中');
+    }
+
+    // 显示资源库页面
+    showResources() {
+        // 简单实现，重新加载并渲染资源
+        console.log('显示资源库页面');
+        this.loadResources();
+    }
+
     // 获取资源类型对应的图标
     getResourceIcon(type) {
         const icons = {
@@ -848,10 +992,13 @@ class ResourceManager {
     }
 }
 
-// 导出资源管理器实例
+// 创建并导出资源管理器实例
 const resourceManager = new ResourceManager();
 
 // 导出ResourceManager类
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ResourceManager;
 }
+
+// 设置全局变量
+window.resourceManager = resourceManager;

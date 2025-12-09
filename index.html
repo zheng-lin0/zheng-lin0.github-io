@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能资源下载站</title>
+    <title>智能工具中心</title>
     
     <!-- 外部资源引用 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -14,8 +14,8 @@
     <nav class="navbar">
         <div class="container">
             <div class="navbar-brand">
-                <i class="fas fa-cloud-download-alt logo-icon"></i>
-                <span class="logo-text">智能资源下载站</span>
+                <i class="fas fa-tools logo-icon"></i>
+                <span class="logo-text">智能工具中心</span>
             </div>
             
             <button class="menu-toggle" onclick="toggleNavMenu()" aria-label="切换菜单">
@@ -24,16 +24,16 @@
             
             <div class="nav-menu" id="navbarMenu">
                 <div class="nav-search">
-                    <input type="text" placeholder="搜索资源..." class="nav-search-input" id="resourceSearch">
+                    <input type="text" placeholder="搜索工具..." class="nav-search-input" id="resourceSearch">
                     <button class="nav-search-btn" onclick="searchResources()">
                         <i class="fas fa-search"></i>
                     </button>
                 </div>
                 
                 <ul class="nav-links">
-                    <li><a href="#resources" class="nav-link"><i class="fas fa-database"></i> 资源库</a></li>
-                    <li><a href="#browser" class="nav-link"><i class="fas fa-globe"></i> 在线浏览器</a></li>
-                    <li><a href="#upload" class="nav-link"><i class="fas fa-upload"></i> 上传资源</a></li>
+                    <li><a href="#tools" class="nav-link"><i class="fas fa-tools"></i> 工具库</a></li>
+                    <li><a href="#membership" class="nav-link"><i class="fas fa-crown"></i> 会员中心</a></li>
+                    <li><a href="#about" class="nav-link"><i class="fas fa-info-circle"></i> 关于我们</a></li>
                 </ul>
                 
                 <div class="nav-actions" id="userActions">
@@ -72,24 +72,24 @@
         <div class="container">
             <div class="hero-content">
                 <h1 class="hero-title">
-                    <span class="highlight">智能资源下载站</span>
-                    <br>专业的资源分享平台
+                    <span class="highlight">智能工具中心</span>
+                    <br>您的一站式工具平台
                 </h1>
                 <p class="hero-subtitle">
-                    登录即可上传和下载资源，会员等级决定您的下载速度
+                    提供丰富的在线工具，满足您的工作、学习和生活需求
                 </p>
                 <div class="hero-actions">
-                    <button class="btn btn-large btn-primary" onclick="openLoginModal()">
-                        <i class="fas fa-sign-in-alt"></i> 立即登录
+                    <button class="btn btn-large btn-primary" onclick="navigateToSection('tools')">
+                        <i class="fas fa-tools"></i> 探索工具
                     </button>
-                    <button class="btn btn-large btn-outline" onclick="openRegisterModal()">
-                        <i class="fas fa-user-plus"></i> 免费注册
+                    <button class="btn btn-large btn-outline" onclick="navigateToSection('membership')">
+                        <i class="fas fa-crown"></i> 会员特权
                     </button>
                 </div>
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <div class="stat-number">1000+</div>
-                        <div class="stat-label">资源文件</div>
+                        <div class="stat-number">100+</div>
+                        <div class="stat-label">工具数量</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-number">10k+</div>
@@ -103,7 +103,7 @@
             </div>
             <div class="hero-visual">
                 <div class="visual-card">
-                    <i class="fas fa-cloud-download-alt globe-icon"></i>
+                    <i class="fas fa-tools globe-icon"></i>
                     <div class="visual-circles">
                         <div class="circle circle-1"></div>
                         <div class="circle circle-2"></div>
@@ -114,48 +114,48 @@
         </div>
     </header>
 
-    <!-- 资源库区域 -->
-    <section id="resources" class="resources-section">
+    <!-- 工具库区域 -->
+    <section id="tools" class="tools-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">资源库</h2>
-                <p class="section-subtitle">浏览和下载各类资源</p>
+                <h2 class="section-title">工具库</h2>
+                <p class="section-subtitle">浏览和使用各类工具</p>
             </div>
             
-            <!-- 资源筛选与搜索区域 -->
+            <!-- 工具筛选与搜索区域 -->
             <div class="resource-controls">
                 <div class="resource-filters">
-                    <button class="filter-btn active" data-filter="all">全部资源</button>
-                    <button class="filter-btn" data-filter="document">文档</button>
-                    <button class="filter-btn" data-filter="video">视频</button>
-                    <button class="filter-btn" data-filter="audio">音频</button>
-                    <button class="filter-btn" data-filter="software">软件</button>
-                    <button class="filter-btn" data-filter="other">其他</button>
+                    <button class="filter-btn active" data-filter="all">全部工具</button>
+                    <button class="filter-btn" data-filter="converter">格式转换</button>
+                    <button class="filter-btn" data-filter="calculator">计算器</button>
+                    <button class="filter-btn" data-filter="generator">生成器</button>
+                    <button class="filter-btn" data-filter="analyzer">分析工具</button>
+                    <button class="filter-btn" data-filter="utilities">实用工具</button>
                 </div>
                 
                 <div class="resource-search-container">
-                    <input type="text" id="resourceSearch" placeholder="搜索资源、上传者或标签...">
+                    <input type="text" id="toolSearch" placeholder="搜索工具...">
                     <i class="fas fa-search"></i>
                 </div>
                 
                 <div class="resource-sort">
                     <label for="sort">排序方式：</label>
                     <div class="sort-options">
-                        <button class="sort-option active" data-sort="newest">
-                            <i class="fas fa-clock"></i> 最新上传
+                        <button class="sort-option active" data-sort="popular">
+                            <i class="fas fa-star"></i> 最受欢迎
                         </button>
-                        <button class="sort-option" data-sort="popular">
-                            <i class="fas fa-download"></i> 最多下载
+                        <button class="sort-option" data-sort="newest">
+                            <i class="fas fa-clock"></i> 最新工具
                         </button>
-                        <button class="sort-option" data-sort="oldest">
-                            <i class="fas fa-history"></i> 最早上传
+                        <button class="sort-option" data-sort="name">
+                            <i class="fas fa-sort-alpha-down"></i> 名称排序
                         </button>
                     </div>
                 </div>
             </div>
             
-            <div class="resources-grid" id="resourcesGrid">
-                <!-- 资源卡片将通过JavaScript动态生成 -->
+            <div class="resources-grid" id="toolsGrid">
+                <!-- 工具卡片将通过JavaScript动态生成 -->
             </div>
         </div>
     </section>
@@ -165,12 +165,12 @@
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">我的收藏</h2>
-                <p class="section-subtitle">查看和管理您收藏的资源</p>
+                <p class="section-subtitle">查看和管理您收藏的工具</p>
             </div>
             
             <div class="favorites-controls">
                 <div class="favorites-search-container">
-                    <input type="text" id="favoritesSearch" placeholder="搜索收藏的资源...">
+                    <input type="text" id="favoritesSearch" placeholder="搜索收藏的工具...">
                     <i class="fas fa-search"></i>
                 </div>
                 
@@ -183,8 +183,8 @@
                         <button class="sort-option" data-sort="name">
                             <i class="fas fa-sort-alpha-down"></i> 名称排序
                         </button>
-                        <button class="sort-option" data-sort="date">
-                            <i class="fas fa-calendar"></i> 上传日期
+                        <button class="sort-option" data-sort="popular">
+                            <i class="fas fa-star"></i> 最受欢迎
                         </button>
                     </div>
                 </div>
@@ -193,10 +193,10 @@
             <div class="favorites-empty" id="favoritesEmpty" style="display: block;">
                 <div class="empty-state">
                     <i class="fas fa-heart-broken"></i>
-                    <h3>您还没有收藏任何资源</h3>
-                    <p>浏览资源库，点击心形图标收藏您感兴趣的资源</p>
-                    <button class="btn btn-primary" onclick="showResources()">
-                        <i class="fas fa-database"></i> 浏览资源库
+                    <h3>您还没有收藏任何工具</h3>
+                    <p>浏览工具库，点击心形图标收藏您感兴趣的工具</p>
+                    <button class="btn btn-primary" onclick="showTools()">
+                        <i class="fas fa-tools"></i> 浏览工具库
                     </button>
                 </div>
             </div>
@@ -254,77 +254,43 @@
         </div>
     </section>
 
-    <!-- 资源上传区域 -->
-    <section id="upload" class="upload-section">
+    <!-- 热门工具展示区域 -->
+    <section id="showcase" class="showcase-section">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">上传资源</h2>
-                <p class="section-subtitle">登录后即可分享您的资源</p>
+                <h2 class="section-title">热门工具</h2>
+                <p class="section-subtitle">发现最受欢迎的日常工具</p>
             </div>
             
-            <div class="upload-container">
-                <div class="upload-form" id="uploadForm">
-                    <div class="form-group">
-                        <label for="resourceTitle">资源标题</label>
-                        <input type="text" id="resourceTitle" placeholder="请输入资源标题" required>
+            <div class="showcase-grid">
+                <!-- 热门工具卡片 -->
+                <div class="showcase-card" onclick="openTool('text-to-speech')">
+                    <div class="showcase-icon">
+                        <i class="fas fa-comment-dots"></i>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="resourceDescription">资源描述</label>
-                        <textarea id="resourceDescription" placeholder="请输入资源描述" rows="3" required></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="resourceType">资源类型</label>
-                        <select id="resourceType" required>
-                            <option value="">请选择资源类型</option>
-                            <option value="document">文档</option>
-                            <option value="video">视频</option>
-                            <option value="audio">音频</option>
-                            <option value="software">软件</option>
-                            <option value="other">其他</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="resourceLink">资源链接</label>
-                        <input type="url" id="resourceLink" placeholder="请输入资源下载链接" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="resourceTags">资源标签（用逗号分隔）</label>
-                        <input type="text" id="resourceTags" placeholder="如：教程,工具,免费">
-                    </div>
-                    
-                    <div class="upload-actions">
-                        <button class="btn btn-primary" onclick="uploadResource()">
-                            <i class="fas fa-upload"></i> 上传资源
-                        </button>
-                    </div>
+                    <h3 class="showcase-title">文字转语音</h3>
+                    <p class="showcase-description">将文字转换为自然语音</p>
                 </div>
-                
-                <div class="upload-info">
-                    <h3><i class="fas fa-info-circle"></i> 上传须知</h3>
-                    <ul>
-                        <li>请确保您有权分享该资源</li>
-                        <li>资源链接必须是有效的下载地址</li>
-                        <li>请勿上传违法、侵权内容</li>
-                        <li>上传资源后，管理员会进行审核</li>
-                    </ul>
-                    
-                    <h3><i class="fas fa-tachometer-alt"></i> 会员等级说明</h3>
-                    <ul>
-                        <li><strong>会员level1</strong>：基础下载速度 (1x)</li>
-                        <li><strong>会员level2</strong>：2倍下载速度 (2x)</li>
-                        <li><strong>会员level3</strong>：2倍下载速度 (2x) + 10GB云存储空间</li>
-                        <li><strong>会员level4</strong>：5倍下载速度 (5x) + 50GB云存储空间 + 优先客服</li>
-                        <li><strong>会员level5</strong>：5倍下载速度 (5x) + 100GB云存储空间 + 优先客服 + 无广告体验</li>
-                        <li><strong>会员level6</strong>：10倍下载速度 (10x) + 200GB云存储空间 + 优先客服 + 无广告体验 + AI助手基础版</li>
-                        <li><strong>会员level7</strong>：10倍下载速度 (10x) + 300GB云存储空间 + 专属客服 + 无广告体验 + AI助手高级版</li>
-                        <li><strong>会员level8</strong>：10倍下载速度 (10x) + 500GB云存储空间 + 专属客服 + 无广告体验 + AI助手高级版 + 专属资源</li>
-                        <li><strong>会员level9</strong>：10倍下载速度 (10x) + 1TB云存储空间 + 专属客服 + 无广告体验 + AI助手高级版 + 专属资源 + 线下活动</li>
-                        <li><strong>会员level10</strong>：10倍下载速度 (10x) + 2TB云存储空间 + 专属客服 + 无广告体验 + AI助手高级版 + 专属资源 + 线下活动 + 定制服务</li>
-                    </ul>
+                <div class="showcase-card" onclick="openTool('calculator')">
+                    <div class="showcase-icon">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3 class="showcase-title">智能计算器</h3>
+                    <p class="showcase-description">强大的多功能计算器</p>
+                </div>
+                <div class="showcase-card" onclick="openTool('unit-converter')">
+                    <div class="showcase-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3 class="showcase-title">单位转换</h3>
+                    <p class="showcase-description">快速转换各种单位</p>
+                </div>
+                <div class="showcase-card" onclick="openTool('password-generator')">
+                    <div class="showcase-icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                    <h3 class="showcase-title">密码生成</h3>
+                    <p class="showcase-description">生成安全复杂的密码</p>
                 </div>
             </div>
         </div>
@@ -336,18 +302,18 @@
             <div class="footer-content">
                 <div class="footer-about">
                     <div class="footer-logo">
-                        <i class="fas fa-cloud-download-alt"></i>
-                        <span>智能资源下载站</span>
+                        <i class="fas fa-tools"></i>
+                        <span>智能工具中心</span>
                     </div>
-                    <p>专业的资源分享平台，为用户提供优质的资源下载服务</p>
+                    <p>一站式在线工具平台，为用户提供丰富、高效的工具服务</p>
                 </div>
                 
                 <div class="footer-links">
                     <h4>快速链接</h4>
                     <ul>
-                        <li><a href="#resources">资源库</a></li>
+                        <li><a href="#tools">工具库</a></li>
                         <li><a href="#browser">在线浏览器</a></li>
-                        <li><a href="#upload">上传资源</a></li>
+                        <li><a href="#upload">上传工具</a></li>
                         <li><a href="#userCenter">个人中心</a></li>
                     </ul>
                 </div>
@@ -364,7 +330,7 @@
             
             <div class="footer-bottom">
                 <div class="footer-copyright">
-                    &copy; 2023 智能资源下载站. 保留所有权利.
+                    &copy; 2023 智能工具中心. 保留所有权利.
                 </div>
                 <div class="footer-social">
                     <a href="#"><i class="fab fa-weixin"></i></a>
@@ -553,6 +519,11 @@
     <script src="js/modules/BrowserSystem.js" defer></script>
     <script src="js/modules/ResourceManager.js" defer></script>
     <script src="js/modules/ResourceCenter.js" defer></script>
+    <script src="js/modules/ToolManager.js" defer></script>
+    <script src="js/modules/CommentSystem.js" defer></script>
+    <script src="js/modules/CategoryTagManager.js" defer></script>
+    <script src="js/modules/DownloadManager.js" defer></script>
+    <script src="js/modules/PointSystem.js" defer></script>
     <script src="js/modules/SearchSystem.js" defer></script>
     
     <!-- 未登录状态修复脚本 -->
@@ -593,6 +564,31 @@
                 }
             }, 1000); // 1秒延迟确保所有模块加载完成
         });
+        
+        // 直接在HTML中定义openFeedbackModal函数，确保它总是可用
+        window.openFeedbackModal = function() {
+            console.log('HTML内联脚本: openFeedbackModal被调用');
+            
+            // 尝试多种方式打开反馈模态框
+            if (window.modalSystem && window.modalSystem.openModal) {
+                console.log('HTML内联脚本: 使用window.modalSystem.openModal');
+                window.modalSystem.openModal('feedbackModal');
+            } else if (window.openModal) {
+                console.log('HTML内联脚本: 使用window.openModal');
+                window.openModal('feedbackModal');
+            } else {
+                console.log('HTML内联脚本: 直接操作DOM显示模态框');
+                const feedbackModal = document.getElementById('feedbackModal');
+                if (feedbackModal) {
+                    feedbackModal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    console.error('HTML内联脚本: 无法找到feedbackModal元素');
+                }
+            }
+        };
+        
+        console.log('HTML内联脚本: openFeedbackModal函数已定义:', typeof window.openFeedbackModal);
     </script>
     
     <!-- 页脚 -->
@@ -601,11 +597,11 @@
             <div class="footer-content">
                 <div class="footer-brand">
                     <div class="logo">
-                        <i class="fas fa-cloud-download-alt logo-icon"></i>
-                        <span class="logo-text">智能资源下载站</span>
+                        <i class="fas fa-tools logo-icon"></i>
+                        <span class="logo-text">智能工具中心</span>
                     </div>
                     <p class="footer-description">
-                        专业的资源分享平台，为用户提供高质量的资源下载和分享服务
+                        一站式在线工具平台，为用户提供丰富、高效的工具服务
                     </p>
                     <div class="footer-social">
                         <a href="#" class="social-link" aria-label="微信">
@@ -623,9 +619,9 @@
                 <div class="footer-links">
                     <h4>快速导航</h4>
                     <ul>
-                        <li><a href="#resources">资源库</a></li>
-                        <li><a href="#browser">在线浏览器</a></li>
-                        <li><a href="#upload">上传资源</a></li>
+                        <li><a href="#tools">工具库</a></li>
+                        <li><a href="#membership">会员中心</a></li>
+                        <li><a href="#about">关于我们</a></li>
                         <li><a href="#userCenter">个人中心</a></li>
                     </ul>
                 </div>
@@ -653,14 +649,15 @@
             
             <div class="footer-bottom">
                 <div class="footer-copyright">
-                    <p>&copy; 2025 智能资源下载站. 保留所有权利.</p>
-                </div>
-                <div class="footer-legal">
-                    <a href="#">ICP备案号: 1234567890号</a>
+                    <p>&copy; 2025 智能工具中心. 保留所有权利.</p>
                 </div>
                 <div class="footer-feedback">
-                    <button class="btn btn-outline-light btn-sm" onclick="openFeedbackModal()">
+                    <button class="btn btn-outline-light btn-sm" onclick="window.openFeedbackModal()">
                         <i class="fas fa-comment-dots"></i> 用户反馈
+                    </button>
+                    <!-- 调试按钮 -->
+                    <button class="btn btn-outline-warning btn-sm" onclick="console.log('调试: openFeedbackModal:', typeof openFeedbackModal, openFeedbackModal);">
+                        <i class="fas fa-bug"></i> 调试
                     </button>
                 </div>
             </div>

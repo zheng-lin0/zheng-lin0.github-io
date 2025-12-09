@@ -32,16 +32,16 @@ class MembershipSystem {
      */
     initMemberLevels() {
         return [
-            { level: 1, name: '会员level1', minPoints: 0, maxPoints: 999, color: '#808080', icon: 'fa-star', privileges: ['基础功能'] },
-            { level: 2, name: '会员level2', minPoints: 1000, maxPoints: 2999, color: '#C0C0C0', icon: 'fa-star', privileges: ['基础功能', '普通下载速度'] },
-            { level: 3, name: '会员level3', minPoints: 3000, maxPoints: 4999, color: '#FFD700', icon: 'fa-star', privileges: ['基础功能', '普通下载速度', '10GB云存储空间'] },
-            { level: 4, name: '会员level4', minPoints: 5000, maxPoints: 9999, color: '#FFA500', icon: 'fa-crown', privileges: ['基础功能', '快速下载速度', '50GB云存储空间', '优先客服'] },
-            { level: 5, name: '会员level5', minPoints: 10000, maxPoints: 14999, color: '#E5E4E2', icon: 'fa-crown', privileges: ['基础功能', '快速下载速度', '100GB云存储空间', '优先客服', '无广告体验'] },
-            { level: 6, name: '会员level6', minPoints: 15000, maxPoints: 19999, color: '#B9F2FF', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '200GB云存储空间', '优先客服', '无广告体验', 'AI助手基础版'] },
-            { level: 7, name: '会员level7', minPoints: 20000, maxPoints: 24999, color: '#00FF7F', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '300GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版'] },
-            { level: 8, name: '会员level8', minPoints: 25000, maxPoints: 29999, color: '#0000FF', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '500GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源'] },
-            { level: 9, name: '会员level9', minPoints: 30000, maxPoints: 39999, color: '#FF0000', icon: 'fa-gem', privileges: ['基础功能', '极速下载速度', '1TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动'] },
-            { level: 10, name: '会员level10', minPoints: 40000, maxPoints: Infinity, color: '#FFD700', icon: 'fa-crown', privileges: ['基础功能', '极速下载速度', '2TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '专属资源', '线下活动', '定制服务'] }
+            { level: 1, name: '普通用户', minPoints: 0, maxPoints: 999, color: '#808080', icon: 'fa-user', privileges: ['基础工具使用', '每日使用次数限制'] },
+            { level: 2, name: '青铜会员', minPoints: 1000, maxPoints: 2999, color: '#C0C0C0', icon: 'fa-user', privileges: ['基础工具使用', '普通下载速度', '更多使用次数'] },
+            { level: 3, name: '白银会员', minPoints: 3000, maxPoints: 4999, color: '#C0C0C0', icon: 'fa-user', privileges: ['基础工具使用', '普通下载速度', '10GB云存储空间', '无使用次数限制'] },
+            { level: 4, name: '黄金会员', minPoints: 5000, maxPoints: 9999, color: '#FFD700', icon: 'fa-crown', privileges: ['基础工具使用', '快速下载速度', '50GB云存储空间', '优先客服', '高级工具使用权'] },
+            { level: 5, name: '铂金会员', minPoints: 10000, maxPoints: 14999, color: '#E5E4E2', icon: 'fa-crown', privileges: ['基础工具使用', '快速下载速度', '100GB云存储空间', '优先客服', '无广告体验', '高级工具使用权'] },
+            { level: 6, name: '钻石会员', minPoints: 15000, maxPoints: 19999, color: '#B9F2FF', icon: 'fa-gem', privileges: ['基础工具使用', '极速下载速度', '200GB云存储空间', '优先客服', '无广告体验', 'AI助手基础版', '高级工具使用权', '专属工具'] },
+            { level: 7, name: '星耀会员', minPoints: 20000, maxPoints: 24999, color: '#00FF7F', icon: 'fa-gem', privileges: ['基础工具使用', '极速下载速度', '300GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '高级工具使用权', '专属工具'] },
+            { level: 8, name: '王者会员', minPoints: 25000, maxPoints: 29999, color: '#0000FF', icon: 'fa-gem', privileges: ['基础工具使用', '极速下载速度', '500GB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '高级工具使用权', '专属工具', '工具定制'] },
+            { level: 9, name: '荣耀会员', minPoints: 30000, maxPoints: 39999, color: '#FF0000', icon: 'fa-gem', privileges: ['基础工具使用', '极速下载速度', '1TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '高级工具使用权', '专属工具', '工具定制', '线下活动'] },
+            { level: 10, name: '至尊会员', minPoints: 40000, maxPoints: Infinity, color: '#FFD700', icon: 'fa-crown', privileges: ['基础工具使用', '极速下载速度', '2TB云存储空间', '专属客服', '无广告体验', 'AI助手高级版', '高级工具使用权', '专属工具', '工具定制', '线下活动', 'VIP客服'] }
         ];
     }
 
@@ -252,6 +252,37 @@ class MembershipSystem {
     }
 
     /**
+     * 检查用户是否有权限使用特定工具
+     * @public
+     * @param {string} username - 用户名
+     * @param {string} toolId - 工具ID
+     * @returns {boolean} 是否有权限
+     */
+    hasToolPermission(username, toolId) {
+        const userMembership = this.getUserMembership(username);
+        const memberLevel = this.getMemberLevel(userMembership.points);
+        const tool = window.toolManager ? window.toolManager.getToolById(toolId) : null;
+        
+        if (!tool) return true; // 默认允许使用
+        
+        return memberLevel.level >= (tool.requiredLevel || 1);
+    }
+
+    /**
+     * 获取用户可用的工具列表
+     * @public
+     * @param {string} username - 用户名
+     * @returns {Array} 可用工具列表
+     */
+    getAvailableTools(username) {
+        const userMembership = this.getUserMembership(username);
+        const memberLevel = this.getMemberLevel(userMembership.points);
+        const allTools = window.toolManager ? window.toolManager.getTools() : [];
+        
+        return allTools.filter(tool => memberLevel.level >= (tool.requiredLevel || 1));
+    }
+
+    /**
      * 购买会员
      * @public
      * @param {string} type - 会员类型 (monthly, quarterly, annual)
@@ -264,23 +295,23 @@ class MembershipSystem {
         }
 
         const membershipOptions = {
-            monthly: { points: 1000, price: 29.9 },
-            quarterly: { points: 3000, price: 79.9 },
-            annual: { points: 15000, price: 299 }
+            monthly: { points: 1000, price: 29.9, name: '月度青铜会员' },
+            quarterly: { points: 3000, price: 79.9, name: '季度白银会员' },
+            annual: { points: 15000, price: 299, name: '年度钻石会员' }
         };
 
         const option = membershipOptions[type];
         if (!option) return;
 
         // 这里可以添加支付逻辑
-        alert(`购买${type}会员成功！获得${option.points}积分`);
+        alert(`购买${option.name}成功！获得${option.points}积分`);
         
         // 更新用户积分
         await this.updatePoints(currentUser.username, option.points);
         
         // 显示通知
         if (window.notificationSystem) {
-            window.notificationSystem.showNotification(`购买${type}会员成功！获得${option.points}积分`, 'success');
+            window.notificationSystem.showNotification(`购买${option.name}成功！获得${option.points}积分，解锁更多工具使用权`, 'success');
         }
     }
 

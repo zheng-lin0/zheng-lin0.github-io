@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站诊断工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .pass {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .fail {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #log {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            height: 200px;
+            overflow-y: scroll;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>网站诊断工具</h1>
+        
+        <div class="test-section">
+            <h2>1. DOM 元素检查</h2>
+            <div id="dom-test-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. 全局变量检查</h2>
+            <div id="global-vars-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. 模块初始化检查</h2>
+            <div id="modules-results"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. localStorage 检查</h2>
+            <div id="localstorage-results"></div>
+        </div>
+        
+        <button onclick="runAllTests()">运行所有测试</button>
+        
+        <div id="log">
+            <p>诊断日志将显示在这里...</p>
+        </div>
+    </div>
+
+    <script>
+        // 诊断日志记录器
+        function log(message) {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<p>[${timestamp}] ${message}</p>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        // 测试结果显示函数
+        function displayTestResult(containerId, testName, status, message) {
+            const container = document.getElementById(containerId);
+            const resultElement = document.createElement('div');
+            resultElement.className = `test-result ${status}`;
+            resultElement.innerHTML = `<strong>${testName}:</strong> ${message}`;
+            container.appendChild(resultElement);
+        }
+
+        // 测试1: DOM元素检查
+        function testDOMElements() {
+            log('开始测试DOM元素...');
+            const elementsToCheck = [
+                { id: 'resourceSearch', name: '资源搜索输入框' },
+                { selector: '.filter-btn', name: '筛选按钮' },
+                { selector: '.sort-option', name: '排序选项' },
+                { id: 'resources-container', name: '资源容器' },
+                { id: 'tools-container', name: '工具容器' },
+                { id: 'header', name: '页面头部' },
+                { id: 'main-content', name: '主内容区域' },
+                { id: 'footer', name: '页面底部' }
+            ];
+
+            elementsToCheck.forEach(element => {
+                let found = false;
+                if (element.id) {
+                    found = document.getElementById(element.id) !== null;
+                } else if (element.selector) {
+                    found = document.querySelectorAll(element.selector).length > 0;
+                }
+                displayTestResult('dom-test-results', element.name, found ? 'pass' : 'fail', found ? '存在' : '不存在');
+                if (!found) {
+                    log(`错误: ${element.name} 不存在`);
+                }
+            });
+            log('DOM元素测试完成');
+        }
+
+        // 测试2: 全局变量检查
+        function testGlobalVars() {
+            log('开始测试全局变量...');
+            const globalVarsToCheck = [
+                { name: 'resourceManager', module: '资源管理器' },
+                { name: 'toolManager', module: '工具管理器' },
+                { name: 'userManagement', module: '用户管理' },
+                { name: 'coreFramework', module: '核心框架' },
+                { name: 'app', module: '应用实例' },
+                { name: 'config', module: '配置' },
+                { name: 'utils', module: '工具函数' }
+            ];
+
+            globalVarsToCheck.forEach(variable => {
+                const exists = typeof window[variable.name] !== 'undefined';
+                displayTestResult('global-vars-results', variable.module, exists ? 'pass' : 'warning', exists ? '已定义' : '未定义');
+                if (!exists) {
+                    log(`警告: ${variable.module} (${variable.name}) 未定义`);
+                } else {
+                    log(`${variable.module} (${variable.name}) 已定义`);
+                }
+            });
+            log('全局变量测试完成');
+        }
+
+        // 测试3: 模块初始化检查
+        function testModulesInitialization() {
+            log('开始测试模块初始化...');
+            const modulesToCheck = [
+                { name: 'resourceManager', method: 'initialize', module: '资源管理器' },
+                { name: 'toolManager', method: 'initialize', module: '工具管理器' },
+                { name: 'userManagement', method: 'initialize', module: '用户管理' },
+                { name: 'coreFramework', method: 'initialize', module: '核心框架' }
+            ];
+
+            modulesToCheck.forEach(module => {
+                let status = 'warning';
+                let message = '未定义';
+                
+                if (window[module.name]) {
+                    message = '已实例化';
+                    status = 'pass';
+                    
+                    if (module.method && typeof window[module.name][module.method] === 'function') {
+                        message += ', 包含初始化方法';
+                    } else if (module.method) {
+                        message += ', 但缺少初始化方法';
+                        status = 'warning';
+                    }
+                    
+                    log(`${module.module} (${module.name}) ${message}`);
+                }
+                
+                displayTestResult('modules-results', module.module, status, message);
+            });
+            log('模块初始化测试完成');
+        }
+
+        // 测试4: localStorage检查
+        function testLocalStorage() {
+            log('开始测试localStorage...');
+            try {
+                // 测试localStorage是否可用
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                
+                // 检查资源数据
+                const resources = localStorage.getItem('resources');
+                let resourcesStatus = 'pass';
+                let resourcesMessage = '可用';
+                
+                if (resources) {
+                    try {
+                        const parsedResources = JSON.parse(resources);
+                        if (Array.isArray(parsedResources)) {
+                            resourcesMessage += `, 包含 ${parsedResources.length} 个资源`;
+                        } else {
+                            resourcesMessage += ', 但数据格式不正确';
+                            resourcesStatus = 'warning';
+                        }
+                    } catch (error) {
+                        resourcesMessage += ', 但JSON解析失败';
+                        resourcesStatus = 'warning';
+                        log(`错误: localStorage中的资源数据JSON解析失败: ${error}`);
+                    }
+                } else {
+                    resourcesMessage += ', 但没有资源数据';
+                }
+                
+                displayTestResult('localstorage-results', 'localStorage可用性', 'pass', '可用');
+                displayTestResult('localstorage-results', '资源数据', resourcesStatus, resourcesMessage);
+                log('localStorage测试完成');
+            } catch (error) {
+                displayTestResult('localstorage-results', 'localStorage可用性', 'fail', '不可用');
+                log(`错误: localStorage不可用: ${error}`);
+            }
+        }
+
+        // 运行所有测试
+        function runAllTests() {
+            // 清空之前的测试结果
+            document.getElementById('dom-test-results').innerHTML = '';
+            document.getElementById('global-vars-results').innerHTML = '';
+            document.getElementById('modules-results').innerHTML = '';
+            document.getElementById('localstorage-results').innerHTML = '';
+            document.getElementById('log').innerHTML = '<p>诊断日志将显示在这里...</p>';
+            
+            log('开始运行所有诊断测试...');
+            
+            // 依次运行所有测试
+            testDOMElements();
+            testGlobalVars();
+            testModulesInitialization();
+            testLocalStorage();
+            
+            log('所有诊断测试完成!');
+        }
+
+        // 页面加载完成后自动运行测试
+        document.addEventListener('DOMContentLoaded', () => {
+            log('页面加载完成，等待2秒后运行诊断测试...');
+            setTimeout(runAllTests, 2000);
+        });
+    </script>
+</body>
+</html>

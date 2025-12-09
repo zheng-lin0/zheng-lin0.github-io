@@ -75,11 +75,18 @@ function initializeModules() {
             console.warn('appCenter模块未加载');
         }
         
-        // 初始化资源中心
+        // 初始化资源中心（已替换为工具中心）
         if (typeof resourceCenter !== 'undefined') {
             resourceCenter.initialize();
         } else {
             console.warn('resourceCenter模块未加载');
+        }
+        
+        // 初始化工具管理系统
+        if (typeof toolManager !== 'undefined') {
+            toolManager.initialize();
+        } else {
+            console.warn('toolManager模块未加载');
         }
         
         // 初始化搜索系统
@@ -94,6 +101,14 @@ function initializeModules() {
             browserSystem.init();
         } else {
             console.warn('browserSystem模块未加载');
+        }
+        
+        // 初始化评论系统
+        if (typeof commentSystem !== 'undefined') {
+            // CommentSystem会在内部自动初始化
+            console.log('commentSystem模块已加载');
+        } else {
+            console.warn('commentSystem模块未加载');
         }
         
         // 初始化反馈表单
