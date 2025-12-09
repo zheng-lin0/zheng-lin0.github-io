@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具测试页面</title>
+    <!-- 引入 Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- 引入自定义样式 -->
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+    <div class="container">
+        <h1>工具测试页面</h1>
+        <p>此页面用于测试工具加载和使用功能是否正常。</p>
+        
+        <div class="test-section">
+            <h2>测试步骤：</h2>
+            <ol>
+                <li>检查下方工具是否能正常加载</li>
+                <li>点击工具图标查看工具信息</li>
+                <li>点击"使用工具"按钮打开工具界面</li>
+                <li>测试工具的各项功能</li>
+            </ol>
+        </div>
+        
+        <div id="tools-container"></div>
+    </div>
+    
+    <!-- 引入工具组件 -->
+    <script src="js/components/TextToSpeech.js"></script>
+    <script src="js/components/Calculator.js"></script>
+    <script src="js/components/UnitConverter.js"></script>
+    
+    <!-- 引入工具管理器 -->
+    <script src="js/modules/ToolManager.js"></script>
+    
+    <script>
+        // 初始化工具管理器
+        document.addEventListener('DOMContentLoaded', function() {
+            // 确保工具管理器已初始化
+            if (window.toolManager) {
+                console.log('工具管理器已初始化');
+                
+                // 获取所有工具
+                const tools = window.toolManager.getTools();
+                console.log('可用工具:', tools);
+                
+                // 在页面上显示工具列表
+                const container = document.getElementById('tools-container');
+                tools.forEach(tool => {
+                    const toolCard = document.createElement('div');
+                    toolCard.className = 'tool-card';
+                    toolCard.innerHTML = `
+                        <div class="tool-icon">
+                            <i class="fas ${tool.icon}"></i>
+                        </div>
+                        <div class="tool-info">
+                            <h3>${tool.name}</h3>
+                            <p>${tool.description}</p>
+                            <button onclick="openTool('${tool.id}')" class="btn btn-primary">查看工具</button>
+                        </div>
+                    `;
+                    container.appendChild(toolCard);
+                });
+            } else {
+                console.error('工具管理器未初始化');
+                
+                // 手动初始化工具管理器
+                window.toolManager = new ToolManager();
+                window.toolManager.init();
+                console.log('工具管理器已手动初始化');
+            }
+        });
+    </script>
+</body>
+</html>

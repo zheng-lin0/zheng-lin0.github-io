@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具功能测试</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div style="max-width: 800px; margin: 50px auto; padding: 20px;">
+        <h1>工具功能测试</h1>
+        <p>点击以下按钮测试工具模态框的显示和关闭功能：</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 15px; margin: 20px 0;">
+            <button onclick="openTool('text-to-speech')" style="padding: 10px 15px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="fas fa-comment-dots"></i> 文字转语音
+            </button>
+            <button onclick="openTool('calculator')" style="padding: 10px 15px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="fas fa-calculator"></i> 计算器
+            </button>
+            <button onclick="openTool('unit-converter')" style="padding: 10px 15px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="fas fa-exchange-alt"></i> 单位转换
+            </button>
+            <button onclick="openTool('password-generator')" style="padding: 10px 15px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="fas fa-key"></i> 密码生成器
+            </button>
+            <button onclick="openTool('age-calculator')" style="padding: 10px 15px; background: #6366f1; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <i class="fas fa-birthday-cake"></i> 年龄计算器
+            </button>
+        </div>
+        
+        <div id="test-results" style="margin: 20px 0; padding: 15px; background: #f3f4f6; border-radius: 5px;">
+            <h3>测试结果：</h3>
+            <ul id="results-list"></ul>
+        </div>
+    </div>
+    
+    <!-- 工具组件脚本 -->
+    <script src="js/components/TextToSpeech.js"></script>
+    <script src="js/components/Calculator.js"></script>
+    <script src="js/components/UnitConverter.js"></script>
+    <script src="js/components/PasswordGenerator.js"></script>
+    <script src="js/components/AgeCalculator.js"></script>
+    
+    <!-- 工具管理器模块 -->
+    <script src="js/modules/ToolManager.js"></script>
+    
+    <script>
+        // 模拟openTool函数
+        function openTool(toolId) {
+            console.log('尝试打开工具:', toolId);
+            
+            // 查找工具信息
+            const tool = toolManager.getToolById(toolId);
+            if (tool) {
+                // 调用工具管理器的openTool方法
+                toolManager.openTool(toolId);
+                
+                // 添加测试结果
+                addTestResult(`工具 "${tool.name}" 已尝试打开`);
+            } else {
+                console.error('工具未找到:', toolId);
+                addTestResult(`工具 "${toolId}" 未找到`, true);
+            }
+        }
+        
+        // 添加测试结果
+        function addTestResult(message, isError = false) {
+            const list = document.getElementById('results-list');
+            const li = document.createElement('li');
+            li.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            if (isError) {
+                li.style.color = '#dc2626';
+            } else {
+                li.style.color = '#16a34a';
+            }
+            list.appendChild(li);
+        }
+        
+        // 测试closeToolComponent函数
+        function testCloseTool() {
+            closeToolComponent();
+            addTestResult('尝试关闭工具模态框');
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addTestResult('测试页面加载完成');
+            addTestResult('工具组件脚本已加载');
+        });
+    </script>
+</body>
+</html>

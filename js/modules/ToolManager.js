@@ -525,7 +525,252 @@ if (typeof module !== 'undefined' && module.exports) {
     
     window.useTool = function(toolId) {
         console.log('使用工具:', toolId);
-        // 这里可以实现具体的工具使用逻辑
-        alert(`开始使用工具: ${toolId}`);
+        
+        // 获取工具信息
+        const tool = window.toolManager.getToolById(toolId);
+        if (!tool) {
+            console.error('工具不存在:', toolId);
+            alert('工具不存在，请稍后重试');
+            return;
+        }
+        
+        // 关闭工具信息模态框
+        window.closeToolModal();
+        
+        // 根据工具ID加载对应的工具组件
+        loadToolComponent(toolId, tool);
+    };
+    
+    // 加载工具组件
+    function loadToolComponent(toolId, tool) {
+        // 创建工具组件容器
+        const toolContainer = document.createElement('div');
+        toolContainer.className = 'tool-component-container';
+        toolContainer.id = 'toolComponentContainer';
+        
+        // 根据工具ID加载不同的工具组件
+        switch(toolId) {
+            case 'text-to-speech':
+                if (typeof window.textToSpeech === 'undefined') {
+                    window.textToSpeech = new window.TextToSpeech();
+                }
+                window.textToSpeech.init();
+                
+                // 创建工具模态框
+                const ttsModal = document.createElement('div');
+                ttsModal.className = 'tool-modal';
+                ttsModal.innerHTML = `
+                    <div class="tool-modal-content">
+                        <div class="tool-modal-header">
+                            <div class="tool-modal-icon">
+                                <i class="fas ${tool.icon}"></i>
+                            </div>
+                            <h2>${tool.name}</h2>
+                            <button class="modal-close" onclick="closeToolComponent()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="tool-modal-body">
+                            ${window.textToSpeech.renderControls()}
+                        </div>
+                    </div>
+                `;
+                
+                ttsModal.id = 'toolComponentModal';
+                document.body.appendChild(ttsModal);
+                
+                // 显示模态框
+                ttsModal.classList.add('show');
+                
+                // 添加关闭事件
+                ttsModal.addEventListener('click', (e) => {
+                    if (e.target === ttsModal) {
+                        closeToolComponent();
+                    }
+                });
+                
+                // 设置事件监听
+                window.textToSpeech.setupEventListeners();
+                break;
+                
+            case 'calculator':
+                if (typeof window.calculator === 'undefined') {
+                    window.calculator = new window.Calculator();
+                }
+                
+                // 创建工具模态框
+                const calcModal = document.createElement('div');
+                calcModal.className = 'tool-modal';
+                calcModal.innerHTML = `
+                    <div class="tool-modal-content">
+                        <div class="tool-modal-header">
+                            <div class="tool-modal-icon">
+                                <i class="fas ${tool.icon}"></i>
+                            </div>
+                            <h2>${tool.name}</h2>
+                            <button class="modal-close" onclick="closeToolComponent()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="tool-modal-body">
+                            ${window.calculator.renderControls()}
+                        </div>
+                    </div>
+                `;
+                
+                calcModal.id = 'toolComponentModal';
+                document.body.appendChild(calcModal);
+                
+                // 显示模态框
+                calcModal.classList.add('show');
+                
+                // 添加关闭事件
+                calcModal.addEventListener('click', (e) => {
+                    if (e.target === calcModal) {
+                        closeToolComponent();
+                    }
+                });
+                
+                // 设置事件监听
+                window.calculator.setupEventListeners();
+                break;
+                
+            case 'unit-converter':
+                if (typeof window.unitConverter === 'undefined') {
+                    window.unitConverter = new window.UnitConverter();
+                }
+                
+                // 创建工具模态框
+                const unitModal = document.createElement('div');
+                unitModal.className = 'tool-modal';
+                unitModal.innerHTML = `
+                    <div class="tool-modal-content">
+                        <div class="tool-modal-header">
+                            <div class="tool-modal-icon">
+                                <i class="fas ${tool.icon}"></i>
+                            </div>
+                            <h2>${tool.name}</h2>
+                            <button class="modal-close" onclick="closeToolComponent()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="tool-modal-body">
+                            ${window.unitConverter.renderControls()}
+                        </div>
+                    </div>
+                `;
+                
+                unitModal.id = 'toolComponentModal';
+                document.body.appendChild(unitModal);
+                
+                // 显示模态框
+                unitModal.classList.add('show');
+                
+                // 添加关闭事件
+                unitModal.addEventListener('click', (e) => {
+                    if (e.target === unitModal) {
+                        closeToolComponent();
+                    }
+                });
+                
+                // 设置事件监听
+                window.unitConverter.setupEventListeners();
+                break;
+
+            case 'password-generator':
+                if (typeof window.passwordGenerator === 'undefined') {
+                    window.passwordGenerator = new window.PasswordGenerator();
+                }
+
+                // 创建工具模态框
+                const passwordModal = document.createElement('div');
+                passwordModal.className = 'tool-modal';
+                passwordModal.innerHTML = `
+                    <div class="tool-modal-content">
+                        <div class="tool-modal-header">
+                            <div class="tool-modal-icon">
+                                <i class="fas ${tool.icon}"></i>
+                            </div>
+                            <h2>${tool.name}</h2>
+                            <button class="modal-close" onclick="closeToolComponent()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="tool-modal-body">
+                            ${window.passwordGenerator.renderControls()}
+                        </div>
+                    </div>
+                `;
+
+                passwordModal.id = 'toolComponentModal';
+                document.body.appendChild(passwordModal);
+                
+                // 显示模态框
+                passwordModal.classList.add('show');
+
+                // 添加关闭事件
+                passwordModal.addEventListener('click', (e) => {
+                    if (e.target === passwordModal) {
+                        closeToolComponent();
+                    }
+                });
+
+                // 设置事件监听
+                window.passwordGenerator.setupEventListeners();
+                break;
+
+            case 'age-calculator':
+                if (typeof window.ageCalculator === 'undefined') {
+                    window.ageCalculator = new window.AgeCalculator();
+                }
+
+                // 创建工具模态框
+                const ageModal = document.createElement('div');
+                ageModal.className = 'tool-modal';
+                ageModal.innerHTML = `
+                    <div class="tool-modal-content">
+                        <div class="tool-modal-header">
+                            <div class="tool-modal-icon">
+                                <i class="fas ${tool.icon}"></i>
+                            </div>
+                            <h2>${tool.name}</h2>
+                            <button class="modal-close" onclick="closeToolComponent()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="tool-modal-body">
+                            ${window.ageCalculator.renderControls()}
+                        </div>
+                    </div>
+                `;
+
+                ageModal.id = 'toolComponentModal';
+                document.body.appendChild(ageModal);
+                
+                // 显示模态框
+                ageModal.classList.add('show');
+
+                // 添加关闭事件
+                ageModal.addEventListener('click', (e) => {
+                    if (e.target === ageModal) {
+                        closeToolComponent();
+                    }
+                });
+
+                // 设置事件监听
+                window.ageCalculator.setupEventListeners();
+                break;
+
+            default:
+                alert(`工具 ${tool.name} 正在开发中，敬请期待！`);
+        }
+    }
+    
+    // 关闭工具组件模态框
+    window.closeToolComponent = function() {
+        const modal = document.getElementById('toolComponentModal');
+        if (modal) {
+            modal.remove();
+        }
     };
 }

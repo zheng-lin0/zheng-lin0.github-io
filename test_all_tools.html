@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工具功能测试</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 主样式文件 -->
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .tool-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .tool-btn:hover {
+            background-color: #0056b3;
+        }
+        .test-results {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 4px;
+            min-height: 200px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>工具功能测试页面</h1>
+        
+        <h2>测试所有工具</h2>
+        <div class="tool-buttons">
+            <button class="tool-btn" onclick="testTool('text-to-speech')">
+                <i class="fas fa-volume-up"></i>
+                文字转语音工具
+            </button>
+            <button class="tool-btn" onclick="testTool('calculator')">
+                <i class="fas fa-calculator"></i>
+                计算器工具
+            </button>
+            <button class="tool-btn" onclick="testTool('unit-converter')">
+                <i class="fas fa-exchange-alt"></i>
+                单位转换工具
+            </button>
+            <button class="tool-btn" onclick="testTool('password-generator')">
+                <i class="fas fa-key"></i>
+                密码生成器工具
+            </button>
+            <button class="tool-btn" onclick="testTool('age-calculator')">
+                <i class="fas fa-calendar"></i>
+                年龄计算器工具
+            </button>
+        </div>
+        
+        <h2>测试结果</h2>
+        <div class="test-results" id="testResults"></div>
+    </div>
+
+    <!-- 工具组件脚本 -->
+    <script src="js/components/TextToSpeech.js"></script>
+    <script src="js/components/Calculator.js"></script>
+    <script src="js/components/UnitConverter.js"></script>
+    <script src="js/components/PasswordGenerator.js"></script>
+    <script src="js/components/AgeCalculator.js"></script>
+    
+    <!-- 核心框架脚本 -->
+    <script src="js/core/helpers.js"></script>
+    <script src="js/core/logger.js"></script>
+    
+    <!-- 模块脚本 -->
+    <script src="js/modules/ResourceManager.js"></script>
+    <script src="js/modules/ResourceCenter.js"></script>
+    <script src="js/modules/ToolManager.js"></script>
+
+    <script>
+        // 测试结果记录
+        let testResults = [];
+        
+        // 测试单个工具
+        function testTool(toolId) {
+            try {
+                addTestResult(`开始测试 ${toolId} 工具...`);
+                
+                // 调用openTool函数打开工具
+                openTool(toolId);
+                
+                addTestResult(`✅ ${toolId} 工具打开成功！`);
+                
+            } catch (error) {
+                addTestResult(`❌ ${toolId} 工具打开失败: ${error.message}`, 'error');
+                console.error(`测试 ${toolId} 工具时出错:`, error);
+            }
+        }
+        
+        // 添加测试结果
+        function addTestResult(message, type = 'success') {
+            const timestamp = new Date().toLocaleTimeString();
+            const result = `[${timestamp}] ${message}`;
+            testResults.push(result);
+            
+            // 更新显示
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = testResults.join('\n');
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            addTestResult('页面加载完成，工具测试准备就绪！');
+            addTestResult('点击上方按钮测试各个工具功能。');
+        });
+    </script>
+</body>
+</html>
